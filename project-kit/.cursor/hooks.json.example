@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/kit-start-on-prompt.ps1",
+        "matcher": "UserPromptSubmit",
+        "timeout": 120
+      }
+    ]
+  }
+}

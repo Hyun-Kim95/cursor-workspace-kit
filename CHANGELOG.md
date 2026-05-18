@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.3.0] - `/start` hook and product integration
+
+### Added
+
+- `scripts/Invoke-KitStart.ps1` — git fetch/pull, sync, `.cursor/state/kit-start-last.json`
+- `scripts/sync-kit-product.ps1` — channel **A** (project-kit rules + lifecycle) / **B** (full shared + project-kit)
+- `.cursor-kit.json` — kit 레포 `self` + channel B
+- `.cursor/hooks/kit-start-on-prompt.ps1` — `beforeSubmitPrompt` (fail-closed)
+- `project-kit/.cursor-kit.json.example`, `project-kit/.cursor/hooks.json.example`, `project-kit/.cursor/hooks/kit-start-on-prompt.ps1`
+- `docs/agent/kit-start.md`, `docs/agent/product-onboarding.md`
+
+### Changed
+
+- `.cursor/hooks.json` — `/start` 훅을 `beforeSubmitPrompt` 맨 위에 등록 (timeout 120s)
+- `AGENTS.md` — `/start` 시 `kit-start-last.json` 선독 규칙
+- `project-kit/README.md`, `docs/agent/kit-inventory.md`, 루트 `README.md`
+
+### Product onboarding
+
+1. `git submodule add ... vendor/cursor-workspace-kit`
+2. `.cursor-kit.json` (`channel: "A"` or `"B"`)
+3. 제품 `.cursor/hooks` — `/start` 훅만 (kit Obsidian·delivery 훅 제외)
+
+Git tag `v0.3.0-kit-start` (선택)
+
 ## [0.2.0] - Skills and Agents SSOT
 
 ### Added

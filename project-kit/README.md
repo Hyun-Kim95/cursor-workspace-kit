@@ -1,6 +1,15 @@
 # project-kit
 
-고객·게이트 중심 Cursor **rules·skills** 묶음이다. 신규 제품 레포에 복사하거나 submodule로 가져온다.
+고객·게이트 중심 Cursor **rules·skills** 묶음이다. 신규 제품 레포에는 **submodule + `/start`** 를 권장한다.
+
+## 제품 온보딩 (권장)
+
+1. `git submodule add https://github.com/Hyun-Kim95/cursor-workspace-kit.git vendor/cursor-workspace-kit`
+2. 루트에 [`.cursor-kit.json.example`](.cursor-kit.json.example) → `.cursor-kit.json` (`channel`: `A` 또는 `B`)
+3. [`.cursor/hooks/kit-start-on-prompt.ps1`](.cursor/hooks/kit-start-on-prompt.ps1) + [`hooks.json.example`](.cursor/hooks.json.example)를 제품 `.cursor/`에 복사·병합
+4. 채팅: `/start <작업 지시>`
+
+상세: [`docs/agent/product-onboarding.md`](../docs/agent/product-onboarding.md), [`docs/agent/kit-start.md`](../docs/agent/kit-start.md).
 
 ## 포함 (SSOT)
 

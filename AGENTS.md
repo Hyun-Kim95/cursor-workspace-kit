@@ -68,6 +68,16 @@
 - 디자인 승인과 구현 착수 승인 통합 규칙은 `.cursor/rules/70-client-lifecycle-default.mdc`를 따른다.
 - 본 파일에는 게이트 세부 불릿을 중복 정의하지 않는다.
 
+## `/start` (kit 최신화)
+
+사용자 메시지가 **`/start`로 시작**하면(예: `/start docs/requirements에 PRD 초안`):
+
+1. 훅이 [`scripts/Invoke-KitStart.ps1`](scripts/Invoke-KitStart.ps1)을 실행해 kit GitHub `fetch`/`pull` 및 sync를 수행한다. 실패 시 프롬프트는 **차단**(fail-closed)된다.
+2. **먼저** [`.cursor/state/kit-start-last.json`](.cursor/state/kit-start-last.json)을 읽고 `ok`, `message`, `pulled`, `channel` 등 pull·sync 요약을 한 줄로 확인한다.
+3. 그다음 **`/start` 뒤에 이어진 지시만** 수행한다(`/start` 접두어 자체는 작업 지시가 아님).
+
+제품 레포·채널 A/B·submodule 설정: [`docs/agent/kit-start.md`](docs/agent/kit-start.md), [`docs/agent/product-onboarding.md`](docs/agent/product-onboarding.md).
+
 ## 기본 진입 규칙
 
 - 고객사 **전체 프로젝트(엔드투엔드)** 대화는 사용자가 스킬 이름을 말하지 않아도 `.cursor/rules/70-client-lifecycle-default.mdc`에 따라 `client-project-lifecycle`을 따른다(PRD·디자인 등 HUMAN 구간에서 멈춤). 단, **디자인 승인 완료 시점은 구현 착수 승인으로 간주**하며 구현 시작에 대한 중복 승인을 추가로 요구하지 않는다. 구현 이후 **다축 검증·리뷰어 GATE**는 해당 스킬 **단계 4B~4D(선택)** 및 `docs/qa/reviewer-gate-rubric.md`를 참고한다.
