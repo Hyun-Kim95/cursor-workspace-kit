@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "enabled": true,
+  "onlyWhen": {
+    "deliveryLoopEnabled": true,
+    "lifecyclePhases": ["verify", "perf", "blocker_loop"]
+  },
+  "commands": [
+    {
+      "id": "lint",
+      "shell": "npm run lint -- --quiet",
+      "maxSeconds": 18,
+      "required": false
+    },
+    {
+      "id": "typecheck",
+      "shell": "npx tsc --noEmit",
+      "maxSeconds": 18,
+      "required": false
+    }
+  ],
+  "onFailure": "warn"
+}

@@ -1,5 +1,7 @@
 # Cursor — local session state (do not commit)
 .cursor/state/
+.cursor/quality-gate.json
+.cursor/guard-shell.local.json
 
 # Generated / runtime agent artifacts
 docs/agent/rule-candidates.ndjson

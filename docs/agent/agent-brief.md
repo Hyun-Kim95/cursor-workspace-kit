@@ -4,6 +4,7 @@
 - **Revision:** (예: v1, v2 또는 날짜)
 - **Last updated:** (YYYY-MM-DD)
 - **Owner:** (담당 또는 역할)
+- **lifecyclePhase:** `mock` (단계 2·비교 목업) \| `implement` (디자인 선택 후·Gate 2+ 제품 구현)
 - **Decisions this revision:** (이번 리비전에서 확정된 결약·결정을 3줄 이내로)
 
 ## 1) Goal
@@ -22,8 +23,9 @@
 
 ## 4) Inputs
 - 참고 문서 경로
-- 참고 코드/디자인 경로
-- 선행 조건(있다면)
+- **선택안 링크/ID**(디자인 HUMAN 선택 후) + **제품 구현 경로**(라우트·모듈)
+- 참고 코드/디자인 경로(목업은 스펙 근거만; `implement` 단계에서 mock-only만 다시 만들지 않음)
+- 선행 조건(있다면): stage3 체크리스트, Gate 2
 
 ## 5) Expected Outputs
 - 산출물 파일/모듈

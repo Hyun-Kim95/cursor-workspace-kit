@@ -14,10 +14,20 @@
 - [ ] `docs/agent/kit-inventory.md` 표가 최신인지
 - [ ] sync 실행 후 `.cursor/rules`에 반영됐는지
 
+## `.cursor-kit.json` / harness를 바꿀 때
+- [ ] `harness` 기본값·fail-open이 `AGENTS.md` 우선순위·`60` Gate·`70` HUMAN과 모순 없는지
+- [ ] [`docs/agent/harness-layer1.md`](harness-layer1.md)·[`kit-inventory.md`](kit-inventory.md)·example JSON이 함께 갱신됐는지
+- [ ] `Get-KitHarnessConfig` 변경 시 `scripts/Test-KitHarnessConfig.ps1` 실행
+- [ ] harness 훅(`shared/hooks`) 변경 시 `sync-hooks.ps1` 후 `Test-GuardShellHarness.ps1` · `Test-QualityGateHarness.ps1` 실행
+
 ## `AGENTS.md`를 바꿀 때
 - [ ] 우선순위 순서가 `60`·`70` 및 `shared/rules/working-principles.mdc`와 어긋나지 않는지
 - [ ] **정책 출처(SSOT)** 절이 `working-principles.mdc`(계획/분담)와 본 파일(직접 처리 목록) 역할 분담과 어긋나지 않는지
 - [ ] “직접 처리 가능한 예외” 섹션과 `60` Gate 1 적용 범위가 함께 읽혀도 되는지
+
+## `65-design-gate`·`client-project-lifecycle`·`frontend-agent`를 바꿀 때
+- [ ] **선택 후 목업 금지**·**제품 구현** 문구가 `70`·`60` Gate 2 비고·`stage3-entry-checklist`·`parallel-delivery` / `start-feature`와 모순 없는지
+- [ ] `70`·lifecycle **HUMAN 우선**·디자인 승인=구현 착수 문구가 바뀌지 않았는지
 
 ## `60-delivery-gates.mdc`를 바꿀 때 (project-kit SSOT)
 - [ ] Gate 1 면제 문구가 `AGENTS.md` **직접 처리 가능한 예외** 섹션(SSOT)만 가리키고, 목록 확장을 다른 파일로 새지 않았는지

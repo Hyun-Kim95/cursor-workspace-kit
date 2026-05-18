@@ -40,6 +40,7 @@
 | `remote` | git remote 이름 | `origin` |
 | `branch` | pull 브랜치 | `main` |
 | `channel` | `A` \| `B` — 제품 sync 범위 | `B` |
+| `harness` | (선택) shell·품질 게이트 설정 — [`harness-layer1.md`](harness-layer1.md) | 생략 시 off (`self`만 shellGuard 미지정 시 warn) |
 
 ### kitRepoMode
 

@@ -45,6 +45,14 @@ tags: [docs, vault-sync]
 - [ ] 승인 상태: `승인` / `수정 필요`
 - [ ] 승인 코멘트:
 - [ ] 승인 일시:
+
+## 6) 구현 착수 (목업 금지)
+
+- [ ] **제품 구현 대상 경로**(앱 라우트·모듈·패키지): ``
+- [ ] **mock 전용 경로 사용:** `아니오`(기본) / `예`(사용자 명시 재목업·사유): ``
+- [ ] API 연동·상태 UI(로딩·빈·오류·권한) 착수 확인
+- [ ] 선택안을 스펙 SSOT로 두고, Gate 2·`parallel-delivery` / `start-feature` 진입 준비 완료
+
 ## Vault
 
 - [[cursor-workspace-kit/docs/cursor-workspace-kit-docs-hub|Hub]]

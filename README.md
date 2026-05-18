@@ -66,6 +66,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Invoke-KitStartSetti
 | `scripts/Invoke-KitStart.ps1` | `/start`: git pull + sync |
 | `scripts/sync-kit-product.ps1` | 제품 `.cursor/` 채널 A/B sync |
 | `scripts/import-from-user-cursor.ps1 -Force` | `~/.cursor` → `shared/` (최초·재동기화) |
+| `scripts/Test-KitHarnessConfig.ps1` | (선택) Layer 1 harness 설정 검증 |
+
+선택 하네스(shell·품질 게이트): [`docs/agent/harness-layer1.md`](docs/agent/harness-layer1.md)  
+작업 흐름(인터랙티브): [`docs/agent/workflow-overview.html`](docs/agent/workflow-overview.html)
 
 문서에 나오는 PowerShell 예시는 Windows에서 훅과 동일하게 **`-ExecutionPolicy Bypass`** 를 붙인다.
 

@@ -4,12 +4,27 @@
 
 ### Added
 
+- `Get-KitHarnessConfig` in `scripts/Kit-HookCommon.ps1` — parse `.cursor-kit.json` `harness` (fail-open, PS 5.1)
+- `scripts/Test-KitHarnessConfig.ps1` — manual harness config verification
+- `docs/agent/harness-layer1.md` — Layer 1 harness SSOT (config + stage 2 hooks)
+- `harness` block in `project-kit/.cursor-kit.json.example` and kit root `.cursor-kit.json`
+- Harness stage 2: `shared/hooks/guard-shell.ps1`, `guard-shell.patterns.json`, `quality-gate.ps1`
+- `scripts/sync-hooks.ps1` — deploy harness hooks; wired in `sync-kit.ps1` and channel B `sync-kit-product.ps1`
+- `scripts/Test-GuardShellHarness.ps1`, `scripts/Test-QualityGateHarness.ps1`
+- `project-kit/.cursor/quality-gate.json.example`; `Invoke-KitStartSetting` merges harness hooks into product `hooks.json`
+- `Resolve-HookProjectRoot`, `Write-HarnessLog`, `Get-QualityGateFileConfig`, shell/quality gate helpers in `Kit-HookCommon.ps1`
 - `scripts/Invoke-KitStartSetting.ps1` — `/start-setting` one-shot product onboarding (submodule, config, hooks, first sync)
 - Chat command `/start-setting` in `kit-start-on-prompt.ps1`
 
 ### Changed
 
-- `docs/agent/product-onboarding.md` — 「처음부터 3단계」(kit clone → `Invoke-KitStartSetting` → `/start-setting`) SSOT
+- Post-design implementation clarity: `65-design-gate` 선택 후 절, `client-project-lifecycle` 단계 3, `70`/`60`, `parallel-delivery`·`start-feature`, `frontend-agent`·`design-system-agent`, `stage3-entry-checklist` 섹션 6, `agent-brief`, `AGENTS.md`, workflow HTML p3/p4
+- `project-kit/.cursor-kit.json.example` — `harness.shellGuard.mode` default **block** for products; kit self `.cursor-kit.json` stays **warn**
+- `.cursor/hooks.json` — `beforeShellExecution` (guard-shell), `afterAgentResponse` (quality-gate after rule-candidate-capture)
+- `.gitignore` — `.cursor/quality-gate.json`, `.cursor/guard-shell.local.json`
+- `AGENTS.md` — do not declare completion when `quality-gate-last.json` has `ok: false`
+- `docs/agent/harness-layer1.md`, `delivery-loop-harness.md`, `product-onboarding.md`, `kit-inventory.md`, `rules-maintenance-checklist.md`
+- `docs/agent/product-onboarding.md` — 「처음부터 3단계」(kit clone → `Invoke-KitStartSetting` → `/start-setting`) SSOT; harness 옵션 절
 - `project-kit/README.md`, root `README.md`, `kit-start.md` — kit vs 제품 절차 분리, PowerShell `-ExecutionPolicy Bypass` 통일
 
 ## [0.3.0] - `/start` hook and product integration

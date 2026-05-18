@@ -11,10 +11,20 @@
         "timeout": 30
       }
     ],
+    "beforeShellExecution": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/guard-shell.ps1",
+        "timeout": 10
+      }
+    ],
     "afterAgentResponse": [
       {
         "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-candidate-capture.ps1",
         "timeout": 20
+      },
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/quality-gate.ps1",
+        "timeout": 25
       }
     ],
     "beforeSubmitPrompt": [

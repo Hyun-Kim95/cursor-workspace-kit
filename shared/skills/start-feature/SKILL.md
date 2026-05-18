@@ -16,13 +16,14 @@ description: Gate 1 확인 후 구현·검증·문서화; 필요 시 parallel-de
 
 ## 절차
 1. `.cursor/rules/60-delivery-gates.mdc` Gate 1을 점검한다. 미충족이면 구현을 시작하지 않고 `plan-feature` 또는 `prd-agent`로 돌아간다.
-2. 요청을 기능 단위로 분해한다.
-3. 요구사항이 모호하면 `prd-agent`를 사용해 범위와 정책을 먼저 정리한다.
-4. UI+API가 모두 필요하고 Gate 2를 이미 충족했다면 `parallel-delivery`로 병렬 진행을 우선 고려한다.
-5. 그 외에는 UI 작업에 `frontend-agent`, API/DB/서비스에 `backend-agent`를 순차·병렬에 맞게 사용한다.
-6. 디자인 토큰, 테마, 다크모드 일관성이 중요하면 `design-system-agent`를 사용한다.
-7. 구현 후 `qa-agent`로 요구사항 충족 여부와 회귀 위험을 검토한다. (Gate 3의 일부)
-8. 마지막으로 `docs-agent`를 사용해 변경사항을 정리한다. (Gate 3의 일부)
+2. **고객 E2E(`client-project-lifecycle`)**에서 **디자인 HUMAN 선택이 이미 끝난** 경우: 단계 2A 목업 전용 작업은 **생략**하고, `docs/qa/stage3-entry-checklist.md` → Gate 2 → (필요 시) `parallel-delivery` 또는 본 스킬의 구현 절차로 **단계 3 제품 구현**을 따른다. 선택 후 mock-only 재구축은 `65-design-gate`·lifecycle 단계 3 금지 규칙을 따른다.
+3. 요청을 기능 단위로 분해한다.
+4. 요구사항이 모호하면 `prd-agent`를 사용해 범위와 정책을 먼저 정리한다.
+5. UI+API가 모두 필요하고 Gate 2를 이미 충족했다면 `parallel-delivery`로 병렬 진행을 우선 고려한다.
+6. 그 외에는 UI 작업에 `frontend-agent`, API/DB/서비스에 `backend-agent`를 순차·병렬에 맞게 사용한다.
+7. 디자인 토큰, 테마, 다크모드 일관성이 중요하면 `design-system-agent`를 사용한다.
+8. 구현 후 `qa-agent`로 요구사항 충족 여부와 회귀 위험을 검토한다. (Gate 3의 일부)
+9. 마지막으로 `docs-agent`를 사용해 변경사항을 정리한다. (Gate 3의 일부)
 
 ## 출력/보고 형식
 - 사용자 입력은 문장형 지시를 기본으로 해석한다.

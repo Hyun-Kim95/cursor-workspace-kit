@@ -97,5 +97,21 @@ else {
     $skillsCount = Copy-SkillFolders -SourceDir $sharedSkills -DestDir $skillsDest -ReplaceAll
     $skillsCount += Copy-SkillFolders -SourceDir $projectKitSkills -DestDir $skillsDest
     $agentsCount = Copy-AgentFiles -SourceDir $sharedAgents -DestDir $agentsDest -ReplaceAll
-    Write-Host "sync-kit-product (channel B): rules=$rulesCount skills=$skillsCount agents=$agentsCount"
+
+    $hooksDest = Join-Path $cursorDest "hooks"
+    $sharedHooks = Join-Path $KitRoot "shared\hooks"
+    $hookWhitelist = @("guard-shell.ps1", "guard-shell.patterns.json", "quality-gate.ps1")
+    $hooksCount = 0
+    if (Test-Path -LiteralPath $sharedHooks) {
+        Ensure-Dir -Path $hooksDest
+        foreach ($name in $hookWhitelist) {
+            $src = Join-Path $sharedHooks $name
+            if (Test-Path -LiteralPath $src) {
+                Copy-Item -LiteralPath $src -Destination (Join-Path $hooksDest $name) -Force
+                $hooksCount++
+            }
+        }
+    }
+
+    Write-Host "sync-kit-product (channel B): rules=$rulesCount skills=$skillsCount agents=$agentsCount harness-hooks=$hooksCount"
 }

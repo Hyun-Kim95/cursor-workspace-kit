@@ -42,6 +42,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\delivery\Invoke-D
 
 `enabled=false`이면 테스트를 실행하지 않고 종료한다. 성공 시 exit 0, 상한 초과 시 exit 1, 시간 초과 시 exit 2.
 
+## Quality gate 훅과의 역할 분담
+
+| 도구 | 시점 | 범위 |
+|------|------|------|
+| **quality-gate** ([`harness-layer1.md`](harness-layer1.md)) | `afterAgentResponse` (25s) | `.cursor/quality-gate.json`의 짧은 lint/tsc 등 |
+| **delivery loop** (본 문서) | `afterFileEdit` 경고 + `Invoke-DeliveryLoop.ps1` | 긴 테스트·반복·체크리스트·완료 선언 가드 |
+
+- `quality-gate`는 `onlyWhen.deliveryLoopEnabled` 등으로 **delivery-ralph** phase가 맞을 때만 돌도록 설정할 수 있다. 두 도구는 **필수 연동이 아니다.**
+- `quality-gate-last.json`의 `ok: false`는 [`AGENTS.md`](../../AGENTS.md) 완료 선언 규칙과 함께 본다. `guard-delivery-loop`와 **자동 동기화되지 않는다.**
+
 ## Cursor 편집 훅과의 관계
 
 문서 저장 시 Obsidian 동기화 등은 [Obsidian 로컬 자동화](../requirements/obsidian-local-automation.md)를 따른다. 본 하네스는 **검증·완료 구간**의 선택 보조이며, 기존 `guard-completion-claims`와 **병행**된다.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Development Workflow</title>
+  <title>cursor-workspace-kit — 작업 순서·방향</title>
   <style>
     :root{
       --bg:#090d16;--surface:#0f1623;--elev:#151d2e;--hover:#1c2840;
@@ -35,7 +35,7 @@
     .btn.start{border-color:rgba(79,143,250,.45);color:#dbeafe}
     .btn.start.running{animation:pulse 1s ease-in-out infinite;box-shadow:0 0 20px rgba(79,143,250,.35)}
     @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-    .wrap{display:flex;height:calc(100vh - 122px)}
+    .wrap{display:flex;height:calc(100vh - 168px)}
     .sidebar{width:300px;border-right:1px solid var(--border);padding:14px;overflow:auto}
     .sb-title{font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:#6b7fa0;font-weight:700;margin-bottom:8px}
     .phase-list{margin-top:10px}
@@ -166,7 +166,14 @@
 </head>
 <body>
   <header class="top">
-    <div class="title">AI Development Workflow</div>
+    <div class="title">cursor-workspace-kit Workflow</div>
+    <p style="margin:8px 0 0;font-size:13px;color:var(--text2);max-width:52rem;line-height:1.55">
+      AGENTS · Gate · 스킬 · 역할 에이전트 · (선택) 하네스 — 작업 분기·회귀. 노드 클릭 → Rule Refs·산출물·필수 점검.
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+      <span style="font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid rgba(34,200,122,.45);color:#86efac">harness 2단계</span>
+      <span style="font-size:10px;padding:3px 8px;border-radius:999px;border:1px dashed rgba(167,139,250,.5);color:#c4b5fd">phase-packs 예정</span>
+    </div>
   </header>
 
   <div class="wrap">
@@ -200,7 +207,7 @@
       <p id="dDesc">좌측 또는 중앙 노드를 클릭하면 해당 단계의 목적, 게이트, 산출물이 표시됩니다.</p>
       <div class="kv" id="dMeta">메타 정보: -</div>
       <div class="kv" id="dOut">주요 산출물: -</div>
-      <div class="guide" id="dGuide">반드시 할 일이 하나라도 남으면「끝냄」말을 하지 말고, 점선(되돌아감) 쪽 흐름을 탑니다.</div>
+      <div class="guide" id="dGuide">반드시 할 일이 하나라도 남으면「끝냄」말을 하지 말고, 점선(되돌아감) 쪽 흐름을 탑니다. 하네스·E2E 상세: docs/agent/harness-layer1.md · delivery-loop-harness.md</div>
       <section class="detail-sec">
         <h4>Rule Refs</h4>
         <ul class="detail-list" id="dRuleRefs"><li>-</li></ul>
@@ -226,13 +233,14 @@
       '요구사항·실제 구현·문서·API 약속이 서로 맞는지(완료 판정 단계)',
       '기본·로딩·빈·오류·권한 화면이 규칙과 스펙대로인지',
       '필요하면 웹/앱 환경·화면 크기·다크모드까지 점검',
-      '바뀐 곳이 다른 곳을 망가뜨리지 않았는지 검토(검증 스킬·에이전트)',
-      '다른 사람이 알 수 있게 변경 요약·영향 범위를 정리'
+      '바뀐 곳이 다른 곳을 망가뜨리지 않았는지 검토(verify-change·qa-agent)',
+      '`.cursor/state/quality-gate-last.json`이 있고 ok가 false이면 완료·검증 완료 선언 금지(AGENTS.md)',
+      '다른 사람이 알 수 있게 변경 요약·영향 범위를 정리(document-change)'
     ];
     const phases = [
       {
         id:'p1', cardLabel:'요청 나누기', title:'요청 분기', desc:'요청은 「초기 착수 건」, 「신규/개선」, 「버그」, 또는 오탈자 수준의 간단한 수정으로 구분됩니다.', meta:'에이전트 총괄(AGENTS), 팀·유저 쪽 실행 계획 규칙', out:'이번 일의 성격·적용 범위',
-        ruleRefs:['규칙: client-lifecycle-default', 'User 스킬: plan-feature', 'User 스킬: start-feature', 'AGENTS.md'],
+        ruleRefs:['.cursor/rules/70-client-lifecycle-default.mdc', '.cursor/skills/plan-feature/SKILL.md', '.cursor/skills/start-feature/SKILL.md', 'AGENTS.md'],
         owners:['Main Agent', 'Integration Owner: Main Agent'],
         artifacts:['요청·범위 메모', '「전 과정(엔드투엔드)」해당 여부', '실행 계획(필요 시)'],
         requiredChecks:[
@@ -244,7 +252,7 @@
       },
       {
         id:'p2', cardLabel:'PRD 작성', title:'PRD 작성', desc:'PRD 초안을 작성하고, 사람의 승인 전까지는 다음 단계로 넘어가지 않습니다.', meta:'고객 프로젝트 기본 규칙, delivery-gates(구현 착수 전) 문서', out:'승인된 PRD',
-        ruleRefs:['규칙: delivery-gates(착수 전)', '규칙: client-lifecycle-default', '.cursor/skills/client-project-lifecycle/SKILL.md', 'AGENTS.md'],
+        ruleRefs:['.cursor/rules/60-delivery-gates.mdc', '.cursor/rules/70-client-lifecycle-default.mdc', '.cursor/skills/client-project-lifecycle/SKILL.md', 'AGENTS.md'],
         owners:['prd-agent', 'Main Agent(승인 대기 안내)'],
         artifacts:['PRD(예: docs/requirements/)', '사람 승인(채팅·이력)'],
         requiredChecks:[
@@ -255,7 +263,7 @@
       },
       {
         id:'p3', cardLabel:'이중 목업·정합(선택 전)', title:'이중 목업·정합 (선택 전)', desc:'자체 목업과 Stitch 등은 PRD·요구와 일치할 때까지 조정합니다(단계 2). 디자인 HUMAN 선택 전까지만 이 트랙이며, 선택 후에는 목업 전용 사이트만 다시 만들지 않습니다.', meta:'client-project-lifecycle 단계 2, 중간/디자인 선택은 사람', out:'맞춘 화면·디자인 선택 준비',
-        ruleRefs:['규칙: delivery-gates(착수 전)', '규칙: design-gate', '규칙: client-lifecycle-default', '.cursor/skills/client-project-lifecycle/SKILL.md', 'docs/design/stitch-sop.md (Stitch·선택)', 'AGENTS.md'],
+        ruleRefs:['.cursor/rules/60-delivery-gates.mdc', '.cursor/rules/65-design-gate.mdc', '.cursor/skills/client-project-lifecycle/SKILL.md', 'docs/design/stitch-sop.md', 'AGENTS.md'],
         owners:['design-system-agent', 'frontend-agent', 'Main Agent(통합)'],
         artifacts:['자체 목업', 'Stitch(선택)', '비교·선택 기록'],
         requiredChecks:[
@@ -266,7 +274,7 @@
       },
       {
         id:'p4', cardLabel:'선택안·제품 구현', title:'선택안 기준 제품 구현', desc:'디자인 HUMAN 선택 후 stage3 체크리스트 → Gate 2 → FE/BE 병렬(parallel-delivery). 선택안을 스펙으로 본 앱에 구현하며, mock 전용 사이트만 다시 만들지 않습니다.', meta:'단계 3, delivery-gates Gate 2, parallel-delivery', out:'연동된 제품 UI·API 일치',
-        ruleRefs:['규칙: delivery-gates(병렬·계약)', '규칙: design-gate', 'docs/qa/stage3-entry-checklist.md', 'User 스킬: parallel-delivery', 'User 스킬: start-feature', 'AGENTS.md'],
+        ruleRefs:['.cursor/rules/60-delivery-gates.mdc', '.cursor/rules/65-design-gate.mdc', 'docs/qa/stage3-entry-checklist.md', '.cursor/skills/parallel-delivery/SKILL.md', '.cursor/skills/start-feature/SKILL.md', 'AGENTS.md'],
         owners:['frontend-agent', 'backend-agent', 'Main Agent(통합)'],
         artifacts:['stage3 체크리스트', '확정 API', '제품 라우트/모듈', '계약 변경 시 document-change'],
         requiredChecks:[
@@ -278,7 +286,7 @@
       },
       {
         id:'p5', cardLabel:'착수 전(일반 신규)', title:'착수에 필요한 문서 확인', desc:'착수 문서, 화면/목업 스펙, API 초안 등이 준비되면 구현에 착수합니다. 빠진 부분이 있다면 요구·스펙 보완 작업을 진행합니다.', meta:'delivery-gates(구현 착수 전), plan-feature, start-feature', out:'착수에 필요한 요구사항 문서·화면 스펙·API 초안이 갖춰짐',
-        ruleRefs:['규칙: delivery-gates(착수 전)', 'User 스킬: plan-feature', 'User 스킬: start-feature', 'AGENTS.md'],
+        ruleRefs:['.cursor/rules/60-delivery-gates.mdc', '.cursor/skills/plan-feature/SKILL.md', '.cursor/skills/start-feature/SKILL.md', 'AGENTS.md'],
         owners:['prd-agent', 'Main Agent'],
         artifacts:['범위/요구', '누가 봐도 이해할 수 있는 화면·흐름', 'API 초안'],
         requiredChecks:[
@@ -289,7 +297,7 @@
       },
       {
         id:'p8', cardLabel:'요구·스펙 보완', title:'요구·스펙 보완', desc:'보완이 가벼운 「신규/개선」인 경우, 빠진 문서를 채운 뒤 「착수에 필요한 문서 확인」 단계로 진행합니다. 작업 규모가 커서 요구사항·PRD를 다시 정렬해야 하면 「PRD 작성」 단계로 돌아갑니다.', meta:'plan-feature, delivery-gates, 고객 프로젝트 기본', out:'보강된 요구·스펙',
-        ruleRefs:['규칙: delivery-gates(착수 전)', '규칙: client-lifecycle-default', 'User 스킬: plan-feature', 'AGENTS.md'],
+        ruleRefs:['.cursor/rules/60-delivery-gates.mdc', '.cursor/rules/70-client-lifecycle-default.mdc', '.cursor/skills/plan-feature/SKILL.md', 'AGENTS.md'],
         owners:['prd-agent', 'Main Agent(통합)'],
         artifacts:['갱신 PRD/스펙', '열려 있는 이슈', '「일반 재검」또는「PRD 작성 쪽」중 어디로 갈지'],
         requiredChecks:[
@@ -299,7 +307,7 @@
       },
       {
         id:'p6', cardLabel:'버그·빠른 수리', title:'버그 수정', desc:'버그 수정 및 오탈자 수준의 간단한 수정을 진행합니다.', meta:'AGENTS, User 스킬 bugfix-flow', out:'고친 코드·기록',
-        ruleRefs:['User 스킬: bugfix-flow', 'AGENTS.md'],
+        ruleRefs:['.cursor/skills/bugfix-flow/SKILL.md', 'AGENTS.md'],
         owners:['Main Agent', 'qa-agent(회귀)'],
         artifacts:['재현, 원인', '검증(verify-change) 메모'],
         requiredChecks:[
@@ -310,7 +318,7 @@
       },
       {
         id:'p7', cardLabel:'끝·검수', title:'완료 판정', desc:'요구사항·코드·API 일치와 화면 상태를 확인하고, 필요 시 기기·테마까지 점검한 뒤 변경 요약으로 완료를 판단합니다. 「초기 착수 건」이면 검증·성능·문서·배포 직전 점검을 정책에 맞게 추가합니다.', meta:'완료·마감 기준, 검증·문서·릴리즈 전 점검', out:'끝냈다는 근거·(선택)배포 직전 점검',
-        ruleRefs:['규칙: delivery-gates(작업 끝)', 'User 스킬: verify-change', 'User 스킬: document-change', 'User 스킬: release-check(배포 직전)', 'AGENTS.md'],
+        ruleRefs:['.cursor/rules/60-delivery-gates.mdc', '.cursor/skills/verify-change/SKILL.md', '.cursor/skills/document-change/SKILL.md', 'docs/agent/harness-layer1.md', 'docs/agent/delivery-loop-harness.md', 'AGENTS.md'],
         owners:['qa-agent', 'docs-agent', 'Main Agent(통합)'],
         artifacts:['검증 및 회귀 테스트 결과', '변경 요약·(선택)릴리즈 점검'],
         requiredChecks: completionHardChecks.map(text => ({ text, level:'MUST' })),
@@ -1542,5 +1550,8 @@
     selectPhase('p1');
     updateRegressionVisual();
   </script>
+  <footer style="text-align:center;padding:12px 16px;font-size:11px;color:var(--text2);border-top:1px solid var(--border)">
+    cursor-workspace-kit · docs/agent/workflow-overview.html · 원본 레이아웃: cursor-workflow-detailed.html
+  </footer>
 </body>
 </html>

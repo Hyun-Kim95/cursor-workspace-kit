@@ -6,5 +6,6 @@ $Scripts = Split-Path -Parent $MyInvocation.MyCommand.Path
 & (Join-Path $Scripts "sync-rules.ps1")
 & (Join-Path $Scripts "sync-skills.ps1")
 & (Join-Path $Scripts "sync-agents.ps1")
+& (Join-Path $Scripts "sync-hooks.ps1")
 
 Write-Host "sync-kit: done"

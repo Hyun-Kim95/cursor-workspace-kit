@@ -188,6 +188,82 @@ function Ensure-HooksJson {
     return "merged"
 }
 
+function Ensure-HarnessHookScripts {
+    param(
+        [string]$Root,
+        [string]$KitRoot
+    )
+
+    $destDir = Join-Path $Root ".cursor\hooks"
+    $srcDir = Join-Path $KitRoot "shared\hooks"
+    $whitelist = @("guard-shell.ps1", "guard-shell.patterns.json", "quality-gate.ps1")
+    if (-not (Test-Path -LiteralPath $srcDir)) { return "skip (no shared/hooks)" }
+
+    if (-not (Test-Path -LiteralPath $destDir)) {
+        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+    }
+
+    $n = 0
+    foreach ($name in $whitelist) {
+        $src = Join-Path $srcDir $name
+        if (Test-Path -LiteralPath $src) {
+            Copy-Item -LiteralPath $src -Destination (Join-Path $destDir $name) -Force
+            $n++
+        }
+    }
+    if ($n -eq 0) { return "skip" }
+    return "copied $n harness hook file(s)"
+}
+
+function Merge-HookEntryIntoJson {
+    param(
+        [string]$HooksPath,
+        [string]$EventName,
+        [hashtable]$NewEntry,
+        [string]$ScriptMarker
+    )
+
+    if (-not (Test-Path -LiteralPath $HooksPath)) { return "no hooks.json" }
+
+    $raw = Get-Content -LiteralPath $HooksPath -Raw -Encoding UTF8
+    if ($raw -match [regex]::Escape($ScriptMarker)) { return "exists ($ScriptMarker)" }
+
+    $doc = $raw | ConvertFrom-Json
+    if (-not $doc.hooks) {
+        $doc | Add-Member -NotePropertyName hooks -NotePropertyValue (New-Object PSObject) -Force
+    }
+
+    $list = New-Object System.Collections.ArrayList
+    [void]$list.Add($NewEntry)
+    $existingProp = $doc.hooks.PSObject.Properties | Where-Object { $_.Name -eq $EventName } | Select-Object -First 1
+    if ($existingProp -and $existingProp.Value) {
+        foreach ($item in @($existingProp.Value)) {
+            [void]$list.Add($item)
+        }
+    }
+    $doc.hooks | Add-Member -NotePropertyName $EventName -NotePropertyValue @($list.ToArray()) -Force
+    $doc | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $HooksPath -Encoding UTF8
+    return "merged ($ScriptMarker)"
+}
+
+function Ensure-HarnessHooksJson {
+    param([string]$Root)
+
+    $hooksPath = Join-Path $Root ".cursor\hooks.json"
+    $shellEntry = @{
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/guard-shell.ps1"
+        timeout = 10
+    }
+    $qgEntry = @{
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/quality-gate.ps1"
+        timeout = 25
+    }
+
+    $r1 = Merge-HookEntryIntoJson -HooksPath $hooksPath -EventName "beforeShellExecution" -NewEntry $shellEntry -ScriptMarker "guard-shell.ps1"
+    $r2 = Merge-HookEntryIntoJson -HooksPath $hooksPath -EventName "afterAgentResponse" -NewEntry $qgEntry -ScriptMarker "quality-gate.ps1"
+    return "$r1; $r2"
+}
+
 function Get-ConfigChannel {
     param([string]$Root, [string]$Default)
     $configPath = Join-Path $Root ".cursor-kit.json"
@@ -225,6 +301,12 @@ try {
 
     $hooksJsonResult = Ensure-HooksJson -Root $WorkspaceRoot
     [void]$steps.Add("hooks.json: $hooksJsonResult")
+
+    $harnessScriptsResult = Ensure-HarnessHookScripts -Root $WorkspaceRoot -KitRoot $kitRoot
+    [void]$steps.Add("harness hooks: $harnessScriptsResult")
+
+    $harnessHooksJsonResult = Ensure-HarnessHooksJson -Root $WorkspaceRoot
+    [void]$steps.Add("harness hooks.json: $harnessHooksJsonResult")
 
     $startScript = Join-Path $kitRoot "scripts\Invoke-KitStart.ps1"
     & powershell -NoProfile -ExecutionPolicy Bypass -File $startScript -WorkspaceRoot $WorkspaceRoot

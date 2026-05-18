@@ -84,22 +84,31 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | 경로 | SSOT |
 |------|------|
 | `AGENTS.md` | 오케스트레이션·직접 처리 예외·`/start` 규칙 |
-| `.cursor-kit.json` | kit 경로·`kitRepoMode`·`channel` (제품은 루트에 복사) |
+| `.cursor-kit.json` | kit 경로·`kitRepoMode`·`channel`·`harness` (제품은 루트에 복사) — [`harness-layer1.md`](harness-layer1.md) |
 | `scripts/import-from-user-cursor.ps1` | `~/.cursor` → `shared/` (일회/재동기화) |
 | `scripts/sync-kit.ps1` | kit 레포 전체 sync (`self` 모드) |
 | `scripts/sync-kit-product.ps1` | 제품 `.cursor/` 채널 A/B sync |
 | `scripts/Invoke-KitStart.ps1` | `/start` 백엔드: pull + sync + 상태 기록 |
 | `scripts/Invoke-KitStartSetting.ps1` | `/start-setting` 백엔드: submodule·설정·훅·첫 sync |
-| `scripts/Kit-HookCommon.ps1` | 훅 UTF-8 stdout · PS 5.1 JSON 읽기 (`Read-HookStdinJson`, `Write-HookJson`) |
+| `scripts/Kit-HookCommon.ps1` | 훅 UTF-8 stdout · PS 5.1 JSON · `Get-KitHarnessConfig` · harness 헬퍼 |
+| `scripts/sync-hooks.ps1` | `shared/hooks/*` → `.cursor/hooks/` (harness 3파일; kit 전용 훅 유지) |
+| `scripts/Test-KitHarnessConfig.ps1` | Harness config 수동 검증 |
+| `scripts/Test-GuardShellHarness.ps1` | Shell guard 훅 수동 검증 |
+| `scripts/Test-QualityGateHarness.ps1` | Quality gate 훅 수동 검증 |
+| `shared/hooks/` | harness 훅 SSOT (`guard-shell.ps1`, `guard-shell.patterns.json`, `quality-gate.ps1`) |
 
 ## 훅·상태
 
 | 경로 | 용도 |
 |------|------|
 | `.cursor/hooks/kit-start-on-prompt.ps1` | `beforeSubmitPrompt` — `/start` 트리거 |
+| `.cursor/hooks/guard-shell.ps1` | `beforeShellExecution` — shell guard |
+| `.cursor/hooks/quality-gate.ps1` | `afterAgentResponse` — 짧은 lint/tsc |
 | `.cursor/hooks/sync-kit-on-session.ps1` | `sessionStart` — 로컬 sync (fail-open) |
 | `.cursor/state/kit-start-last.json` | 마지막 `/start` 결과 (에이전트·디버그) |
 | `.cursor/state/kit-start-setting-last.json` | 마지막 `/start-setting` 온보딩 결과 |
+| `.cursor/state/quality-gate-last.json` | 마지막 quality gate 결과 (로컬) |
+| `.cursor/state/shell-guard.log` | shell guard warn 로그 (로컬) |
 
 제품 레포 템플릿: `project-kit/.cursor-kit.json.example`, `project-kit/.cursor/hooks*`
 

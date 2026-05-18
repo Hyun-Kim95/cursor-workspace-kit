@@ -77,6 +77,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Invoke-KitStartSetti
 
 kit [`AGENTS.md`](../../AGENTS.md)를 참고해 제품 루트에 두고, `/start`·`/start-setting` 시 상태 JSON 선독 규칙을 넣는다. **자동 생성되지 않는다.**
 
+### (선택) Harness — shell guard + quality gate
+
+[`harness-layer1.md`](harness-layer1.md) 2단계. `/start-setting`이 `hooks.json`에 `guard-shell`·`quality-gate` 슬롯과 훅 `.ps1` 3개를 merge한다.
+
+| 항목 | 제품 기본 (example) |
+|------|---------------------|
+| `.cursor-kit.json` `harness.shellGuard.mode` | **block** (위험 shell 실차단) |
+| 패턴 | sync된 `.cursor/hooks/guard-shell.patterns.json` |
+| quality gate | [`project-kit/.cursor/quality-gate.json.example`](../../project-kit/.cursor/quality-gate.json.example) → `.cursor/quality-gate.json` (로컬, gitignore) |
+
+- 채널 **B** `sync-kit-product`는 harness 훅 3파일만 복사한다. 채널 **A**는 submodule `shared/hooks`에서 수동 복사 또는 B 권장.
+- kit 템플릿 레포 self는 오탐 완화를 위해 `shellGuard.mode: warn`을 쓴다.
+
 ---
 
 ## 훅이 이미 있는 제품 (2단계 생략)
