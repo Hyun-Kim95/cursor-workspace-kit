@@ -74,7 +74,7 @@
 
 1. 훅이 [`scripts/Invoke-KitStartSetting.ps1`](scripts/Invoke-KitStartSetting.ps1)을 실행한다 — submodule 추가(필요 시), `.cursor-kit.json`, `/start` 훅, `hooks.json`, 첫 sync까지 자동.
 2. **먼저** [`.cursor/state/kit-start-setting-last.json`](.cursor/state/kit-start-setting-last.json)을 읽고 요약을 확인한다.
-3. 훅이 없을 때는 kit clone에서 수동 1회: `powershell -File scripts/Invoke-KitStartSetting.ps1 -WorkspaceRoot <제품경로>`
+3. 훅이 없을 때는 kit clone에서 수동 1회: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Invoke-KitStartSetting.ps1 -WorkspaceRoot <제품경로>`
 
 이후 일상 작업은 **`/start <할 일>`** 만 사용한다.
 

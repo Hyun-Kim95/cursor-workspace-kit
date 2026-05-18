@@ -7,6 +7,11 @@
 - `scripts/Invoke-KitStartSetting.ps1` — `/start-setting` one-shot product onboarding (submodule, config, hooks, first sync)
 - Chat command `/start-setting` in `kit-start-on-prompt.ps1`
 
+### Changed
+
+- `docs/agent/product-onboarding.md` — 「처음부터 3단계」(kit clone → `Invoke-KitStartSetting` → `/start-setting`) SSOT
+- `project-kit/README.md`, root `README.md`, `kit-start.md` — kit vs 제품 절차 분리, PowerShell `-ExecutionPolicy Bypass` 통일
+
 ## [0.3.0] - `/start` hook and product integration
 
 ### Added

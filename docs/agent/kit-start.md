@@ -1,6 +1,8 @@
-# `/start` — kit GitHub 최신화 후 작업
+# `/start` · `/start-setting` — kit 연동 명령
 
-채팅에 **`/start`** 로 시작하는 메시지를내면, 제출 전 훅이 kit 저장소를 `fetch`/`pull`한 뒤 제품(또는 kit) `.cursor/`에 sync하고, 결과를 상태 파일에 기록한다.
+**제품 레포 처음 연결(kit clone → PowerShell 1회 → 채팅):** [`product-onboarding.md`](product-onboarding.md#처음부터-3단계-완전-빈-제품)
+
+채팅에 **`/start`** 로 시작하면, 훅이 kit `fetch`/`pull` 후 제품(또는 kit) `.cursor/`에 sync한다.
 
 ## 문법
 

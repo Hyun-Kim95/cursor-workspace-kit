@@ -1,36 +1,107 @@
-# 제품 레포 온보딩 — kit submodule + `/start`
+# 제품 레포 온보딩 — kit submodule + `/start-setting` + `/start`
 
-제품 앱 레포에 [cursor-workspace-kit](https://github.com/Hyun-Kim95/cursor-workspace-kit)을 붙이고, 채팅 `/start`로 rules·스킬을 최신화하는 절차이다.
+제품 앱 레포에 [cursor-workspace-kit](https://github.com/Hyun-Kim95/cursor-workspace-kit)을 붙이고, 채팅으로 rules·스킬을 최신화하는 절차이다.
 
-## 빠른 경로: `/start-setting` (권장)
+**명령 정리:** [`kit-start.md`](kit-start.md) · 스크립트 목록: [`kit-inventory.md`](kit-inventory.md)
 
-**Git 저장소인 제품 레포**를 Cursor로 연 뒤 채팅에 한 줄:
+---
 
-```text
-/start-setting
+## 어떤 경로를 쓸지
+
+| 상황 | 할 일 |
+|------|--------|
+| **제품에 kit·훅이 전혀 없음** (처음) | 아래 **[처음부터 3단계](#처음부터-3단계-완전-빈-제품)** |
+| **훅은 있는데** submodule·설정만 다시 맞추기 | 제품 폴더를 Cursor로 연 뒤 채팅 **`/start-setting`** |
+| **이미 온보딩 끝남** (`dietManagement` 등) | 매일 채팅 **`/start <할 일>`** 만 |
+
+---
+
+## 처음부터 3단계 (완전 빈 제품)
+
+채팅 `/start-setting`은 **제품 `.cursor/hooks`에 훅이 있어야** 동작한다. 훅이 없으면 **아래 1→2를 먼저** 한 뒤, **3**에서 `/start-setting`을 쓴다.
+
+### 전제
+
+- **제품 레포**가 Git 저장소다 (`git init` 또는 clone된 상태).
+- 이 PC에 `git`, `powershell`이 있다.
+- 기본 **채널 A** (전역 `~/.cursor/skills`·`agents` 유지) — 채널 B는 [수동 설정](#1회-설정-수동참고) 참고.
+
+### 1단계 — kit 레포 clone (이 PC, 보통 1회)
+
+kit **템플릿 저장소**를 clone한다. 제품 레포 clone이 아니다.
+
+```powershell
+git clone https://github.com/Hyun-Kim95/cursor-workspace-kit.git
+cd cursor-workspace-kit
 ```
 
-자동 처리(가능한 범위):
+(이미 `D:\cursor\cursor-workspace-kit` 등이 있으면 이 단계는 생략.)
 
-1. `git submodule add` → `vendor/cursor-workspace-kit` (없을 때만)
-2. 루트 `.cursor-kit.json` (채널 A 기본)
-3. `.cursor/hooks/kit-start-on-prompt.ps1` + `hooks.json`
-4. 첫 `Invoke-KitStart` sync
+### 2단계 — 제품에 자동 설정 (PowerShell 1회)
 
-결과: [`.cursor/state/kit-start-setting-last.json`](../.cursor/state/kit-start-setting-last.json) (생성 후 확인)
-
-**훅이 아직 없을 때(완전 빈 제품 레포):** kit을 clone해 둔 PC에서 1회만:
+**kit clone 폴더**에서 제품 경로를 넘긴다.
 
 ```powershell
 cd D:\path\to\cursor-workspace-kit
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Invoke-KitStartSetting.ps1 -WorkspaceRoot D:\path\to\my-product
 ```
 
-이후 제품 워크스페이스에서 `/start-setting`·`/start` 모두 사용 가능.
+자동 처리:
+
+1. 제품에 `git submodule add` → `vendor/cursor-workspace-kit` (없을 때만)
+2. 제품 루트 `.cursor-kit.json` (없을 때만, 채널 A 기본)
+3. 제품 `.cursor/hooks/kit-start-on-prompt.ps1` + `hooks.json` (없을 때만)
+4. 첫 sync (`Invoke-KitStart`)
+
+결과 파일: 제품의 [`.cursor/state/kit-start-setting-last.json`](../.cursor/state/kit-start-setting-last.json)
+
+**선택:** 제품에서 `git add` / `commit` (submodule, `.cursor-kit.json`, `.cursor/` 등).
+
+### 3단계 — 제품 워크스페이스에서 채팅
+
+1. Cursor에서 **제품 레포 루트**(`my-product`)를 연다. kit 레포가 아님.
+2. 채팅:
+
+```text
+/start-setting
+```
+
+이미 2단계에서 설정됐으면 대부분 `exists` + sync만 다시 돈다. 문제 없으면 OK.
+3. 이후 매일:
+
+```text
+/start 오늘 할 일: ...
+```
+
+### (선택) 4단계 — `AGENTS.md`
+
+kit [`AGENTS.md`](../../AGENTS.md)를 참고해 제품 루트에 두고, `/start`·`/start-setting` 시 상태 JSON 선독 규칙을 넣는다. **자동 생성되지 않는다.**
 
 ---
 
-## 1회 설정 (수동)
+## 훅이 이미 있는 제품 (2단계 생략)
+
+제품에 `.cursor/hooks/kit-start-on-prompt.ps1`과 `hooks.json`이 이미 있으면:
+
+1. Cursor에서 **제품 레포** 연다.
+2. 채팅 **`/start-setting`** 한 번 (또는 바로 **`/start`**).
+
+---
+
+## 이미 온보딩된 제품
+
+| 하지 않아도 됨 | 매일 할 일 |
+|----------------|------------|
+| submodule add, `.cursor-kit.json` 복사, 훅 수동 복사 | **`/start <할 일>`** |
+| `/start-setting` 반복 (설정 재확인·sync만 필요할 때만) | |
+
+`/start-setting`을 다시 치면 설치 단계는 `exists`로 건너뛰고 **pull + sync**만 실행된다. 평소에는 `/start`만 쓰면 된다.
+
+---
+
+## 1회 설정 (수동·참고)
+
+`/start-setting`·`Invoke-KitStartSetting.ps1`과 동일한 결과를 손으로 맞출 때 참고한다.
 
 ### 1. Submodule 추가
 
@@ -41,7 +112,7 @@ git submodule add https://github.com/Hyun-Kim95/cursor-workspace-kit.git vendor/
 git commit -m "chore: add cursor-workspace-kit submodule"
 ```
 
-팀원 clone:
+다른 PC에서 제품 clone 시:
 
 ```powershell
 git clone --recurse-submodules <product-repo-url>
@@ -51,73 +122,38 @@ git submodule update --init
 
 ### 2. `.cursor-kit.json`
 
-[`project-kit/.cursor-kit.json.example`](../../project-kit/.cursor-kit.json.example)를 제품 루트에 복사:
+[`project-kit/.cursor-kit.json.example`](../../project-kit/.cursor-kit.json.example) → 제품 루트 `.cursor-kit.json`
 
-```json
-{
-  "kitPath": "vendor/cursor-workspace-kit",
-  "kitRepoMode": "submodule",
-  "remote": "origin",
-  "branch": "main",
-  "channel": "A"
-}
-```
+### 3. `/start` 훅 (제품 `.cursor/`만)
 
-- **채널 A** — 전역 `~/.cursor/skills`·`agents` 유지, `/start`는 게이트 rules + lifecycle만 갱신.
-- **채널 B** — 전역 비우고 kit 전체를 제품 `.cursor/`에 sync.
+[`project-kit/.cursor/hooks/kit-start-on-prompt.ps1`](../../project-kit/.cursor/hooks/kit-start-on-prompt.ps1) + [`hooks.json.example`](../../project-kit/.cursor/hooks.json.example)
 
-### 3. `/start` 훅 (제품에만)
+Obsidian·delivery 훅은 **kit 레포 전용** — 제품에 복사하지 않는다.
 
-1. [`project-kit/.cursor/hooks/kit-start-on-prompt.ps1`](../../project-kit/.cursor/hooks/kit-start-on-prompt.ps1) → `<product>/.cursor/hooks/`
-2. [`project-kit/.cursor/hooks.json.example`](../../project-kit/.cursor/hooks.json.example) 내용을 제품 `.cursor/hooks.json`에 병합 (`beforeSubmitPrompt` 맨 위 권장).
-
-**대안** — hooks.json에 직접:
-
-```json
-"command": "powershell -NoProfile -ExecutionPolicy Bypass -File vendor/cursor-workspace-kit/scripts/Invoke-KitStart.ps1 -WorkspaceRoot ."
-```
-
-### 4. AGENTS.md
-
-kit [`AGENTS.md`](../../AGENTS.md)를 참고해 제품용으로 조정. `/start` 규칙(상태 파일 선독)을 포함하는 것을 권장한다.
-
-### 5. 첫 sync
+### 4. 첫 sync
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File vendor/cursor-workspace-kit/scripts/Invoke-KitStart.ps1 -WorkspaceRoot .
+powershell -NoProfile -ExecutionPolicy Bypass -File vendor\cursor-workspace-kit\scripts\Invoke-KitStart.ps1 -WorkspaceRoot .
 ```
-
-또는 채팅: `/start 오늘 작업: ...`
 
 ---
 
-## 기존 레포 — 채널 A (같은 PC, 전역 skills 유지)
-
-현재: `~/.cursor/skills`·`agents` + 제품 `.cursor/rules` 일부.
+## 기존 레포 — 채널 A (전역 skills 유지)
 
 | 항목 | 조치 |
 |------|------|
-| 전역 skills·agents | **그대로** — `/start`가 대체하지 않음 |
-| User Rules | 그대로 (또는 `shared/rules`와 중복 점검) |
-| 제품 `.cursor/rules` | `/start` 시 **60·64·70**만 submodule `project-kit`에서 갱신 |
-| submodule | 레포마다 1회 `git submodule add` |
-| hooks | 제품에 `/start` 훅만 추가 (Obsidian·delivery 훅은 kit 레포 전용) |
+| 전역 skills·agents | **그대로** |
+| 제품 `.cursor/rules` | `/start` 시 **60·64·70**만 갱신 |
+| 제품 `.cursor/skills` | **lifecycle만** — `plan-feature` 등 넣지 않음 |
 | `.cursor-kit.json` | `"channel": "A"` |
-| 제품 `.cursor/skills` | **lifecycle만** — `plan-feature` 등 공통 스킬 폴더 넣지 않음 |
 
-### 채널 A → B 전환 (선택, 레포별)
-
-1. `.cursor-kit.json` → `"channel": "B"`
-2. `~/.cursor/skills`·`agents`에서 kit과 겹치는 항목 제거 — [`skills-agents-deploy.md`](skills-agents-deploy.md)
-3. `/start` 또는 `Invoke-KitStart.ps1` 실행
+채널 B: [`skills-agents-deploy.md`](skills-agents-deploy.md)
 
 ---
 
-## kit 레포 자체
+## kit 레포 자체 (템플릿만 개발할 때)
 
-루트 [`.cursor-kit.json`](../../.cursor-kit.json): `kitRepoMode: "self"`, `channel: "B"`.
-
-`/start` = 이 레포 `git pull` + `sync-kit.ps1`. 상세: [`kit-start.md`](kit-start.md).
+[`README.md`](../../README.md) 빠른 시작 → 이 폴더를 Cursor로 연다. 제품 연동은 위 **처음부터 3단계**를 본다.
 
 ---
 
@@ -125,10 +161,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File vendor/cursor-workspace-kit/
 
 | 증상 | 확인 |
 |------|------|
-| pull 실패, 프롬프트 차단 | 네트워크·git 인증·브랜치명; `kit-start-last.json`의 `message` |
-| submodule 폴더 비어 있음 | `git submodule update --init` |
-| 스킬 중복 | 채널 A에서 제품 `.cursor/skills`에 공통 스킬 넣지 않기 |
-| git 없음 | PATH에 `git` 설치; 훅은 fail-closed |
+| `/start-setting`이 아무 일도 안 함 | 제품에 `hooks.json`·훅 파일 있는지 → 없으면 **2단계** PowerShell 먼저 |
+| `Missing .cursor-kit.json` | 2단계 또는 `/start-setting` 재실행 |
+| pull 실패 | `kit-start-last.json` · 네트워크·git 인증 |
+| submodule 비어 있음 | `git submodule update --init` |
+| 한글 오류 깨짐 | [`kit-start.md`](kit-start.md) Windows PowerShell 5.1 절 |
 
 ---
 
