@@ -1,0 +1,1545 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Development Workflow</title>
+  <style>
+    :root{
+      --bg:#090d16;--surface:#0f1623;--elev:#151d2e;--hover:#1c2840;
+      --border:#1e2d46;--border-l:#2d4470;--text:#e8edf5;--text2:#8b9ab0;
+      --accent:#4f8ffa;--ok:#22c87a;--warn:#f5a623;--bad:#f04444;--info:#22d3ee;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;color:var(--text);font-family:"Segoe UI","Malgun Gothic",sans-serif;background:radial-gradient(1200px 500px at 0% -10%, rgba(79,143,250,.2), transparent 60%),radial-gradient(900px 500px at 100% 0%, rgba(124,111,247,.12), transparent 60%),var(--bg);}
+    .top{padding:22px 24px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(9,13,22,.9);backdrop-filter:blur(8px);z-index:20}
+    .title{font-size:34px;font-weight:900;letter-spacing:-.3px;background:linear-gradient(135deg,#9dbbff,#7c6ff7 55%,#22c87a);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sidebar-start-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+    .anim-scenario-wrap{display:flex;align-items:center;flex:1;min-width:0}
+    .anim-scenario-select{
+      flex:1;min-width:0;max-width:100%;padding:6px 8px;border-radius:10px;border:1px solid var(--border-l);
+      background:var(--elev);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;
+      box-sizing:border-box
+    }
+    .anim-scenario-select:focus{outline:2px solid rgba(79,143,250,.45);outline-offset:1px}
+    .anim-dock{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .anim-dock.hide{display:none !important}
+    .anim-icon-btn{
+      width:40px;height:40px;padding:0;border-radius:12px;border:1px solid var(--border-l);
+      background:var(--elev);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+      box-shadow:0 4px 14px rgba(0,0,0,.35)
+    }
+    .anim-icon-btn:hover{border-color:rgba(79,143,250,.55);color:#dbeafe}
+    .anim-icon-btn svg{display:block;width:18px;height:18px;fill:currentColor}
+    .btn{border:1px solid var(--border);background:var(--surface);color:var(--text2);padding:8px 12px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
+    .btn.start{border-color:rgba(79,143,250,.45);color:#dbeafe}
+    .btn.start.running{animation:pulse 1s ease-in-out infinite;box-shadow:0 0 20px rgba(79,143,250,.35)}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+    .wrap{display:flex;height:calc(100vh - 122px)}
+    .sidebar{width:300px;border-right:1px solid var(--border);padding:14px;overflow:auto}
+    .sb-title{font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:#6b7fa0;font-weight:700;margin-bottom:8px}
+    .phase-list{margin-top:10px}
+    .phase{padding:9px 10px;border:1px solid transparent;border-radius:9px;color:#c5d3ea;cursor:pointer;margin-bottom:4px;font-size:11px;line-height:1.35}
+    .phase .phase-id{color:#8fa4c4;font-weight:700;white-space:nowrap;opacity:.95}
+    .phase:hover{background:var(--hover);border-color:var(--border)}
+    .phase.sel{background:rgba(79,143,250,.14);border-color:rgba(79,143,250,.4)}
+    .edge-legend-title{margin-top:14px}
+    .edge-legend-wrap{max-height:220px;overflow-y:auto;margin-bottom:12px;padding-right:6px}
+    .edge-legend-h{font-size:10px;letter-spacing:.5px;color:#6b7fa0;font-weight:700;text-transform:uppercase;margin:10px 0 6px}
+    .edge-legend-h:first-child{margin-top:0}
+    .edge-legend-item{font-size:11px;line-height:1.38;color:#c5d3ea;margin-bottom:9px;padding:6px 10px;border-radius:8px;background:rgba(15,22,35,.55);border:1px solid rgba(79,143,250,.28)}
+    .edge-legend-item.regression{border-color:rgba(240,68,68,.38);background:rgba(26,14,18,.35)}
+    .edge-legend-bridge{display:block;font-weight:800;font-size:10px;letter-spacing:.04em;color:#dbeafe;margin-bottom:3px}
+    .edge-legend-item.regression .edge-legend-bridge{color:#fecaca}
+    .edge-legend-mean{display:block;color:#9bb0d3;font-weight:500}
+    /* 연결선 라벨 가독성 */
+    .edge-label{
+      font-size:11.5px;font-weight:700;fill:var(--text);
+      pointer-events:none;paint-order:stroke fill;
+      stroke:rgba(9,13,22,.92);stroke-width:2px;stroke-linejoin:round;
+      writing-mode:horizontal-tb;text-orientation:mixed;
+      text-rendering:geometricPrecision;dominant-baseline:middle
+    }
+    .edge-label.regression{fill:#ffd6d6;stroke:rgba(20,8,10,.95)}
+    .main{flex:1;padding:0;overflow:hidden;min-width:0}
+    .process-view{
+      height:100%;width:100%;min-height:0;
+      display:flex;justify-content:center;align-items:center;
+      overflow:hidden;box-sizing:border-box
+    }
+    .fit-stage{
+      width:100%;max-width:100%;min-width:0;box-sizing:border-box;
+      flex-shrink:0;transform-origin:top center;
+      -webkit-font-smoothing: auto;
+    }
+    /* p7→p1 선의 p6 하단 통과 여백 */
+    .grid-wrap{position:relative;width:100%;max-width:100%;min-width:0;padding:0 0 64px;box-sizing:border-box}
+    .edge-layer{
+      position:absolute;inset:0;z-index:3;pointer-events:none;overflow:visible
+    }
+    /* 11x3 그리드: edge/노드/간격 */
+    .grid{
+      display:grid;
+      width:100%;max-width:100%;min-width:0;
+      --grid-edge:6px;
+      --grid-pad-y:14px;
+      --grid-col-gap:110px;
+      --grid-row-gap:130px;
+      /* 카드 최대 폭 제한 */
+      --node-max-w:256px;
+      padding:var(--grid-pad-y) 0;
+      box-sizing:border-box;
+      grid-template-columns:
+        var(--grid-edge)
+        minmax(264px,1fr) var(--grid-col-gap)
+        minmax(264px,1fr) var(--grid-col-gap)
+        minmax(264px,1fr) var(--grid-col-gap)
+        minmax(264px,1fr) var(--grid-col-gap)
+        minmax(264px,1fr)
+        var(--grid-edge);
+      grid-template-rows:repeat(3,auto);
+      row-gap:var(--grid-row-gap);
+      justify-content:stretch;
+      align-items:stretch;
+      position:relative;
+      z-index:2
+    }
+    .grid .gcell-min{min-height:1px;min-width:1px}
+    .grid .gcell-2{min-width:0;width:100%;max-width:100%;padding:0;box-sizing:border-box;align-self:stretch}
+    .grid .gcol-150{min-width:0;min-height:1px;box-sizing:border-box;pointer-events:none}
+    /* 노드 카드: 높이 고정. 가로는 셀보다 좁게 max-width(엣지는 getBoundingClientRect로 실제 박스 기준) */
+    .node{
+      width:100%;
+      max-width:min(100%,var(--node-max-w));
+      justify-self:center;
+      min-height:18rem;
+      max-height:18rem;
+      height:18rem;
+      display:flex;
+      flex-direction:column;
+      box-sizing:border-box;
+      overflow:hidden;
+      background:linear-gradient(180deg,rgba(21,29,46,.95),rgba(15,22,35,.96));border:1px solid var(--border);border-radius:14px;padding:15px 14px;position:relative;cursor:pointer;transition:box-shadow .2s,border-color .2s,transform .2s;outline:none;
+      /* 확대/축소 시 텍스트 번짐 완화 */
+      -webkit-font-smoothing: auto;
+      -moz-osx-font-smoothing: auto;
+      text-rendering: auto
+    }
+    .node:hover{transform:translateY(-2px);border-color:var(--border-l);box-shadow:0 10px 28px rgba(0,0,0,.35)}
+    .node.sel{box-shadow:0 0 0 2px rgba(79,143,250,.25)}
+    .node.run{border-color:rgba(79,143,250,.8);box-shadow:0 0 0 2px rgba(79,143,250,.28),0 0 24px rgba(79,143,250,.28)}
+    .node:focus-visible{box-shadow:0 0 0 2px rgba(79,143,250,.45)}
+    .node .h{flex:0 0 auto;font-size:19px;font-weight:800;margin-top:0;line-height:1.28;color:var(--text);word-break:keep-all;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+    .node .h .node-id-sfx{font-size:14px;font-weight:700;color:var(--text2);margin-left:5px;white-space:nowrap;opacity:.9}
+    .node .d{
+      flex:1 1 0;min-height:0;
+      font-size:15px;color:var(--text);font-weight:500;line-height:1.6;margin-top:8px;letter-spacing:0;
+      word-break:keep-all;overflow-wrap:break-word;overflow-y:auto;scrollbar-gutter:stable
+    }
+    .edge{fill:none;stroke-linecap:butt;stroke-linejoin:round;shape-rendering:geometricPrecision}
+    .edge.forward{stroke:rgba(79,143,250,.95);stroke-width:2.75}
+    .edge.regression{stroke:rgba(240,68,68,.95);stroke-width:2.55;stroke-dasharray:9 7}
+    .edge.active{stroke-width:3.1;filter:drop-shadow(0 0 6px rgba(79,143,250,.55))}
+    .edge.anim-path{stroke-width:3.4;filter:drop-shadow(0 0 8px rgba(79,143,250,.5))}
+    .edge.regression.anim-path{filter:drop-shadow(0 0 8px rgba(240,68,68,.45))}
+    .flow-dot{fill:rgba(79,143,250,.2);stroke:rgba(186,220,255,.9);stroke-width:1.4;filter:drop-shadow(0 0 10px rgba(79,143,250,.5))}
+    .detail{width:360px;border-left:1px solid var(--border);padding:14px;overflow:auto;background:var(--surface)}
+    .detail h3{margin:2px 0 8px;font-size:18px}
+    .detail p{font-size:13px;color:#b8c6e2;line-height:1.55}
+    .kv{font-size:12px;color:#9fb1d2;margin:8px 0}
+    .detail-sec{margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+    .detail-sec h4{margin:0 0 6px;font-size:12px;color:#a8bcde;letter-spacing:.4px;text-transform:uppercase}
+    .detail-list{margin:0;padding-left:18px;color:#c7d6ee;font-size:12px;line-height:1.45}
+    .detail-list li{margin:3px 0}
+    .badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:999px;border:1px solid var(--border-l);margin-left:4px}
+    .badge.warn{color:#fde68a;border-color:rgba(245,166,35,.5);background:rgba(245,166,35,.1)}
+    .badge.must{color:#fca5a5;border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.1)}
+    .guide{font-size:11px;color:#9bb0d3;line-height:1.5;margin-top:8px}
+    .hide{display:none}
+    .tt{
+      position:fixed;z-index:999;display:none;max-width:280px;
+      background:rgba(9,13,22,.97);border:1px solid var(--border-l);border-radius:10px;
+      padding:10px 12px;color:#d7e4fb;font-size:12px;line-height:1.5;pointer-events:none;
+      box-shadow:0 12px 32px rgba(0,0,0,.5)
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="title">AI Development Workflow</div>
+  </header>
+
+  <div class="wrap">
+    <aside class="sidebar">
+      <div class="sidebar-start-row">
+        <div class="anim-scenario-wrap">
+          <select id="animScenario" class="anim-scenario-select" aria-label="START로 재생할 데모 흐름 선택"></select>
+        </div>
+        <button class="btn start" id="btnStart" type="button">START 애니메이션</button>
+        <div class="anim-dock hide" id="animDock" aria-live="polite">
+          <button type="button" class="anim-icon-btn" id="btnAnimTogglePause" aria-label="일시정지" title="정지 / 재생">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z"/></svg>
+          </button>
+          <button type="button" class="anim-icon-btn" id="btnAnimDockStop" aria-label="애니메이션 취소" title="중지">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6V6z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="sb-title">Phase 목록</div>
+      <div class="phase-list" id="phaseList"></div>
+      <div class="sb-title edge-legend-title">연결선</div>
+      <div class="edge-legend-wrap" id="edgeLegend" aria-label="그래프 화살표 의미"></div>
+    </aside>
+
+    <main class="main">
+      <section class="process-view" id="processView"></section>
+    </main>
+
+    <aside class="detail" id="detail">
+      <h3 id="dTitle">단계를 선택하세요</h3>
+      <p id="dDesc">좌측 또는 중앙 노드를 클릭하면 해당 단계의 목적, 게이트, 산출물이 표시됩니다.</p>
+      <div class="kv" id="dMeta">메타 정보: -</div>
+      <div class="kv" id="dOut">주요 산출물: -</div>
+      <div class="guide" id="dGuide">반드시 할 일이 하나라도 남으면「끝냄」말을 하지 말고, 점선(되돌아감) 쪽 흐름을 탑니다.</div>
+      <section class="detail-sec">
+        <h4>Rule Refs</h4>
+        <ul class="detail-list" id="dRuleRefs"><li>-</li></ul>
+      </section>
+      <section class="detail-sec">
+        <h4>Owners</h4>
+        <ul class="detail-list" id="dOwners"><li>-</li></ul>
+      </section>
+      <section class="detail-sec">
+        <h4>Required Checks</h4>
+        <ul class="detail-list" id="dChecks"><li>-</li></ul>
+      </section>
+      <section class="detail-sec">
+        <h4>Artifacts</h4>
+        <ul class="detail-list" id="dArtifacts"><li>-</li></ul>
+      </section>
+    </aside>
+  </div>
+  <div class="tt" id="tooltip"></div>
+
+  <script>
+    const completionHardChecks = [
+      '요구사항·실제 구현·문서·API 약속이 서로 맞는지(완료 판정 단계)',
+      '기본·로딩·빈·오류·권한 화면이 규칙과 스펙대로인지',
+      '필요하면 웹/앱 환경·화면 크기·다크모드까지 점검',
+      '바뀐 곳이 다른 곳을 망가뜨리지 않았는지 검토(검증 스킬·에이전트)',
+      '다른 사람이 알 수 있게 변경 요약·영향 범위를 정리'
+    ];
+    const phases = [
+      {
+        id:'p1', cardLabel:'요청 나누기', title:'요청 분기', desc:'요청은 「초기 착수 건」, 「신규/개선」, 「버그」, 또는 오탈자 수준의 간단한 수정으로 구분됩니다.', meta:'에이전트 총괄(AGENTS), 팀·유저 쪽 실행 계획 규칙', out:'이번 일의 성격·적용 범위',
+        ruleRefs:['규칙: client-lifecycle-default', 'User 스킬: plan-feature', 'User 스킬: start-feature', 'AGENTS.md'],
+        owners:['Main Agent', 'Integration Owner: Main Agent'],
+        artifacts:['요청·범위 메모', '「전 과정(엔드투엔드)」해당 여부', '실행 계획(필요 시)'],
+        requiredChecks:[
+          { text:'이 대화가 고객「전체 프로젝트(엔드투엔드)」에 해당하는지, 아니면 작은 수정/버그인지', level:'MUST' },
+          { text:'팀이 정한 실행 계획 형식이 있으면 맞출 것', level:'MUST' },
+          { text:'돌이키기 힘든 선택은 먼저 갈래를 정한 뒤 진행', level:'SHOULD' }
+        ],
+        tags:['plan','output','role','deferred']
+      },
+      {
+        id:'p2', cardLabel:'PRD 작성', title:'PRD 작성', desc:'PRD 초안을 작성하고, 사람의 승인 전까지는 다음 단계로 넘어가지 않습니다.', meta:'고객 프로젝트 기본 규칙, delivery-gates(구현 착수 전) 문서', out:'승인된 PRD',
+        ruleRefs:['규칙: delivery-gates(착수 전)', '규칙: client-lifecycle-default', '.cursor/skills/client-project-lifecycle/SKILL.md', 'AGENTS.md'],
+        owners:['prd-agent', 'Main Agent(승인 대기 안내)'],
+        artifacts:['PRD(예: docs/requirements/)', '사람 승인(채팅·이력)'],
+        requiredChecks:[
+          { text:'PRD 승인 전, 목업·구현用 코드·이미지 작업을 시작하지 않는다', level:'MUST' },
+          { text:'초안 작성·고치기는 승인 전에도 할 수 있음', level:'MUST' }
+        ],
+        tags:['plan','output']
+      },
+      {
+        id:'p3', cardLabel:'이중 목업·맞춤', title:'이중 목업·정합', desc:'자체 디자인 목업과 Stitch 등 외부 산출물은 요구사항·PRD와 일치할 때까지 조정합니다. 불일치 원인이 문서에 있으면 PRD 작성 단계로 돌아가고, 화면 구현에만 있으면 자체/도구 목업을 다시 조정합니다.', meta:'스킬 둘째, 중간/디자인 선택은 사람, 그다음「병렬로 가기 전」에 계약·화면 뜻이 고정', out:'맞춘 화면·사람이 고른 디자인(구현 착수로 이어짐)',
+        ruleRefs:['규칙: delivery-gates(착수 전)', '규칙: client-lifecycle-default', '.cursor/skills/client-project-lifecycle/SKILL.md', 'docs/design/stitch-sop.md (Stitch·선택)', 'AGENTS.md'],
+        owners:['design-system-agent', 'frontend-agent', 'Main Agent(통합)'],
+        artifacts:['자체 목업', 'Stitch(선택)', '병렬 착수 전·API·화면 상태에 대한 합의'],
+        requiredChecks:[
+          { text:'「디자인 선택/승인」은 이후 곧바로 구현에 들어갈 수 있게 한 결정(별도「구현만 승인」은 없음, 고객 프로젝트 기본)', level:'MUST' },
+          { text:'PRD/범위를 바꿔야 하면「PRD 작성」으로, 화면만이면 목 안에서 루프', level:'SHOULD' }
+        ],
+        tags:['plan','role']
+      },
+      {
+        id:'p4', cardLabel:'앞뒤 맞춤 구현', title:'통합 구현', desc:'프론트와 백엔드를 모두 변경하는 작업은 병렬을 우선 검토하되, API 계약과 상태 UI 합의가 완료된 경우에만 병렬로 진행합니다.', meta:'delivery-gates(프론트/백 동시에) 충족·구현', out:'구현 결과물',
+        ruleRefs:['규칙: delivery-gates(병렬·계약)', 'User 스킬: parallel-delivery', 'User 스킬: start-feature', 'AGENTS.md'],
+        owners:['frontend-agent', 'backend-agent', 'Main Agent(통합)'],
+        artifacts:['확정 API', '상태(화면) 정의', '계약이 바뀌면 document-change'],
+        requiredChecks:[
+          { text:'API 모양(스키마, 오류, 응답)이 팀이 고른 대로 확정', level:'MUST' },
+          { text:'로딩·빈·오류·권한·목업/스펙이 서로 엇갈리지 않는지', level:'MUST' }
+        ],
+        tags:['plan','role']
+      },
+      {
+        id:'p5', cardLabel:'착수 전(일반 신규)', title:'착수에 필요한 문서 확인', desc:'착수 문서, 화면/목업 스펙, API 초안 등이 준비되면 구현에 착수합니다. 빠진 부분이 있다면 요구·스펙 보완 작업을 진행합니다.', meta:'delivery-gates(구현 착수 전), plan-feature, start-feature', out:'착수에 필요한 요구사항 문서·화면 스펙·API 초안이 갖춰짐',
+        ruleRefs:['규칙: delivery-gates(착수 전)', 'User 스킬: plan-feature', 'User 스킬: start-feature', 'AGENTS.md'],
+        owners:['prd-agent', 'Main Agent'],
+        artifacts:['범위/요구', '누가 봐도 이해할 수 있는 화면·흐름', 'API 초안'],
+        requiredChecks:[
+          { text:'고객「전 과정(엔드투엔드)」이면 반드시 PRD·이중 목업·선택된 디자인까지 거침(여기서만 끊어 구현으로 점프하지 않음)', level:'MUST' },
+          { text:'갖춰지지 않으면「요구·스펙 보완」으로', level:'MUST' }
+        ],
+        tags:['plan','deferred']
+      },
+      {
+        id:'p8', cardLabel:'요구·스펙 보완', title:'요구·스펙 보완', desc:'보완이 가벼운 「신규/개선」인 경우, 빠진 문서를 채운 뒤 「착수에 필요한 문서 확인」 단계로 진행합니다. 작업 규모가 커서 요구사항·PRD를 다시 정렬해야 하면 「PRD 작성」 단계로 돌아갑니다.', meta:'plan-feature, delivery-gates, 고객 프로젝트 기본', out:'보강된 요구·스펙',
+        ruleRefs:['규칙: delivery-gates(착수 전)', '규칙: client-lifecycle-default', 'User 스킬: plan-feature', 'AGENTS.md'],
+        owners:['prd-agent', 'Main Agent(통합)'],
+        artifacts:['갱신 PRD/스펙', '열려 있는 이슈', '「일반 재검」또는「PRD 작성 쪽」중 어디로 갈지'],
+        requiredChecks:[
+          { text:'보강 뒤에는 어느 쪽이든, 일반이면 착수 문서를 다시 보고, 크면 PRD 작성·이중 목 줄로', level:'MUST' }
+        ],
+        tags:['plan','deferred','role']
+      },
+      {
+        id:'p6', cardLabel:'버그·빠른 수리', title:'버그 수정', desc:'버그 수정 및 오탈자 수준의 간단한 수정을 진행합니다.', meta:'AGENTS, User 스킬 bugfix-flow', out:'고친 코드·기록',
+        ruleRefs:['User 스킬: bugfix-flow', 'AGENTS.md'],
+        owners:['Main Agent', 'qa-agent(회귀)'],
+        artifacts:['재현, 원인', '검증(verify-change) 메모'],
+        requiredChecks:[
+          { text:'꼭 필요한 만큼만 고침', level:'MUST' },
+          { text:'옆 흐름(회귀) 위험', level:'SHOULD' }
+        ],
+        tags:['output','role']
+      },
+      {
+        id:'p7', cardLabel:'끝·검수', title:'완료 판정', desc:'요구사항·코드·API 일치와 화면 상태를 확인하고, 필요 시 기기·테마까지 점검한 뒤 변경 요약으로 완료를 판단합니다. 「초기 착수 건」이면 검증·성능·문서·배포 직전 점검을 정책에 맞게 추가합니다.', meta:'완료·마감 기준, 검증·문서·릴리즈 전 점검', out:'끝냈다는 근거·(선택)배포 직전 점검',
+        ruleRefs:['규칙: delivery-gates(작업 끝)', 'User 스킬: verify-change', 'User 스킬: document-change', 'User 스킬: release-check(배포 직전)', 'AGENTS.md'],
+        owners:['qa-agent', 'docs-agent', 'Main Agent(통합)'],
+        artifacts:['검증 및 회귀 테스트 결과', '변경 요약·(선택)릴리즈 점검'],
+        requiredChecks: completionHardChecks.map(text => ({ text, level:'MUST' })),
+        tags:['output','role']
+      }
+    ];
+
+    const phaseList = document.getElementById('phaseList');
+    const processView = document.getElementById('processView');
+    const dTitle = document.getElementById('dTitle');
+    const dDesc = document.getElementById('dDesc');
+    const dMeta = document.getElementById('dMeta');
+    const dOut = document.getElementById('dOut');
+    const dRuleRefs = document.getElementById('dRuleRefs');
+    const dOwners = document.getElementById('dOwners');
+    const dChecks = document.getElementById('dChecks');
+    const dArtifacts = document.getElementById('dArtifacts');
+    const animControl = { stopped: false, paused: false };
+    const svgPause = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z"/></svg>';
+    const svgPlay = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>';
+
+    function syncAnimDock() {
+      const dock = document.getElementById('animDock');
+      const btnPause = document.getElementById('btnAnimTogglePause');
+      const btnStop = document.getElementById('btnAnimDockStop');
+      const start = document.getElementById('btnStart');
+      if (!dock || !btnPause || !btnStop || !start) return;
+      const running = start.classList.contains('running');
+      if (!running) {
+        dock.classList.add('hide');
+        return;
+      }
+      dock.classList.remove('hide');
+      btnPause.innerHTML = animControl.paused ? svgPlay : svgPause;
+      btnPause.setAttribute('aria-label', animControl.paused ? '재생' : '일시정지');
+      btnPause.setAttribute('title', animControl.paused ? '재생' : '정지');
+    }
+
+    async function animDelay(ms) {
+      const end = performance.now() + ms;
+      while (performance.now() < end) {
+        if (animControl.stopped) return;
+        while (animControl.paused && !animControl.stopped) {
+          await new Promise(res => setTimeout(res, 50));
+        }
+        if (animControl.stopped) return;
+        const left = end - performance.now();
+        if (left <= 0) break;
+        await new Promise(res => setTimeout(res, Math.min(90, left)));
+      }
+    }
+
+    /** 연결선 라벨/제목 텍스트 */
+    function phaseLineLabel(id) {
+      const p = phases.find(x => x.id === id);
+      if (!p) return String(id).toUpperCase();
+      return (p.title && String(p.title).trim()) || p.cardLabel || id;
+    }
+
+    function renderEdgeLegend() {
+      const host = document.getElementById('edgeLegend');
+      if (!host) return;
+      host.replaceChildren();
+      const mkHeading = (text) => {
+        const h = document.createElement('div');
+        h.className = 'edge-legend-h';
+        h.textContent = text;
+        host.appendChild(h);
+      };
+      const mkItem = (e) => {
+        const div = document.createElement('div');
+        div.className = `edge-legend-item${e.type === 'regression' ? ' regression' : ''}`;
+        const bridge = `${phaseLineLabel(e.from)} → ${phaseLineLabel(e.to)}`;
+        div.title = `${bridge}: ${e.meaning}`;
+        const b = document.createElement('span');
+        b.className = 'edge-legend-bridge';
+        b.textContent = bridge;
+        const m = document.createElement('span');
+        m.className = 'edge-legend-mean';
+        m.textContent = e.meaning;
+        div.appendChild(b);
+        div.appendChild(m);
+        host.appendChild(div);
+      };
+      mkHeading('전진 (실선)');
+      edges.filter(x => x.type === 'forward').forEach(mkItem);
+      mkHeading('회귀 (점선)');
+      edges.filter(x => x.type === 'regression').forEach(mkItem);
+    }
+
+    function renderSidebar() {
+      phaseList.innerHTML = phases.map((p, i) => `<div class="phase" tabindex="0" data-idx="${i}" data-id="${p.id}">${(p.title && String(p.title).trim()) || p.cardLabel || ''} <span class="phase-id">(${p.id})</span></div>`).join('');
+      phaseList.querySelectorAll('.phase').forEach(el => {
+        el.addEventListener('click', () => selectPhase(el.dataset.id));
+        el.addEventListener('keydown', (e) => {
+          const idx = Number(el.dataset.idx);
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectPhase(el.dataset.id); }
+          if (e.key === 'ArrowDown') { e.preventDefault(); focusPhase(idx + 1); }
+          if (e.key === 'ArrowUp') { e.preventDefault(); focusPhase(idx - 1); }
+        });
+      });
+      renderEdgeLegend();
+    }
+    function focusPhase(idx) {
+      const items = [...document.querySelectorAll('.phase')];
+      if (!items.length) return;
+      const clamped = Math.max(0, Math.min(items.length - 1, idx));
+      items[clamped].focus();
+    }
+
+    const edges = [
+      {
+        from: 'p1', to: 'p2', type: 'forward',
+        meaning: '고객「전체 프로젝트(엔드투엔드)」에 해당하면 카드와 같이 PRD 초안을 올리고 사람 승인 전까지는 다음 단계로 넘어가지 않습니다(client-project-lifecycle, delivery-gates 착수 전).',
+        meaningShort: '초기 착수'
+      },
+      {
+        from: 'p1', to: 'p5', type: 'forward',
+        meaning: '「신규/개선」 등 일반 경로로, 착수 문서·화면/목업 스펙·API 초안을 갖춘 뒤 구현에 착수합니다. 이중 목업은 팀/요구에 따라 생략될 수 있으나 범위·화면·API 초안은 갖춥니다(plan-feature, start-feature).',
+        meaningShort: '개선 착수'
+      },
+      {
+        from: 'p1', to: 'p6', type: 'forward',
+        meaning: '「버그 수정」으로 분기합니다. 오탈자 등 AGENTS「직접 처리 가능한 예외」면 여기서 바로 끝낼 수도 있습니다(bugfix-flow).',
+        meaningShort: '버그 수정 착수'
+      },
+      {
+        from: 'p2', to: 'p3', type: 'forward',
+        meaning: '승인된 PRD를 전제로, 자체 목업과 Stitch 등 외부 산출물을 PRD·요구와 일치할 때까지 맞춥니다(이중 목업·정합).',
+        meaningShort: 'PRD 승인'
+      },
+      {
+        from: 'p3', to: 'p4', type: 'forward',
+        meaning: '디자인 선택/승인과 API·화면 상태가 병렬 착수 전에 고정된 뒤, API 계약과 상태 UI 합의가 된 경우에만 프론트/백 통합 구현으로 진행합니다(parallel-delivery, delivery-gates 병렬).',
+        meaningShort: '디자인 선택'
+      },
+      {
+        from: 'p5', to: 'p4', type: 'forward',
+        meaning: '착수에 필요한 말·그림·API 초안이 갖춰지면 통합 구현으로 갑니다. 고객 전 과정(엔드투엔드)이면 PRD·이중 목업·선택된 디자인까지 거친 뒤에만 이 화살표로 구현에 들어갑니다.',
+        meaningShort: '구현'
+      },
+      {
+        from: 'p5', to: 'p8', type: 'forward',
+        meaning: '빠진 문서가 있으면 카드 설명대로 「요구·스펙 보완」으로 보내 보강합니다.',
+        meaningShort: '보완'
+      },
+      {
+        from: 'p8', to: 'p5', type: 'forward',
+        meaning: '보완이 가벼운 「신규/개선」이면, 다시 「착수에 필요한 문서 확인」으로 돌아가 착수 조건을 재확인합니다.',
+        meaningShort: '다시 착수'
+      },
+      {
+        from: 'p8', to: 'p2', type: 'forward',
+        meaning: '요구사항·PRD를 다시 정렬해야 할 만큼 크면 「PRD 작성」 단계로 돌아갑니다.',
+        meaningShort: 'PRD 수정'
+      },
+      {
+        from: 'p4', to: 'p7', type: 'forward',
+        meaning: '구현 후 「완료 판정」에서 요구·코드·API 일치와 화면 상태를 확인하고, 변경 요약 등으로 끝냅니다(verify-change, document-change, delivery-gates 작업 끝).',
+        meaningShort: '검수'
+      },
+      {
+        from: 'p6', to: 'p7', type: 'forward',
+        meaning: '버그·간단 수정 후에도 「완료 판정」에서 검증과 회귀 테스트를 진행하고 기록을 맞춥니다.',
+        meaningShort: '검수'
+      },
+      {
+        from: 'p3', to: 'p2', type: 'regression',
+        meaning: 'PRD/범위를 바꿔야 하면 「PRD 작성」으로 환류합니다. 화면만 어긋나면 이중 목업 단계 안에서 루프합니다(카드 필수 점검과 동일).',
+        meaningShort: 'PRD 수정'
+      },
+      {
+        from: 'p7', to: 'p4', type: 'regression',
+        meaning: '완료 기준을 채우지 못하면 「통합 구현」으로 돌아가 코드·문서·계약을 다시 맞춥니다.',
+        meaningShort: '다시 구현'
+      },
+      {
+        from: 'p7', to: 'p5', type: 'regression',
+        meaning: '일반 신규 줄에서 착수·문서를 다시 맞출 때 「착수에 필요한 문서 확인」으로 돌아갑니다.',
+        meaningShort: '다시 착수'
+      },
+      {
+        from: 'p7', to: 'p6', type: 'regression',
+        meaning: '짧은 수리로 덜 맞는 부분은 「버그 수정」으로 되돌아 짧게 고칩니다.',
+        meaningShort: '재수정'
+      },
+      {
+        from: 'p7', to: 'p1', type: 'regression',
+        meaning: '채널·범위를 처음부터 다시 나눌 때 「요청 분기」로 돌아갑니다.',
+        meaningShort: '재분류'
+      }
+    ];
+    const edgeOverrides = {
+      'p1->p2': { route: 'custom_p1_oneL', fromSide: 'top', toSide: 'left', startOffset: -10, endOffset: -10, labelT: 0.62, labelHorizontal: true },
+      /* p1→p5 선 경로 고정 */
+      'p1->p5': { route: 'custom_orth5', fromSide: 'right', toSide: 'left', startOffset: 12, endOffset: 12, labelT: 0.42, skipOneBend: true },
+      'p1->p6': { route: 'custom_p1_oneL', fromSide: 'bottom', toSide: 'left', startOffset: -16, endOffset: -16, labelT: 0.5 },
+      'p2->p3': { route: 'custom_p2_p3', startOffset: -16, endOffset: -16, labelT: 0.4 },
+      'p3->p2': { route: 'custom_p3_p2', startOffset: 16, endOffset: 16, labelT: 0.4 },
+      'p3->p4': { route: 'custom_p3_p4_main', fromSide: 'right', toSide: 'top', startOffset: -10, endOffset: -10, labelT: 0.34, labelTangentBias: 'from' },
+      /* p5 아래 선 순서 */
+      'p5->p4': { route: 'custom_p5_p4', fromSide: 'bottom', toSide: 'bottom', startOffset: 12, endOffset: -14, labelT: 0.48 },
+      'p5->p8': { route: 'direct', startOffset: -16, endOffset: -16, labelT: 0.45 },
+      'p8->p5': { route: 'direct', startOffset: 16, endOffset: 16, labelT: 0.45 },
+      'p8->p2': { route: 'custom_p8_p2_main', startOffset: 8, endOffset: 8, labelT: 0.4 },
+      'p4->p7': { route: 'custom_p4_p7', startOffset: -8, endOffset: -8, labelT: 0.5 },
+      /* p7 아래 선 순서 */
+      'p6->p7': { route: 'custom_orth5', fromSide: 'right', toSide: 'bottom', startOffset: -20, endOffset: -11, labelT: 0.5 },
+      'p7->p4': { route: 'custom_p7_p4', startOffset: -20, endOffset: -20, labelT: 0.5 },
+      'p7->p5': { route: 'custom_p7_p5', fromSide: 'bottom', toSide: 'bottom', startOffset: -33, endOffset: -20, labelT: 0.45 },
+      'p7->p6': { route: 'custom_orth5', fromSide: 'bottom', toSide: 'right', startOffset: 11, endOffset: 20, labelT: 0.5 },
+      'p7->p1': { route: 'custom_p7_p1_below_p6', fromSide: 'bottom', toSide: 'bottom', startOffset: 33, endOffset: 20, labelT: 0.4 }
+    };
+    let activeStepId = null;
+    /** renderEdges obstacle pad와 동일 값 유지 */
+    const RENDER_OBSTACLE_PAD = 10;
+    /** 기본 코너 반경 */
+    const DEFAULT_EDGE_CORNER_RADIUS = 10;
+    /** 엣지 간 코너 반경 통일값 */
+    const EDGE_UNIFIED_FILLET = 10;
+    /** 시작/끝 터미널 길이 */
+    const DEFAULT_TERMINAL_LEN = 36;
+    /** rMax 캡 비율 */
+    const EDGE_FILLET_LEN_FRAC = 0.5;
+
+    function rectCenter(rect, baseRect) {
+      return {
+        x: rect.left + rect.width / 2 - baseRect.left,
+        y: rect.top + rect.height / 2 - baseRect.top
+      };
+    }
+
+    function edgeAnchor(rect, targetPoint, baseRect, alongOffset = 0) {
+      const center = rectCenter(rect, baseRect);
+      const halfW = rect.width / 2;
+      const halfH = rect.height / 2;
+      const dx = targetPoint.x - center.x;
+      const dy = targetPoint.y - center.y;
+
+      if (dx === 0 && dy === 0) return center;
+
+      // 박스 테두리 중심점 연결용 side midpoint 사용
+      if (Math.abs(dx) >= Math.abs(dy)) {
+        const clampedOffset = Math.max(-(halfH - 16), Math.min(halfH - 16, alongOffset));
+        return {
+          x: center.x + (dx >= 0 ? halfW : -halfW),
+          y: center.y + clampedOffset,
+          side: dx >= 0 ? 'right' : 'left'
+        };
+      }
+      const clampedOffset = Math.max(-(halfW - 16), Math.min(halfW - 16, alongOffset));
+      return {
+        x: center.x + clampedOffset,
+        y: center.y + (dy >= 0 ? halfH : -halfH),
+        side: dy >= 0 ? 'bottom' : 'top'
+      };
+    }
+
+    /** from/to 면 고정 경로 힌트 (alongOffset: 좌우면 y, 상하면 x 슬롯) */
+    function edgeAnchorOnSide(rect, otherCenter, baseRect, side, alongOffset = 0) {
+      const center = rectCenter(rect, baseRect);
+      const halfW = rect.width / 2;
+      const halfH = rect.height / 2;
+      if (side === 'left') {
+        const c = Math.max(-(halfH - 16), Math.min(halfH - 16, alongOffset));
+        return { x: center.x - halfW, y: center.y + c, side: 'left' };
+      }
+      if (side === 'right') {
+        const c = Math.max(-(halfH - 16), Math.min(halfH - 16, alongOffset));
+        return { x: center.x + halfW, y: center.y + c, side: 'right' };
+      }
+      if (side === 'top') {
+        const c = Math.max(-(halfW - 16), Math.min(halfW - 16, alongOffset));
+        return { x: center.x + c, y: center.y - halfH, side: 'top' };
+      }
+      if (side === 'bottom') {
+        const c = Math.max(-(halfW - 16), Math.min(halfW - 16, alongOffset));
+        return { x: center.x + c, y: center.y + halfH, side: 'bottom' };
+      }
+      return edgeAnchor(rect, otherCenter, baseRect, alongOffset);
+    }
+
+    function sideNormal(side) {
+      if (side === 'left') return { x: -1, y: 0 };
+      if (side === 'right') return { x: 1, y: 0 };
+      if (side === 'top') return { x: 0, y: -1 };
+      return { x: 0, y: 1 };
+    }
+
+    /** 한 번만 꺾는 L자 경로 */
+    function kneeForOnePerpendicularBend(start, end, startN) {
+      if (Math.abs(startN.x) < 0.0001) return { x: start.x, y: end.y };
+      return { x: end.x, y: start.y };
+    }
+
+    function getEdgeGeometry(edge) {
+      if ((edge.from === 'p4' && edge.to === 'p7') || (edge.from === 'p7' && edge.to === 'p4')) {
+        return { laneBias: 0, terminalLen: 0 };
+      }
+      if (edge.type !== 'regression') return { laneBias: 0, terminalLen: DEFAULT_TERMINAL_LEN };
+      if (edge.from === 'p7' && edge.to === 'p5') return { laneBias: 2, terminalLen: DEFAULT_TERMINAL_LEN };
+      if (edge.from === 'p7' && edge.to === 'p6') return { laneBias: 3, terminalLen: DEFAULT_TERMINAL_LEN };
+      if (edge.from === 'p7' && edge.to === 'p1') return { laneBias: 1, terminalLen: DEFAULT_TERMINAL_LEN };
+      return { laneBias: 1, terminalLen: DEFAULT_TERMINAL_LEN };
+    }
+
+    function pointInRect(x, y, rect) {
+      return x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h;
+    }
+
+    function segmentIntersectsRect(x1, y1, x2, y2, rect) {
+      if (pointInRect(x1, y1, rect) || pointInRect(x2, y2, rect)) return true;
+      const edges = [
+        [rect.x, rect.y, rect.x + rect.w, rect.y],
+        [rect.x + rect.w, rect.y, rect.x + rect.w, rect.y + rect.h],
+        [rect.x + rect.w, rect.y + rect.h, rect.x, rect.y + rect.h],
+        [rect.x, rect.y + rect.h, rect.x, rect.y]
+      ];
+      const ccw = (ax, ay, bx, by, cx, cy) => (cy - ay) * (bx - ax) > (by - ay) * (cx - ax);
+      const intersect = (ax, ay, bx, by, cx, cy, dx, dy) =>
+        ccw(ax, ay, cx, cy, dx, dy) !== ccw(bx, by, cx, cy, dx, dy) &&
+        ccw(ax, ay, bx, by, cx, cy) !== ccw(ax, ay, bx, by, dx, dy);
+      return edges.some(([ex1, ey1, ex2, ey2]) => intersect(x1, y1, x2, y2, ex1, ey1, ex2, ey2));
+    }
+
+    function polylineIntersectsAnyRect(points, obstacleRects) {
+      for (let i = 0; i < points.length - 1; i += 1) {
+        const a = points[i];
+        const b = points[i + 1];
+        if (obstacleRects.some(rect => segmentIntersectsRect(a.x, a.y, b.x, b.y, rect))) return true;
+      }
+      return false;
+    }
+
+    function routeCost(points) {
+      let sum = 0;
+      for (let i = 0; i < points.length - 1; i += 1) {
+        sum += Math.abs(points[i + 1].x - points[i].x) + Math.abs(points[i + 1].y - points[i].y);
+      }
+      return sum;
+    }
+
+    function computeSideSlotMap(edgeList, sideResolver, step = 14) {
+      const grouped = new Map();
+      edgeList.forEach(edge => {
+        const side = sideResolver(edge);
+        const key = `${edge.to}|${side}`;
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(edge);
+      });
+
+      const map = new Map();
+      grouped.forEach(list => {
+        const sorted = [...list].sort((a, b) => `${a.from}->${a.to}`.localeCompare(`${b.from}->${b.to}`));
+        const center = (sorted.length - 1) / 2;
+        sorted.forEach((edge, idx) => {
+          map.set(`${edge.from}->${edge.to}`, (idx - center) * step);
+        });
+      });
+      return map;
+    }
+
+    function pathFmt(n) {
+      return Math.round(Number(n) * 100) / 100;
+    }
+
+    /** 화살표 머리 겹침 방지용 끝점 안쪽 보정 */
+    function applyPathEndInset(points, inset) {
+      if (inset <= 0 || points.length < 2) return points;
+      const a = points[points.length - 2];
+      const b = points[points.length - 1];
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const len = Math.hypot(dx, dy);
+      if (len < inset + 0.35) return points;
+      const t = (len - inset) / len;
+      return points.slice(0, -1).concat([{ x: a.x + dx * t, y: a.y + dy * t }]);
+    }
+
+    function polylineToRoundedPath(points, radius = DEFAULT_EDGE_CORNER_RADIUS, endInset = 0) {
+      const pts = applyPathEndInset(points, endInset);
+      if (pts.length < 2) return '';
+      if (pts.length === 2) {
+        return `M ${pathFmt(pts[0].x)} ${pathFmt(pts[0].y)} L ${pathFmt(pts[1].x)} ${pathFmt(pts[1].y)}`;
+      }
+      if (!radius || radius <= 0) {
+        let d0 = `M ${pathFmt(pts[0].x)} ${pathFmt(pts[0].y)}`;
+        for (let i = 1; i < pts.length; i += 1) {
+          d0 += ` L ${pathFmt(pts[i].x)} ${pathFmt(pts[i].y)}`;
+        }
+        return d0;
+      }
+      // 꼭짓점 rMax 산출 후 rUnify 통일 적용
+      const f = EDGE_FILLET_LEN_FRAC;
+      const rMaxList = [];
+      for (let i = 1; i < pts.length - 1; i += 1) {
+        const prev = pts[i - 1];
+        const curr = pts[i];
+        const next = pts[i + 1];
+        const inVecX = curr.x - prev.x;
+        const inVecY = curr.y - prev.y;
+        const outVecX = next.x - curr.x;
+        const outVecY = next.y - curr.y;
+        const inLen = Math.max(1e-6, Math.hypot(inVecX, inVecY));
+        const outLen = Math.max(1e-6, Math.hypot(outVecX, outVecY));
+        const nx0 = inVecX / inLen;
+        const ny0 = inVecY / inLen;
+        const nx1 = outVecX / outLen;
+        const ny1 = outVecY / outLen;
+        const dot = nx0 * nx1 + ny0 * ny1;
+        if (Math.abs(dot) > 0.998) {
+          rMaxList.push({ i, collinear: true });
+          continue;
+        }
+        rMaxList.push({
+          i,
+          collinear: false,
+          rMax: Math.min(radius, inLen * f, outLen * f),
+          nx0,
+          ny0,
+          nx1,
+          ny1,
+          curr: { x: curr.x, y: curr.y }
+        });
+      }
+      const rRounded = rMaxList.filter(c => !c.collinear);
+      const rUnify = rRounded.length
+        ? Math.min(EDGE_UNIFIED_FILLET, ...rRounded.map(c => c.rMax))
+        : null;
+
+      let d = `M ${pathFmt(pts[0].x)} ${pathFmt(pts[0].y)}`;
+      for (const ent of rMaxList) {
+        if (ent.collinear) {
+          d += ` L ${pathFmt(pts[ent.i].x)} ${pathFmt(pts[ent.i].y)}`;
+          continue;
+        }
+        const { curr, nx0, ny0, nx1, ny1 } = ent;
+        const r = rUnify;
+        const p1 = { x: curr.x - nx0 * r, y: curr.y - ny0 * r };
+        const p2 = { x: curr.x + nx1 * r, y: curr.y + ny1 * r };
+        d += ` L ${pathFmt(p1.x)} ${pathFmt(p1.y)} Q ${pathFmt(curr.x)} ${pathFmt(curr.y)} ${pathFmt(p2.x)} ${pathFmt(p2.y)}`;
+      }
+      const end = pts[pts.length - 1];
+      d += ` L ${pathFmt(end.x)} ${pathFmt(end.y)}`;
+      return d;
+    }
+
+    function buildEdgePath(fromRect, toRect, baseRect, edge, obstacleRects, endOffset = 0, startOffset = 0, pathMeta = null) {
+      const fromCenter = rectCenter(fromRect, baseRect);
+      const toCenter = rectCenter(toRect, baseRect);
+      const o = typeof pathMeta === 'string' ? { route: pathMeta } : (pathMeta && typeof pathMeta === 'object' ? pathMeta : {});
+      const forcedRoute = o.route != null && o.route !== '' ? o.route : '';
+      const fromSide = o.fromSide;
+      const toSide = o.toSide;
+      const p7P1YMin = o.p7P1YMin;
+      const start = fromSide
+        ? edgeAnchorOnSide(fromRect, toCenter, baseRect, fromSide, startOffset)
+        : edgeAnchor(fromRect, toCenter, baseRect, startOffset);
+      const end = toSide
+        ? edgeAnchorOnSide(toRect, fromCenter, baseRect, toSide, endOffset)
+        : edgeAnchor(toRect, fromCenter, baseRect, endOffset);
+      const startN = sideNormal(start.side);
+      const endN = sideNormal(end.side);
+      const { laneBias, terminalLen } = getEdgeGeometry(edge);
+      const pathR = DEFAULT_EDGE_CORNER_RADIUS;
+      const minTop = obstacleRects.length ? Math.min(...obstacleRects.map(r => r.y)) : Math.min(start.y, end.y);
+      const maxBottom = obstacleRects.length ? Math.max(...obstacleRects.map(r => r.y + r.h)) : Math.max(start.y, end.y);
+      const minLeft = obstacleRects.length ? Math.min(...obstacleRects.map(r => r.x)) : Math.min(start.x, end.x);
+      const maxRight = obstacleRects.length ? Math.max(...obstacleRects.map(r => r.x + r.w)) : Math.max(start.x, end.x);
+      const viewW = Math.max(1, Math.round(baseRect.width));
+      const viewH = Math.max(1, Math.round(baseRect.height));
+      const safePad = 14;
+      const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+      const laneStep = 24;
+      const basePad = 28 + laneBias * 8;
+      const maxTries = 10;
+      const directCandidates = [];
+      const oneTurnCandidates = [];
+      const perimeterCandidates = [];
+      const terminalSegmentLen = terminalLen ?? 34;
+      // 화살표 전단 방향 유지를 위한 터미널 길이 고정
+      const startOut = {
+        x: start.x + startN.x * terminalSegmentLen,
+        y: start.y + startN.y * terminalSegmentLen
+      };
+      const endIn = {
+        x: end.x + endN.x * terminalSegmentLen,
+        y: end.y + endN.y * terminalSegmentLen
+      };
+
+      const pickBest = (routes) => {
+        const safeRoutes = routes.filter(route => !polylineIntersectsAnyRect(route, obstacleRects));
+        if (safeRoutes.length === 0) return null;
+        safeRoutes.sort((a, b) => routeCost(a) - routeCost(b));
+        return safeRoutes[0];
+      };
+
+      if (forcedRoute.startsWith('custom_')) {
+        const custom = [];
+
+        if (forcedRoute === 'custom_orth5' || forcedRoute === 'custom_p1_oneL') {
+          const knee3 = kneeForOnePerpendicularBend(start, end, startN);
+          const oneBend = [start, knee3, end];
+          const tryOneBend = forcedRoute === 'custom_p1_oneL' || !o.skipOneBend;
+          if (tryOneBend && !polylineIntersectsAnyRect(oneBend, obstacleRects)) {
+            return polylineToRoundedPath(oneBend, pathR);
+          }
+          const orth = [start, startOut, { x: endIn.x, y: startOut.y }, endIn, end];
+          if (!polylineIntersectsAnyRect(orth, obstacleRects)) {
+            return polylineToRoundedPath(orth, pathR);
+          }
+          return polylineToRoundedPath(oneBend, pathR);
+        } else if (forcedRoute === 'custom_p7_p1_below_p6') {
+          // p1 하단 연결 경로(p6 아래 우회, 5구간)
+          const p1C = rectCenter(toRect, baseRect);
+          const halfWb = toRect.width / 2;
+          const nudgeFromCenter = -halfWb * 0.32;
+          const endP1 = {
+            x: p1C.x + nudgeFromCenter,
+            y: p1C.y + toRect.height / 2,
+            side: 'bottom'
+          };
+          const endN2 = sideNormal('bottom');
+          const endInP1 = {
+            x: endP1.x,
+            y: endP1.y + endN2.y * terminalSegmentLen
+          };
+          const p6R = obstacleRects.find(r => r.id === 'p6');
+          /* p7P1YMin: render 패딩 하단 기준 좌표 */
+          const p6PaddedBottom = p6R ? p6R.y + p6R.h : 0;
+          const fromDom = p7P1YMin;
+          const minUnderP6 = p6PaddedBottom + 1;
+          const maxBottomExP6 = obstacleRects
+            .filter(r => r.id !== 'p6')
+            .reduce((m, r) => Math.max(m, r.y + r.h), 0);
+          const floor = Math.max(
+            fromDom != null ? fromDom : minUnderP6,
+            minUnderP6,
+            maxBottomExP6
+          );
+          /* p6 하방 경로 유지용 yPath 하한 보정 */
+          const yPath = Math.max(
+            floor,
+            startOut.y + 2,
+            endInP1.y + 2,
+            safePad + 40
+          );
+          const a = { x: startOut.x, y: yPath };
+          const b = { x: endInP1.x, y: yPath };
+          return polylineToRoundedPath([start, startOut, a, b, endInP1, endP1], pathR);
+        } else if (forcedRoute === 'custom_p3_p4_main') {
+          // p3→p4 상단 진입용 수평 정렬 경로
+          const run = (yH) => [start, startOut, { x: endIn.x, y: yH }, endIn, end];
+          const tryOne = (yH) => {
+            const pts = run(yH);
+            if (polylineIntersectsAnyRect(pts, obstacleRects)) return null;
+            return polylineToRoundedPath(pts, pathR);
+          };
+          for (const dy of [0, -10, 10, -20, 20, -32, 32, -45]) {
+            const yH = startOut.y + dy;
+            if (yH < safePad + 4 || yH > viewH - safePad - 4) continue;
+            const r = tryOne(yH);
+            if (r) return r;
+          }
+          {
+            const vx = clamp(
+              (startOut.x + endIn.x) / 2,
+              minLeft - 40,
+              viewW - safePad
+            );
+            const yH2 = startOut.y;
+            const detour = [start, startOut, { x: vx, y: yH2 }, { x: vx, y: endIn.y }, endIn, end];
+            if (!polylineIntersectsAnyRect(detour, obstacleRects)) {
+              return polylineToRoundedPath(detour, pathR);
+            }
+            return polylineToRoundedPath(run(yH2), pathR);
+          }
+        } else if (forcedRoute === 'custom_p8_p2_main') {
+          // p8→p2 경로
+          const orthP8P2 = [start, startOut, { x: endIn.x, y: startOut.y }, endIn, end];
+          if (!polylineIntersectsAnyRect(orthP8P2, obstacleRects)) {
+            return polylineToRoundedPath(orthP8P2, pathR);
+          }
+          const fromCenter = rectCenter(fromRect, baseRect);
+          const toCenter = rectCenter(toRect, baseRect);
+          const p8Top = { x: fromCenter.x - 6, y: fromCenter.y - fromRect.height / 2 };
+          const p2Bottom = { x: toCenter.x + 20, y: toCenter.y + toRect.height / 2 };
+          const p8TopOut = { x: p8Top.x, y: p8Top.y - terminalSegmentLen };
+          const p2BottomIn = { x: p2Bottom.x, y: p2Bottom.y + terminalSegmentLen };
+          return polylineToRoundedPath([p8Top, p8TopOut, { x: p2BottomIn.x, y: p8TopOut.y }, p2BottomIn, p2Bottom], pathR);
+        } else if (forcedRoute === 'custom_p2_p3') {
+          const fromCenter = rectCenter(fromRect, baseRect);
+          const toCenter = rectCenter(toRect, baseRect);
+          const p2Right = { x: fromCenter.x + fromRect.width / 2, y: fromCenter.y - 18 };
+          const p2RightOut = { x: p2Right.x + terminalSegmentLen, y: p2Right.y };
+          const p3Left = { x: toCenter.x - toRect.width / 2, y: toCenter.y - 18 };
+          const p3LeftIn = { x: p3Left.x - terminalSegmentLen, y: p3Left.y };
+          const forced = [p2Right, p2RightOut, p3LeftIn, p3Left];
+          if (!polylineIntersectsAnyRect(forced, obstacleRects)) {
+            return polylineToRoundedPath(forced, pathR);
+          }
+          custom.push([
+            p2Right,
+            p2RightOut,
+            { x: (p2RightOut.x + p3LeftIn.x) / 2, y: p2RightOut.y },
+            { x: (p2RightOut.x + p3LeftIn.x) / 2, y: p3LeftIn.y },
+            p3LeftIn,
+            p3Left
+          ]);
+        } else if (forcedRoute === 'custom_p3_p2') {
+          const fromCenter = rectCenter(fromRect, baseRect);
+          const toCenter = rectCenter(toRect, baseRect);
+          const p3Left = { x: fromCenter.x - fromRect.width / 2, y: fromCenter.y + 18 };
+          const p3LeftOut = { x: p3Left.x - terminalSegmentLen, y: p3Left.y };
+          const p2Right = { x: toCenter.x + toRect.width / 2, y: toCenter.y + 18 };
+          const p2RightIn = { x: p2Right.x + terminalSegmentLen, y: p2Right.y };
+          const forced = [p3Left, p3LeftOut, p2RightIn, p2Right];
+          if (!polylineIntersectsAnyRect(forced, obstacleRects)) {
+            return polylineToRoundedPath(forced, pathR);
+          }
+          custom.push([
+            p3Left,
+            p3LeftOut,
+            { x: (p3LeftOut.x + p2RightIn.x) / 2, y: p3LeftOut.y },
+            { x: (p3LeftOut.x + p2RightIn.x) / 2, y: p2RightIn.y },
+            p2RightIn,
+            p2Right
+          ]);
+        } else if (forcedRoute === 'custom_p5_p4' || forcedRoute === 'custom_p7_p5') {
+          // 하단 경로의 p6 상단 통과 제한
+          // p7→p5 경로의 p5→p4 대비 하방 오프셋
+          const p7P5BelowP5P4 = 28;
+          const dedupePts = (arr) => {
+            const out = [];
+            for (const p of arr) {
+              const q = out[out.length - 1];
+              if (q && Math.hypot(p.x - q.x, p.y - q.y) < 0.08) continue;
+              out.push(p);
+            }
+            return out;
+          };
+          const p6Ob = obstacleRects.find(r => r.id === 'p6');
+          const yMaxAboveP6 = p6Ob != null ? p6Ob.y - 16 : viewH - safePad - 2;
+          const yCap = Math.min(viewH - safePad - 2, yMaxAboveP6);
+          const nonP6 = obstacleRects.filter(r => r.id !== 'p6');
+          const maxBottomExP6 = nonP6.length ? Math.max(...nonP6.map(r => r.y + r.h)) : 0;
+          const yMinBus = Math.max(startOut.y, endIn.y);
+          const tryY0 = (extra) => {
+            const yBase = Math.min(
+              yCap,
+              Math.max(yMinBus, maxBottomExP6 + 18 + extra)
+            );
+            if (forcedRoute !== 'custom_p7_p5') return yBase;
+            return Math.min(yBase + p7P5BelowP5P4, yCap);
+          };
+          for (const extraY of [0, 6, 14, 22, 32, 44, 58, 72]) {
+            const y0 = tryY0(extraY);
+            const pts0 = [start, startOut];
+            if (y0 > startOut.y + 0.5) pts0.push({ x: startOut.x, y: y0 });
+            pts0.push({ x: endIn.x, y: y0 }, endIn, end);
+            const pts = dedupePts(pts0);
+            if (!polylineIntersectsAnyRect(pts, obstacleRects)) {
+              return polylineToRoundedPath(pts, pathR);
+            }
+          }
+          {
+            const y0 = tryY0(88);
+            const pts0 = [start, startOut, { x: startOut.x, y: y0 }, { x: endIn.x, y: y0 }, endIn, end];
+            return polylineToRoundedPath(dedupePts(pts0), pathR);
+          }
+        } else if (forcedRoute === 'custom_p7_p4') {
+          const p7Center = rectCenter(fromRect, baseRect);
+          const p4Center = rectCenter(toRect, baseRect);
+          const p6B = obstacleRects.find(r => r.id === 'p6');
+          const yJoin0 = p4Center.y + 2;
+          const yJoin = p6B != null ? Math.min(yJoin0, p6B.y - 12) : yJoin0;
+          const p7Left = { x: p7Center.x - fromRect.width / 2, y: yJoin };
+          const p4Right = { x: p4Center.x + toRect.width / 2, y: yJoin };
+          return polylineToRoundedPath([p7Left, p4Right], pathR);
+        } else if (forcedRoute === 'custom_p4_p7') {
+          const p4Center = rectCenter(fromRect, baseRect);
+          const p7Center = rectCenter(toRect, baseRect);
+          const p6B = obstacleRects.find(r => r.id === 'p6');
+          const yLow0 = p4Center.y + 26;
+          const yLow = p6B != null ? Math.min(yLow0, p6B.y - 12) : yLow0;
+          const p4Right = { x: p4Center.x + fromRect.width / 2, y: yLow };
+          const p7Left = { x: p7Center.x - toRect.width / 2, y: yLow };
+          return polylineToRoundedPath([p4Right, p7Left], pathR);
+        }
+
+        const bestCustom = pickBest(custom);
+        if (bestCustom) return polylineToRoundedPath(bestCustom, pathR);
+      }
+
+      if (forcedRoute === 'direct') {
+        const direct = [{ x: start.x, y: start.y }, startOut, endIn, { x: end.x, y: end.y }];
+        if (!polylineIntersectsAnyRect(direct, obstacleRects)) {
+          return polylineToRoundedPath(direct, pathR);
+        }
+      }
+
+      directCandidates.push([{ x: start.x, y: start.y }, startOut, endIn, { x: end.x, y: end.y }]);
+
+      oneTurnCandidates.push([
+        { x: start.x, y: start.y },
+        startOut,
+        { x: startOut.x, y: endIn.y },
+        endIn,
+        { x: end.x, y: end.y }
+      ]);
+      oneTurnCandidates.push([
+        { x: start.x, y: start.y },
+        startOut,
+        { x: endIn.x, y: startOut.y },
+        endIn,
+        { x: end.x, y: end.y }
+      ]);
+
+      for (let i = 0; i < maxTries; i += 1) {
+        const biasStep = i * laneStep;
+        const topY = clamp(minTop - (basePad + biasStep), safePad, viewH - safePad);
+        const bottomY = clamp(maxBottom + (basePad + biasStep), safePad, viewH - safePad);
+        const leftX = clamp(minLeft - (basePad + biasStep), safePad, viewW - safePad);
+        const rightX = clamp(maxRight + (basePad + biasStep), safePad, viewW - safePad);
+
+        const topRoute = [{ x: start.x, y: start.y }, startOut, { x: startOut.x, y: topY }, { x: endIn.x, y: topY }, endIn, { x: end.x, y: end.y }];
+        const bottomRoute = [{ x: start.x, y: start.y }, startOut, { x: startOut.x, y: bottomY }, { x: endIn.x, y: bottomY }, endIn, { x: end.x, y: end.y }];
+        const leftRoute = [{ x: start.x, y: start.y }, startOut, { x: leftX, y: startOut.y }, { x: leftX, y: endIn.y }, endIn, { x: end.x, y: end.y }];
+        const rightRoute = [{ x: start.x, y: start.y }, startOut, { x: rightX, y: startOut.y }, { x: rightX, y: endIn.y }, endIn, { x: end.x, y: end.y }];
+
+        perimeterCandidates.push(topRoute, bottomRoute, leftRoute, rightRoute);
+      }
+
+      const bestDirect = pickBest(directCandidates);
+      if (bestDirect) return polylineToRoundedPath(bestDirect, pathR);
+      const bestOneTurn = pickBest(oneTurnCandidates);
+      if (bestOneTurn) return polylineToRoundedPath(bestOneTurn, pathR);
+      const bestPerimeter = pickBest(perimeterCandidates);
+      if (!bestPerimeter) return '';
+
+      return polylineToRoundedPath(bestPerimeter, pathR);
+    }
+
+    function renderEdges() {
+      const wrap = processView.querySelector('.grid-wrap');
+      const grid = processView.querySelector('.grid');
+      const edgeLayer = processView.querySelector('#edgeLayer');
+      if (!wrap || !grid || !edgeLayer) return;
+      const baseRect = wrap.getBoundingClientRect();
+      edgeLayer.setAttribute('viewBox', `0 0 ${Math.max(1, Math.round(baseRect.width))} ${Math.max(1, Math.round(baseRect.height))}`);
+      const visibleNodes = [...grid.querySelectorAll('.node:not(.hide)')];
+      const obstacleRects = visibleNodes.map(node => {
+        const r = node.getBoundingClientRect();
+        const pad = RENDER_OBSTACLE_PAD;
+        return {
+          id: node.dataset.id,
+          x: r.left - baseRect.left - pad,
+          y: r.top - baseRect.top - pad,
+          w: r.width + pad * 2,
+          h: r.height + pad * 2
+        };
+      });
+      edgeLayer.innerHTML = `
+        <defs>
+          <!-- userSpaceOnUse + px 크기: 전진/회귀 화살 머리를 충분히 크게 (이전 strokeWidth 마커에 가깝게) -->
+          <marker id="arrowForward" viewBox="0 0 16 16" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+            <path d="M0,2 L14.5,8 L0,14 z" fill="rgba(79,143,250,.98)" />
+          </marker>
+          <marker id="arrowRegression" viewBox="0 0 16 16" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto" markerUnits="userSpaceOnUse">
+            <path d="M0,2 L14.5,8 L0,14 z" fill="rgba(240,68,68,.98)" />
+          </marker>
+        </defs>
+        <g id="edgeGroup"></g>
+        <g id="edgeLabelLayer" pointer-events="none"></g>
+        <g id="animLayer" pointer-events="none">
+          <circle id="flowDot" class="flow-dot" cx="0" cy="0" r="9" opacity="0" />
+        </g>
+      `;
+      const edgeGroup = edgeLayer.querySelector('#edgeGroup');
+      const labelLayer = edgeLayer.querySelector('#edgeLabelLayer');
+      if (!edgeGroup || !labelLayer) return;
+
+      const inOffsetMap = computeSideSlotMap(edges, edge => {
+        const fromEl = grid.querySelector(`.node[data-id="${edge.from}"]`);
+        const toEl = grid.querySelector(`.node[data-id="${edge.to}"]`);
+        if (!fromEl || !toEl) return 'unknown';
+        const fromRect = fromEl.getBoundingClientRect();
+        const toRect = toEl.getBoundingClientRect();
+        const fromCenter = rectCenter(fromRect, baseRect);
+        const toCenter = rectCenter(toRect, baseRect);
+        return edgeAnchor(toRect, fromCenter, baseRect, 0).side;
+      }, 22);
+      const outOffsetMap = computeSideSlotMap(edges, edge => {
+        const fromEl = grid.querySelector(`.node[data-id="${edge.from}"]`);
+        const toEl = grid.querySelector(`.node[data-id="${edge.to}"]`);
+        if (!fromEl || !toEl) return 'unknown';
+        const fromRect = fromEl.getBoundingClientRect();
+        const toRect = toEl.getBoundingClientRect();
+        const toCenter = rectCenter(toRect, baseRect);
+        return edgeAnchor(fromRect, toCenter, baseRect, 0).side;
+      }, 16);
+
+      // p1 분기군 / p7 회귀군 슬롯 간격 확장
+      const p1Fanout = edges.filter(e => e.from === 'p1').sort((a, b) => a.to.localeCompare(b.to));
+      const p7Fanout = edges.filter(e => e.from === 'p7').sort((a, b) => a.to.localeCompare(b.to));
+      p1Fanout.forEach((edge, idx) => {
+        const key = `${edge.from}->${edge.to}`;
+        outOffsetMap.set(key, (idx - (p1Fanout.length - 1) / 2) * 24);
+      });
+      p7Fanout.forEach((edge, idx) => {
+        const key = `${edge.from}->${edge.to}`;
+        if (edgeOverrides[key]?.route) return;
+        outOffsetMap.set(key, (idx - (p7Fanout.length - 1) / 2) * 28);
+      });
+
+      edges.forEach(edge => {
+        const fromEl = grid.querySelector(`.node[data-id="${edge.from}"]`);
+        const toEl = grid.querySelector(`.node[data-id="${edge.to}"]`);
+        if (!fromEl || !toEl) return;
+        const filteredObstacles = obstacleRects.filter(rect => rect.id !== edge.from && rect.id !== edge.to);
+        const edgeKey = `${edge.from}->${edge.to}`;
+        const override = edgeOverrides[edgeKey] || {};
+        const endOffset = override.endOffset ?? inOffsetMap.get(edgeKey) ?? 0;
+        const startOffset = override.startOffset ?? outOffsetMap.get(edgeKey) ?? 0;
+        const labelT = override.labelT != null ? override.labelT : 0.48;
+        const labelHorizontal = override.labelHorizontal === true;
+        const labelTangentBias = override.labelTangentBias;
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('class', `edge ${edge.type}`);
+        if (activeStepId && (activeStepId === edge.from || activeStepId === edge.to)) {
+          path.classList.add('active');
+        }
+        const pathOverride = { ...override, route: override.route || '' };
+        if (edgeKey === 'p7->p1') {
+          const p6El = grid.querySelector('.node[data-id="p6"]');
+          if (p6El) {
+            const r6 = p6El.getBoundingClientRect();
+            /* buildEdgePath와 동일한 p6 패딩 하단 좌표 */
+            const p6PaddedBottomVb = r6.bottom - baseRect.top + RENDER_OBSTACLE_PAD;
+            pathOverride.p7P1YMin = p6PaddedBottomVb + 5;
+          }
+        }
+        const d = buildEdgePath(
+          fromEl.getBoundingClientRect(),
+          toEl.getBoundingClientRect(),
+          baseRect,
+          edge,
+          filteredObstacles,
+          endOffset,
+          startOffset,
+          pathOverride
+        );
+        if (!d) return;
+        path.setAttribute('d', d);
+        path.setAttribute('data-from', edge.from);
+        path.setAttribute('data-to', edge.to);
+        path.setAttribute('marker-end', edge.type === 'regression' ? 'url(#arrowRegression)' : 'url(#arrowForward)');
+        const a11y = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        a11y.textContent = `${phaseLineLabel(edge.from)} → ${phaseLineLabel(edge.to)}: ${edge.meaning}`;
+        path.appendChild(a11y);
+        edgeGroup.appendChild(path);
+
+        try {
+          const lenRaw = path.getTotalLength();
+          const len = Math.max(1, lenRaw);
+          const mid = len * labelT;
+          const p = path.getPointAtLength(mid);
+          const eps = Math.min(6, len * 0.04);
+          let t0;
+          let t1;
+          if (labelTangentBias === 'from') {
+            t0 = Math.max(0, mid - eps * 2.2);
+            t1 = mid;
+          } else if (labelTangentBias === 'to') {
+            t0 = mid;
+            t1 = Math.min(len, mid + eps * 2.2);
+          } else {
+            t0 = Math.max(0, mid - eps);
+            t1 = Math.min(len, mid + eps);
+          }
+          if (t1 <= t0) {
+            t0 = Math.max(0, mid - eps);
+            t1 = Math.min(len, mid + eps);
+          }
+          const p0 = path.getPointAtLength(t0);
+          const p1 = path.getPointAtLength(t1);
+          let angDeg = 0;
+          if (!labelHorizontal) {
+            angDeg = (Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180) / Math.PI;
+            if (Number.isFinite(angDeg)) {
+              if (angDeg > 90) angDeg -= 180;
+              else if (angDeg < -90) angDeg += 180;
+            } else {
+              angDeg = 0;
+            }
+          }
+          const lab = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          lab.setAttribute('class', `edge-label ${edge.type}`);
+          lab.setAttribute('text-anchor', 'middle');
+          lab.setAttribute('dominant-baseline', 'middle');
+          lab.setAttribute('x', pathFmt(p.x));
+          lab.setAttribute('y', pathFmt(p.y));
+          if (angDeg !== 0) {
+            lab.setAttribute('transform', `rotate(${pathFmt(angDeg)} ${pathFmt(p.x)} ${pathFmt(p.y)})`);
+          }
+          lab.textContent = edge.meaningShort || edge.meaning;
+          labelLayer.appendChild(lab);
+        } catch (_) {}
+      });
+    }
+
+    function renderProcess() {
+      const getNode = (id) => {
+        const ph0 = phases.find(x => x.id === id) || {};
+        return `<article class="node" tabindex="0" data-id="${id}" data-tip="${ph0.desc || ''}">
+          <div class="h">${ph0.title || ''}<span class="node-id-sfx" aria-label="노드 ID">(${id})</span></div>
+          <div class="d">${ph0.desc || ''}</div>
+        </article>`;
+      };
+      const e2 = '<div class="gcell-2" aria-hidden="true"></div>';
+      const s150 = '<div class="gcol-150" aria-hidden="true"></div>';
+      const g = '<div class="gcell-min" aria-hidden="true"></div>';
+      /* 행당 11칸 배치 */
+      processView.innerHTML = `
+        <div class="fit-stage" id="fitStage">
+        <div class="grid-wrap">
+        <svg class="edge-layer" id="edgeLayer" aria-hidden="true"></svg>
+        <div class="grid" aria-label="양끝 얇은 여백, 박스 가로간격·행간격은 CSS 변수(--grid-col-gap, --grid-row-gap), p6는 가운데 열">${e2}${g}${s150}${getNode('p2')}${s150}${getNode('p3')}${s150}${g}${s150}${g}${e2}${e2}${getNode('p1')}${s150}${getNode('p5')}${s150}${getNode('p8')}${s150}${getNode('p4')}${s150}${getNode('p7')}${e2}${e2}${g}${s150}${g}${s150}${getNode('p6')}${s150}${g}${s150}${g}${e2}</div>
+        </div>
+        </div>
+      `;
+      const tt = document.getElementById('tooltip');
+      processView.querySelectorAll('.node').forEach((el, i) => {
+        el.dataset.idx = String(i);
+        el.addEventListener('click', () => selectPhase(el.dataset.id));
+        el.addEventListener('keydown', (e) => {
+          const idx = Number(el.dataset.idx);
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectPhase(el.dataset.id); }
+          if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); focusNode(idx + 1); }
+          if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); focusNode(idx - 1); }
+        });
+        el.addEventListener('mouseenter', (e) => showTip(e.currentTarget.dataset.tip));
+        el.addEventListener('mouseleave', hideTip);
+        el.addEventListener('mousemove', (e) => moveTip(e.clientX, e.clientY));
+      });
+      function showTip(text) {
+        tt.textContent = text;
+        tt.style.display = 'block';
+      }
+      function moveTip(x, y) {
+        tt.style.left = `${x + 14}px`;
+        tt.style.top = `${y + 14}px`;
+      }
+      function hideTip() {
+        tt.style.display = 'none';
+      }
+      fitProcessView();
+      renderEdges();
+      updateRegressionVisual();
+    }
+
+    function fitProcessView() {
+      const fitStage = processView.querySelector('#fitStage');
+      const wrap = processView.querySelector('.grid-wrap');
+      if (!fitStage || !wrap) return;
+
+      fitStage.style.transform = '';
+      fitStage.style.width = '';
+      fitStage.style.height = '';
+      fitStage.style.zoom = '';
+
+      const contentW = wrap.offsetWidth;
+      const contentH = wrap.offsetHeight;
+      if (!contentW || !contentH) return;
+
+      /* 무스크롤 뷰포트 맞춤 */
+      const availW = Math.max(1, processView.clientWidth);
+      const availH = Math.max(1, processView.clientHeight);
+      const pre = Math.min(availW / contentW, availH / contentH, 1);
+      if (pre >= 0.998) return;
+      const raw = pre;
+
+      /* zoom 값 2자리 반올림 */
+      const snapped = Math.max(0.5, Math.round(raw * 100) / 100);
+      const zoomOk = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('zoom', '1');
+      if (zoomOk) {
+        fitStage.style.zoom = String(snapped);
+        return;
+      }
+
+      fitStage.style.width = `${contentW}px`;
+      fitStage.style.height = `${contentH}px`;
+      fitStage.style.transform = `scale(${snapped})`;
+    }
+
+    /** START 애니메이션 시나리오(개별/전체) */
+    const ANIM_SCENARIOS = [
+      { id: 'full', label: '초기 개발', nodes: ['p1', 'p2', 'p3', 'p2', 'p3', 'p4', 'p7'] },
+      { id: 'general', label: '간단 개선', nodes: ['p1', 'p5', 'p8', 'p5', 'p4', 'p7'] },
+      { id: 'generalPRD', label: '복잡 개선', nodes: ['p1', 'p5', 'p8', 'p2', 'p3', 'p4', 'p7'] },
+      { id: 'bug', label: '버그 수정', nodes: ['p1', 'p6', 'p7'] }
+    ];
+    function getAnimOrderAllConcat() {
+      return ANIM_SCENARIOS.flatMap(s => s.nodes);
+    }
+    function getAnimOrder() {
+      const sel = document.getElementById('animScenario');
+      const v = sel?.value || 'full';
+      if (v === 'all') return getAnimOrderAllConcat();
+      const sc = ANIM_SCENARIOS.find(s => s.id === v);
+      return sc ? [...sc.nodes] : [...ANIM_SCENARIOS[0].nodes];
+    }
+    function initAnimScenarioSelect() {
+      const sel = document.getElementById('animScenario');
+      if (!sel) return;
+      sel.innerHTML = '';
+      ANIM_SCENARIOS.forEach(s => {
+        const o = document.createElement('option');
+        o.value = s.id;
+        o.textContent = s.label;
+        sel.appendChild(o);
+      });
+      const oAll = document.createElement('option');
+      oAll.value = 'all';
+      oAll.textContent = '네 가지 이어서 보기';
+      sel.appendChild(oAll);
+      sel.value = 'full';
+    }
+
+    function hideFlowDot() {
+      const dot = processView.querySelector('#flowDot');
+      if (dot) dot.setAttribute('opacity', '0');
+    }
+
+    function animateAlongEdge(from, to, msPerPx = 5, maxMs = 9450) {
+      return new Promise(resolve => {
+        const edgeGroup = processView.querySelector('#edgeGroup');
+        const pathEl = edgeGroup?.querySelector(`path[data-from="${from}"][data-to="${to}"]`);
+        const dot = processView.querySelector('#flowDot');
+        if (!pathEl || !dot) {
+          resolve();
+          return;
+        }
+        edgeGroup.querySelectorAll('.edge.anim-path').forEach(el => el.classList.remove('anim-path'));
+        pathEl.classList.add('anim-path');
+        const lenRaw = pathEl.getTotalLength();
+        const len = Math.max(1, lenRaw);
+        const ptStart = pathEl.getPointAtLength(0);
+        // 애니메이션 점의 실제 path(d) 기준 추적
+        const endInset = 0.35;
+        const duration = Math.min(Math.max(855, len * msPerPx), maxMs);
+        dot.setAttribute('cx', String(ptStart.x));
+        dot.setAttribute('cy', String(ptStart.y));
+        dot.setAttribute('opacity', '0.92');
+        const t0 = performance.now();
+        let pauseStarted = null;
+        let pausedAccum = 0;
+        let rafId = 0;
+        function cleanup() {
+          pathEl.classList.remove('anim-path');
+          if (rafId) cancelAnimationFrame(rafId);
+        }
+        function frame(now) {
+          if (animControl.stopped) {
+            cleanup();
+            hideFlowDot();
+            resolve();
+            return;
+          }
+          if (animControl.paused) {
+            if (pauseStarted == null) pauseStarted = now;
+            rafId = requestAnimationFrame(frame);
+            return;
+          }
+          if (pauseStarted != null) {
+            pausedAccum += now - pauseStarted;
+            pauseStarted = null;
+          }
+          const elapsed = now - t0 - pausedAccum;
+          const u = Math.min(1, Math.max(0, elapsed / duration));
+          const maxDist = Math.max(0, lenRaw - endInset);
+          const dist = u >= 1 ? maxDist : u * maxDist;
+          const pt = pathEl.getPointAtLength(Math.min(maxDist, dist));
+          const x = pt.x;
+          const y = pt.y;
+          dot.setAttribute('cx', String(x));
+          dot.setAttribute('cy', String(y));
+          if (u < 1) {
+            rafId = requestAnimationFrame(frame);
+          } else {
+            cleanup();
+            resolve();
+          }
+        }
+        rafId = requestAnimationFrame(frame);
+      });
+    }
+
+    function focusNode(idx) {
+      const nodes = [...document.querySelectorAll('.node')];
+      if (!nodes.length) return;
+      const clamped = Math.max(0, Math.min(nodes.length - 1, idx));
+      nodes[clamped].focus();
+    }
+
+    function asList(items, formatter) {
+      if (!items || !items.length) return '<li>-</li>';
+      return items.map(formatter).join('');
+    }
+
+    function selectPhase(id) {
+      const p = phases.find(x => x.id === id);
+      if (!p) return;
+      document.querySelectorAll('.phase').forEach(el => el.classList.toggle('sel', el.dataset.id === id));
+      document.querySelectorAll('.node').forEach(el => el.classList.toggle('sel', el.dataset.id === id));
+      dTitle.textContent = p.title ? `${p.title} (${p.id})` : '';
+      dDesc.textContent = p.desc;
+      dMeta.textContent = `메타 정보: ${p.meta}`;
+      dOut.textContent = `주요 산출물: ${p.out}`;
+      dRuleRefs.innerHTML = asList(p.ruleRefs, item => `<li>${item}</li>`);
+      dOwners.innerHTML = asList(p.owners, item => `<li>${item}</li>`);
+      dChecks.innerHTML = asList(p.requiredChecks, item => {
+        const cls = item.level === 'MUST' ? 'must' : 'warn';
+        return `<li>${item.text}<span class="badge ${cls}">${item.level}</span></li>`;
+      });
+      dArtifacts.innerHTML = asList(p.artifacts, item => `<li>${item}</li>`);
+      activeStepId = id;
+      renderEdges();
+    }
+
+    document.getElementById('btnAnimTogglePause').addEventListener('click', () => {
+      const btn = document.getElementById('btnStart');
+      if (!btn.classList.contains('running')) return;
+      animControl.paused = !animControl.paused;
+      syncAnimDock();
+    });
+    document.getElementById('btnAnimDockStop').addEventListener('click', () => {
+      const btn = document.getElementById('btnStart');
+      if (!btn.classList.contains('running')) return;
+      animControl.stopped = true;
+      animControl.paused = false;
+      const dock = document.getElementById('animDock');
+      if (dock) dock.classList.add('hide');
+    });
+
+    document.getElementById('btnStart').addEventListener('click', async () => {
+      const btn = document.getElementById('btnStart');
+      if (btn.classList.contains('running')) return;
+      btn.classList.add('running');
+      animControl.stopped = false;
+      animControl.paused = false;
+      syncAnimDock();
+      fitProcessView();
+      const order = getAnimOrder();
+      try {
+        hideFlowDot();
+        const startId = order[0] || 'p1';
+        selectPhase(startId);
+        activeStepId = startId;
+        renderEdges();
+        const startNode = document.querySelector(`.node[data-id="${startId}"]`);
+        if (startNode) {
+          startNode.classList.add('run');
+          await animDelay(630);
+          startNode.classList.remove('run');
+        }
+        if (animControl.stopped) return;
+        for (let i = 0; i < order.length - 1; i++) {
+          if (animControl.stopped) break;
+          const from = order[i];
+          const to = order[i + 1];
+          await animateAlongEdge(from, to);
+          if (animControl.stopped) break;
+          selectPhase(to);
+          activeStepId = to;
+          renderEdges();
+          const nodeEl = document.querySelector(`.node[data-id="${to}"]`);
+          if (nodeEl) {
+            nodeEl.classList.add('run');
+            await animDelay(570);
+            nodeEl.classList.remove('run');
+          }
+        }
+        hideFlowDot();
+        if (!animControl.stopped) {
+          updateRegressionVisual();
+          await animDelay(750);
+        }
+      } finally {
+        btn.classList.remove('running');
+        animControl.paused = false;
+        animControl.stopped = false;
+        hideFlowDot();
+        document.querySelectorAll('.edge.anim-path').forEach(el => el.classList.remove('anim-path'));
+        document.querySelectorAll('.node.run').forEach(el => el.classList.remove('run'));
+        syncAnimDock();
+        updateRegressionVisual();
+      }
+    });
+
+    function updateRegressionVisual() {
+      const severityMap = {
+        major: {
+          soft: 'rgba(240,68,68,.22)',
+          strong: 'rgba(240,68,68,.98)',
+          dash: '8 6',
+          glow: 7
+        },
+      };
+      const style = severityMap.major;
+      const edgeLayer = processView.querySelector('#edgeLayer');
+      if (!edgeLayer) return;
+      edgeLayer.querySelectorAll('.edge.regression').forEach(el => {
+        el.style.stroke = style.strong;
+        el.style.filter = `drop-shadow(0 0 ${style.glow}px ${style.soft})`;
+        el.style.strokeDasharray = style.dash;
+      });
+    }
+
+    window.addEventListener('resize', () => {
+      fitProcessView();
+      renderEdges();
+      updateRegressionVisual();
+    });
+
+    renderSidebar();
+    renderProcess();
+    initAnimScenarioSelect();
+    selectPhase('p1');
+    updateRegressionVisual();
+  </script>
+</body>
+</html>

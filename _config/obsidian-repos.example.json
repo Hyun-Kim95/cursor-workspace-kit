@@ -1,0 +1,16 @@
+{
+  "repositories": [
+    {
+      "slug": "cursor-workspace-kit",
+      "displayName": "Cursor workspace kit (optional)",
+      "hubFileStem": "cursor-workspace-kit-hub",
+      "path": "d:\\cursor\\cursor-workspace-kit",
+      "docsPaths": ["docs"]
+    },
+    {
+      "slug": "another-project",
+      "path": "d:\\work\\another-project",
+      "docsPaths": ["docs", "adr"]
+    }
+  ]
+}

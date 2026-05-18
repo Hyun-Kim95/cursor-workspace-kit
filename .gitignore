@@ -1,0 +1,32 @@
+# Cursor — local session state (do not commit)
+.cursor/state/
+
+# Generated / runtime agent artifacts
+docs/agent/rule-candidates.ndjson
+
+# Machine-local Obsidian ingest config (copy from _config/obsidian-repos.example.json)
+_config/obsidian-repos.json
+
+# Secrets and environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*~
+
+# Dependencies / build
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
