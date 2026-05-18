@@ -2,7 +2,35 @@
 
 제품 앱 레포에 [cursor-workspace-kit](https://github.com/Hyun-Kim95/cursor-workspace-kit)을 붙이고, 채팅 `/start`로 rules·스킬을 최신화하는 절차이다.
 
-## 1회 설정
+## 빠른 경로: `/start-setting` (권장)
+
+**Git 저장소인 제품 레포**를 Cursor로 연 뒤 채팅에 한 줄:
+
+```text
+/start-setting
+```
+
+자동 처리(가능한 범위):
+
+1. `git submodule add` → `vendor/cursor-workspace-kit` (없을 때만)
+2. 루트 `.cursor-kit.json` (채널 A 기본)
+3. `.cursor/hooks/kit-start-on-prompt.ps1` + `hooks.json`
+4. 첫 `Invoke-KitStart` sync
+
+결과: [`.cursor/state/kit-start-setting-last.json`](../.cursor/state/kit-start-setting-last.json) (생성 후 확인)
+
+**훅이 아직 없을 때(완전 빈 제품 레포):** kit을 clone해 둔 PC에서 1회만:
+
+```powershell
+cd D:\path\to\cursor-workspace-kit
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Invoke-KitStartSetting.ps1 -WorkspaceRoot D:\path\to\my-product
+```
+
+이후 제품 워크스페이스에서 `/start-setting`·`/start` 모두 사용 가능.
+
+---
+
+## 1회 설정 (수동)
 
 ### 1. Submodule 추가
 

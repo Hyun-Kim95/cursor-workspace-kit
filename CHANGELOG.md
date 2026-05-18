@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `scripts/Invoke-KitStartSetting.ps1` — `/start-setting` one-shot product onboarding (submodule, config, hooks, first sync)
+- Chat command `/start-setting` in `kit-start-on-prompt.ps1`
+
 ## [0.3.0] - `/start` hook and product integration
 
 ### Added

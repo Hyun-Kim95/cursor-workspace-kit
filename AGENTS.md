@@ -68,6 +68,16 @@
 - 디자인 승인과 구현 착수 승인 통합 규칙은 `.cursor/rules/70-client-lifecycle-default.mdc`를 따른다.
 - 본 파일에는 게이트 세부 불릿을 중복 정의하지 않는다.
 
+## `/start-setting` (제품 레포 1회 온보딩)
+
+사용자 메시지가 **`/start-setting`으로 시작**하면(예: `/start-setting`):
+
+1. 훅이 [`scripts/Invoke-KitStartSetting.ps1`](scripts/Invoke-KitStartSetting.ps1)을 실행한다 — submodule 추가(필요 시), `.cursor-kit.json`, `/start` 훅, `hooks.json`, 첫 sync까지 자동.
+2. **먼저** [`.cursor/state/kit-start-setting-last.json`](.cursor/state/kit-start-setting-last.json)을 읽고 요약을 확인한다.
+3. 훅이 없을 때는 kit clone에서 수동 1회: `powershell -File scripts/Invoke-KitStartSetting.ps1 -WorkspaceRoot <제품경로>`
+
+이후 일상 작업은 **`/start <할 일>`** 만 사용한다.
+
 ## `/start` (kit 최신화)
 
 사용자 메시지가 **`/start`로 시작**하면(예: `/start docs/requirements에 PRD 초안`):

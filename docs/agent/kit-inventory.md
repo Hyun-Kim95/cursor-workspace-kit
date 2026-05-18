@@ -89,6 +89,7 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `scripts/sync-kit.ps1` | kit 레포 전체 sync (`self` 모드) |
 | `scripts/sync-kit-product.ps1` | 제품 `.cursor/` 채널 A/B sync |
 | `scripts/Invoke-KitStart.ps1` | `/start` 백엔드: pull + sync + 상태 기록 |
+| `scripts/Invoke-KitStartSetting.ps1` | `/start-setting` 백엔드: submodule·설정·훅·첫 sync |
 | `scripts/Kit-HookCommon.ps1` | 훅 UTF-8 stdout · PS 5.1 JSON 읽기 (`Read-HookStdinJson`, `Write-HookJson`) |
 
 ## 훅·상태
@@ -98,6 +99,7 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `.cursor/hooks/kit-start-on-prompt.ps1` | `beforeSubmitPrompt` — `/start` 트리거 |
 | `.cursor/hooks/sync-kit-on-session.ps1` | `sessionStart` — 로컬 sync (fail-open) |
 | `.cursor/state/kit-start-last.json` | 마지막 `/start` 결과 (에이전트·디버그) |
+| `.cursor/state/kit-start-setting-last.json` | 마지막 `/start-setting` 온보딩 결과 |
 
 제품 레포 템플릿: `project-kit/.cursor-kit.json.example`, `project-kit/.cursor/hooks*`
 

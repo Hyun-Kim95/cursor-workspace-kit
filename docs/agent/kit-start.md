@@ -4,11 +4,17 @@
 
 ## 문법
 
-```text
-/start <이후에 할 작업 지시>
-```
+| 명령 | 용도 | 빈도 |
+|------|------|------|
+| `/start-setting` | submodule·설정·훅·첫 sync **자동 온보딩** | 제품 레포 **1회** (또는 재설정) |
+| `/start <지시>` | kit `pull` + sync 후 작업 | **매일** |
 
-예: `/start docs/requirements에 PRD 초안 작성`
+예:
+
+```text
+/start-setting
+/start docs/requirements에 PRD 초안 작성
+```
 
 - `/start` 접두어는 **kit 갱신 트리거**이며, 에이전트는 갱신 요약을 확인한 뒤 **뒤쪽 지시만** 수행한다.
 - [`AGENTS.md`](../../AGENTS.md) — 에이전트는 `.cursor/state/kit-start-last.json`을 먼저 읽는다.
