@@ -187,6 +187,7 @@ Copy-Item -Path "D:\path\to\cursor-workspace-kit\shared\skills\*" -Destination $
 
 | 증상 | 확인 |
 |------|------|
+| `/start` 대신 `start-feature`만 실행됨 | 자동완성 Tab 주의 → **`/kit-start `** 또는 **`/start `** 직접 입력, 또는 스킬 **`kit-start`** |
 | `/start-setting`이 아무 일도 안 함 | 제품에 `hooks.json`·훅 파일 있는지 → 없으면 **2단계** PowerShell 먼저 |
 | `Missing .cursor-kit.json` | 2단계 또는 `/start-setting` 재실행 |
 | pull 실패 | `kit-start-last.json` · 네트워크·git 인증 |

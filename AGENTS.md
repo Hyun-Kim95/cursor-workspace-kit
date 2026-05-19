@@ -78,15 +78,15 @@
 2. **먼저** [`.cursor/state/kit-start-setting-last.json`](.cursor/state/kit-start-setting-last.json)을 읽고 요약을 확인한다.
 3. 훅이 없을 때는 kit clone에서 수동 1회: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Invoke-KitStartSetting.ps1 -WorkspaceRoot <제품경로>`
 
-이후 일상 작업은 **`/start <할 일>`** 만 사용한다.
+이후 일상 작업은 **`/start <할 일>`** 또는 **`/kit-start <할 일>`**(자동완성·스킬 `kit-start`)을 사용한다. **`start-feature` 스킬과 혼동하지 않는다.**
 
-## `/start` (kit 최신화)
+## `/start` · `/kit-start` (kit 최신화)
 
-사용자 메시지가 **`/start`로 시작**하면(예: `/start docs/requirements에 PRD 초안`):
+사용자 메시지가 **`/start` 또는 `/kit-start`로 시작**하거나 스킬 **`kit-start`** 로 kit 갱신이 요청되면(예: `/start docs/requirements에 PRD 초안`):
 
 1. 훅이 [`scripts/Invoke-KitStart.ps1`](scripts/Invoke-KitStart.ps1)을 실행해 kit GitHub `fetch`/`pull` 및 sync를 수행한다. 실패 시 프롬프트는 **차단**(fail-closed)된다.
 2. **먼저** [`.cursor/state/kit-start-last.json`](.cursor/state/kit-start-last.json)을 읽고 `ok`, `message`, `pulled`, `channel` 등 pull·sync 요약을 한 줄로 확인한다.
-3. 그다음 **`/start` 뒤에 이어진 지시만** 수행한다(`/start` 접두어 자체는 작업 지시가 아님).
+3. 그다음 **접두어(`/start`, `/kit-start`) 뒤에 이어진 지시만** 수행한다(접두어 자체는 작업 지시가 아님).
 
 제품 레포·채널 A/B·submodule 설정: [`docs/agent/kit-start.md`](docs/agent/kit-start.md), [`docs/agent/product-onboarding.md`](docs/agent/product-onboarding.md).
 

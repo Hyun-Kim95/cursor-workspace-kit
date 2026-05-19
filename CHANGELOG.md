@@ -2,8 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- `kit-start` skill + `/kit-start` hook alias — autocomplete distinct from `start-feature`
+
 ### Changed
 
+- `/start` on product: `sync-kit-product` refreshes `kit-start-on-prompt.ps1`; `/start-setting` overwrites hook (`updated` not `exists` only)
 - Channel A `sync-kit-product`: sync **all** `shared/skills` + harness hook scripts on `/start` (not lifecycle-only)
 
 ### Added

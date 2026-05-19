@@ -129,7 +129,7 @@ function Ensure-StartHookScript {
     )
     $destDir = Join-Path $Root ".cursor\hooks"
     $dest = Join-Path $destDir "kit-start-on-prompt.ps1"
-    if (Test-Path -LiteralPath $dest) { return "exists" }
+    $hadDest = Test-Path -LiteralPath $dest
 
     $src = Join-Path $KitRoot ".cursor\hooks\kit-start-on-prompt.ps1"
     if (-not (Test-Path -LiteralPath $src)) {
@@ -142,6 +142,7 @@ function Ensure-StartHookScript {
         New-Item -ItemType Directory -Path $destDir -Force | Out-Null
     }
     Copy-Item -LiteralPath $src -Destination $dest -Force
+    if ($hadDest) { return "updated" }
     return "created"
 }
 

@@ -79,6 +79,21 @@ function Copy-AgentFiles {
     return $n
 }
 
+function Copy-KitStartHookScript {
+    param(
+        [string]$KitRoot,
+        [string]$HooksDest
+    )
+    $src = Join-Path $KitRoot ".cursor\hooks\kit-start-on-prompt.ps1"
+    if (-not (Test-Path -LiteralPath $src)) {
+        $src = Join-Path $KitRoot "project-kit\.cursor\hooks\kit-start-on-prompt.ps1"
+    }
+    if (-not (Test-Path -LiteralPath $src)) { return 0 }
+    Ensure-Dir -Path $HooksDest
+    Copy-Item -LiteralPath $src -Destination (Join-Path $HooksDest "kit-start-on-prompt.ps1") -Force
+    return 1
+}
+
 function Copy-HarnessHookScripts {
     param(
         [string]$KitRoot,
@@ -109,8 +124,10 @@ if ($Channel -eq "A") {
         $skillsCount = Copy-SkillFolders -SourceDir $sharedSkills -DestDir $skillsDest
     }
     $skillsCount += Copy-SkillFolders -SourceDir $projectKitSkills -DestDir $skillsDest
-    $hooksCount = Copy-HarnessHookScripts -KitRoot $KitRoot -HooksDest (Join-Path $cursorDest "hooks")
-    Write-Host "sync-kit-product (channel A): rules=$rulesCount skill-folders=$skillsCount harness-hooks=$hooksCount"
+    $hooksDest = Join-Path $cursorDest "hooks"
+    $startHookCount = Copy-KitStartHookScript -KitRoot $KitRoot -HooksDest $hooksDest
+    $hooksCount = Copy-HarnessHookScripts -KitRoot $KitRoot -HooksDest $hooksDest
+    Write-Host "sync-kit-product (channel A): rules=$rulesCount skill-folders=$skillsCount kit-start-hook=$startHookCount harness-hooks=$hooksCount"
 }
 else {
     Ensure-Dir -Path $rulesDest
@@ -122,7 +139,9 @@ else {
     $skillsCount += Copy-SkillFolders -SourceDir $projectKitSkills -DestDir $skillsDest
     $agentsCount = Copy-AgentFiles -SourceDir $sharedAgents -DestDir $agentsDest -ReplaceAll
 
-    $hooksCount = Copy-HarnessHookScripts -KitRoot $KitRoot -HooksDest (Join-Path $cursorDest "hooks")
+    $hooksDest = Join-Path $cursorDest "hooks"
+    $startHookCount = Copy-KitStartHookScript -KitRoot $KitRoot -HooksDest $hooksDest
+    $hooksCount = Copy-HarnessHookScripts -KitRoot $KitRoot -HooksDest $hooksDest
 
-    Write-Host "sync-kit-product (channel B): rules=$rulesCount skills=$skillsCount agents=$agentsCount harness-hooks=$hooksCount"
+    Write-Host "sync-kit-product (channel B): rules=$rulesCount skills=$skillsCount agents=$agentsCount kit-start-hook=$startHookCount harness-hooks=$hooksCount"
 }
