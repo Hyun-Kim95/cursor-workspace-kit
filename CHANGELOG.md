@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Channel A `sync-kit-product`: sync **all** `shared/skills` + harness hook scripts on `/start` (not lifecycle-only)
+
 ### Added
 
 - `Get-KitHarnessConfig` in `scripts/Kit-HookCommon.ps1` — parse `.cursor-kit.json` `harness` (fail-open, PS 5.1)

@@ -88,7 +88,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-QualityGateHarn
 |------|------|
 | block인데 명령이 통과됨 | `.cursor-kit.json` `ParseOk`, `harness.shellGuard.mode`, 훅이 최신 sync인지 |
 | quality gate가 안 돈다 | `.cursor/quality-gate.json` 존재·`enabled`, `onlyWhen` vs `delivery-ralph.json` phase |
-| 제품에 훅 파일 없음 | 채널 A면 수동 복사 또는 `/start-setting` · 채널 B sync |
+| 제품에 훅 파일 없음 | `/start`(채널 A·B sync) 또는 `/start-setting` · `hooks.json` 슬롯 |
 | 한글 설정 깨짐 | `.cursor-kit.json` UTF-8 **BOM 없음** |
 
 ## 관련

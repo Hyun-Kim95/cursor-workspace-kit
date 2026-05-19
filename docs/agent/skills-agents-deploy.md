@@ -45,11 +45,12 @@ powershell -NoProfile -File scripts/sync-kit.ps1
 
 | 위치 | 내용 |
 |------|------|
-| `~/.cursor/skills` | `shared/skills` 공통 스킬 |
-| `~/.cursor/agents` | `shared/agents` 6개 |
-| 제품 `.cursor/skills/` | (선택) `project-kit`의 `client-project-lifecycle`만 |
+| `~/.cursor/agents` | `shared/agents` 6개 (권장) |
+| `~/.cursor/skills` | (선택) 비워 두어도 됨 — 제품이 SSOT |
+| 제품 `.cursor/skills/` | `/start` → **`shared/skills` 전체** + `client-project-lifecycle` |
+| 제품 `.cursor/rules/` | `/start` → `project-kit` 60·64·70 |
 
-kit 풀세트를 제품에 넣을 때는 `shared/`, `project-kit/`, `scripts/sync-kit.ps1` 복사 후 sync.
+kit 풀세트를 제품에 넣을 때는 `shared/`, `project-kit/`, `scripts/sync-kit.ps1` 복사 후 sync. 채널 B는 제품에 rules·agents까지 전부 복사.
 
 ## 신규 제품 레포 최소 세트
 

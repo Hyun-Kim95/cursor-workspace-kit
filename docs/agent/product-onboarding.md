@@ -24,7 +24,7 @@
 
 - **제품 레포**가 Git 저장소다 (`git init` 또는 clone된 상태).
 - 이 PC에 `git`, `powershell`이 있다.
-- 기본 **채널 A** (전역 `~/.cursor/skills`·`agents` 유지) — 채널 B는 [수동 설정](#1회-설정-수동참고) 참고.
+- 기본 **채널 A** (제품에 **공통 스킬 전체** + lifecycle; 전역 agents 유지) — 채널 B는 [수동 설정](#1회-설정-수동참고) 참고.
 
 ### 1단계 — kit 레포 clone (이 PC, 보통 1회)
 
@@ -87,7 +87,7 @@ kit [`AGENTS.md`](../../AGENTS.md)를 참고해 제품 루트에 두고, `/start
 | 패턴 | sync된 `.cursor/hooks/guard-shell.patterns.json` |
 | quality gate | [`project-kit/.cursor/quality-gate.json.example`](../../project-kit/.cursor/quality-gate.json.example) → `.cursor/quality-gate.json` (로컬, gitignore) |
 
-- 채널 **B** `sync-kit-product`는 harness 훅 3파일만 복사한다. 채널 **A**는 submodule `shared/hooks`에서 수동 복사 또는 B 권장.
+- 채널 **A**·**B** 모두 `/start` 시 harness 훅 3파일을 제품 `.cursor/hooks/`에 복사한다(`hooks.json` 슬롯은 `/start-setting`).
 - kit 템플릿 레포 self는 오탐 완화를 위해 `shellGuard.mode: warn`을 쓴다.
 
 ---
@@ -151,14 +151,27 @@ powershell -NoProfile -ExecutionPolicy Bypass -File vendor\cursor-workspace-kit\
 
 ---
 
-## 기존 레포 — 채널 A (전역 skills 유지)
+## 기존 레포 — 채널 A (기본)
 
 | 항목 | 조치 |
 |------|------|
-| 전역 skills·agents | **그대로** |
-| 제품 `.cursor/rules` | `/start` 시 **60·64·70**만 갱신 |
-| 제품 `.cursor/skills` | **lifecycle만** — `plan-feature` 등 넣지 않음 |
+| 전역 agents | **그대로** (또는 제품에 두지 않음) |
+| 전역 skills | 비어 있어도 됨 — `/start`가 **shared/skills 전체**를 제품 `.cursor/skills`에 반영 |
+| 제품 `.cursor/rules` | `/start` 시 **60·64·70** 갱신 |
+| 제품 `.cursor/skills` | `/start` 시 **공통 스킬 + lifecycle** 갱신 |
 | `.cursor-kit.json` | `"channel": "A"` |
+
+### 전역 skills 복구 (선택)
+
+전역을 kit과 맞추려면 kit clone에서:
+
+```powershell
+$dst = Join-Path $env:USERPROFILE ".cursor\skills"
+New-Item -ItemType Directory -Path $dst -Force | Out-Null
+Copy-Item -Path "D:\path\to\cursor-workspace-kit\shared\skills\*" -Destination $dst -Recurse -Force
+```
+
+제품만 쓸 경우 위 없이 제품에서 **`/start`** 만으로도 스킬이 채워진다.
 
 채널 B: [`skills-agents-deploy.md`](skills-agents-deploy.md)
 
