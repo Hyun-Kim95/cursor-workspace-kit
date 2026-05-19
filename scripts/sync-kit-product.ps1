@@ -1,5 +1,5 @@
 # Sync kit SSOT from a kit root (submodule/embedded) into a product workspace .cursor/
-# Channel A: project-kit rules + shared/skills + project-kit/skills + harness hooks (agents stay global or local)
+# Channel A: project-kit rules + shared/skills + project-kit/skills + shared/agents + harness hooks
 # Channel B: full shared + project-kit -> .cursor/rules|skills|agents + harness hooks
 
 param(
@@ -127,7 +127,10 @@ if ($Channel -eq "A") {
     $hooksDest = Join-Path $cursorDest "hooks"
     $startHookCount = Copy-KitStartHookScript -KitRoot $KitRoot -HooksDest $hooksDest
     $hooksCount = Copy-HarnessHookScripts -KitRoot $KitRoot -HooksDest $hooksDest
-    Write-Host "sync-kit-product (channel A): rules=$rulesCount skill-folders=$skillsCount kit-start-hook=$startHookCount harness-hooks=$hooksCount"
+    if (Test-Path -LiteralPath $sharedAgents) {
+        $agentsCount = Copy-AgentFiles -SourceDir $sharedAgents -DestDir $agentsDest
+    }
+    Write-Host "sync-kit-product (channel A): rules=$rulesCount skill-folders=$skillsCount agents=$agentsCount kit-start-hook=$startHookCount harness-hooks=$hooksCount"
 }
 else {
     Ensure-Dir -Path $rulesDest

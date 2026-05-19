@@ -64,10 +64,10 @@
 
 | channel | 제품 `.cursor/` 반영 | 전역 `~/.cursor` |
 |---------|----------------------|------------------|
-| **A** | `project-kit` rules(60·64·70) + **`shared/skills` 전체** + `project-kit` 스킬 + harness 훅 3파일 | agents·(선택) User Rules **유지** — 전역 skills가 비어도 제품 `.cursor/skills`로 동작 |
+| **A** | `project-kit` rules(60·64·70) + **`shared/skills` 전체** + **`shared/agents` 6개** + `project-kit` 스킬 + harness 훅 | (선택) User Rules·전역 `~/.cursor` — 제품 `.cursor/skills`·`.cursor/agents`가 SSOT |
 | **B** | `shared/` + `project-kit/` 전부 → rules·skills·agents + harness 훅 | 중복 제거 권장 |
 
-**채널 A:** `/start`마다 공통 스킬이 제품에 복사된다. 전역 `~/.cursor/skills`와 **이름이 겹치면** Cursor가 둘 다 로드할 수 있으니, 전역을 비우거나 kit과 동일하게 맞추는 것을 권장한다([`product-onboarding.md`](product-onboarding.md) 문제 해결).
+**채널 A:** `/start`마다 공통 **스킬·에이전트**가 제품 `.cursor/`에 복사된다. 전역 `~/.cursor/skills`·`~/.cursor/agents`와 **이름이 겹치면** 중복 로드될 수 있으니, 전역을 비우거나 kit과 맞추는 것을 권장한다([`product-onboarding.md`](product-onboarding.md) 문제 해결).
 
 ## Submodule (권장)
 

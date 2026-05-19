@@ -6,7 +6,7 @@ description: kit 템플릿 pull·sync(/start·/kit-start 훅). start-feature(기
 # kit-start
 
 ## 목적
-제품 워크스페이스에서 **cursor-workspace-kit** submodule을 `fetch`/`pull`하고, `.cursor-kit.json` 채널에 맞게 **rules·skills·(선택) harness 훅 스크립트**를 제품 `.cursor/`에 반영한다.
+제품 워크스페이스에서 **cursor-workspace-kit** submodule을 `fetch`/`pull`하고, `.cursor-kit.json` 채널에 맞게 **rules·skills·agents·(선택) harness 훅 스크립트**를 제품 `.cursor/`에 반영한다(채널 A: 공통 skills·agents + project-kit rules).
 
 ## `start-feature`와 구분 (필수)
 

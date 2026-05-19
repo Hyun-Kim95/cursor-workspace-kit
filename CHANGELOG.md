@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Channel A `sync-kit-product`: sync **`shared/agents`** to product `.cursor/agents` on `/start` (same as skills; no ReplaceAll wipe)
+
 ### Added
 
 - `kit-start` skill + `/kit-start` hook alias — autocomplete distinct from `start-feature`

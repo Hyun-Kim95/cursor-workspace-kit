@@ -24,7 +24,7 @@
 
 - **제품 레포**가 Git 저장소다 (`git init` 또는 clone된 상태).
 - 이 PC에 `git`, `powershell`이 있다.
-- 기본 **채널 A** (제품에 **공통 스킬 전체** + lifecycle; 전역 agents 유지) — 채널 B는 [수동 설정](#1회-설정-수동참고) 참고.
+- 기본 **채널 A** (제품에 **공통 스킬·에이전트 전체** + lifecycle) — 채널 B는 [수동 설정](#1회-설정-수동참고) 참고.
 
 ### 1단계 — kit 레포 clone (이 PC, 보통 1회)
 
@@ -155,23 +155,23 @@ powershell -NoProfile -ExecutionPolicy Bypass -File vendor\cursor-workspace-kit\
 
 | 항목 | 조치 |
 |------|------|
-| 전역 agents | **그대로** (또는 제품에 두지 않음) |
-| 전역 skills | 비어 있어도 됨 — `/start`가 **shared/skills 전체**를 제품 `.cursor/skills`에 반영 |
+| 전역 agents·skills | 비어 있어도 됨 — `/start`가 **shared/agents·shared/skills**를 제품 `.cursor/`에 반영 |
 | 제품 `.cursor/rules` | `/start` 시 **60·64·70** 갱신 |
 | 제품 `.cursor/skills` | `/start` 시 **공통 스킬 + lifecycle** 갱신 |
+| 제품 `.cursor/agents` | `/start` 시 **공통 에이전트 6개** 갱신 (kit `shared/agents`와 동일 파일명 덮어씀) |
 | `.cursor-kit.json` | `"channel": "A"` |
 
-### 전역 skills 복구 (선택)
+### 전역 복구 (선택)
 
-전역을 kit과 맞추려면 kit clone에서:
+제품만 쓸 경우 **`/start`** 만으로 스킬·에이전트가 채워진다. 전역을 kit과 맞추려면 kit clone에서:
 
 ```powershell
-$dst = Join-Path $env:USERPROFILE ".cursor\skills"
-New-Item -ItemType Directory -Path $dst -Force | Out-Null
-Copy-Item -Path "D:\path\to\cursor-workspace-kit\shared\skills\*" -Destination $dst -Recurse -Force
+$skillsDst = Join-Path $env:USERPROFILE ".cursor\skills"
+$agentsDst = Join-Path $env:USERPROFILE ".cursor\agents"
+New-Item -ItemType Directory -Path $skillsDst, $agentsDst -Force | Out-Null
+Copy-Item -Path "D:\path\to\cursor-workspace-kit\shared\skills\*" -Destination $skillsDst -Recurse -Force
+Copy-Item -Path "D:\path\to\cursor-workspace-kit\shared\agents\*.md" -Destination $agentsDst -Force
 ```
-
-제품만 쓸 경우 위 없이 제품에서 **`/start`** 만으로도 스킬이 채워진다.
 
 채널 B: [`skills-agents-deploy.md`](skills-agents-deploy.md)
 
@@ -229,9 +229,10 @@ if (Test-Path .cursor-kit.json) {
 Test-Path (Join-Path $kitPath "scripts\Invoke-KitStart.ps1")
 Test-Path (Join-Path $kitPath "scripts\sync-kit-product.ps1")
 
-# 3) 채널 A 전체 스킬 sync 스크립트 포함 여부 (257f212 이후)
+# 3) 채널 A 전체 스킬·에이전트 sync 스크립트 포함 여부
 Select-String -Path (Join-Path $kitPath "scripts\sync-kit-product.ps1") -Pattern "sharedSkills" -Quiet
-# True 여야 channel A에서 shared/skills 전체 복사
+Select-String -Path (Join-Path $kitPath "scripts\sync-kit-product.ps1") -Pattern "sharedAgents" -Quiet
+# 둘 다 True 여야 channel A에서 shared/skills·shared/agents 복사
 
 # 4) 로컬 submodule HEAD vs 원격 main
 Push-Location $kitPath
@@ -243,8 +244,9 @@ Pop-Location
 "$remote"
 # 두 SHA가 다르면 submodule 작업 트리가 원격 main보다 뒤처짐 → --remote 또는 submodule 안 git pull 검토
 
-# 5) 제품에 복사된 스킬 폴더 수 (채널 A 기대: shared 9 + lifecycle 등 10개 전후)
+# 5) 제품에 복사된 스킬·에이전트 (채널 A 기대: 스킬 폴더 10개 전후, 에이전트 .md 6개)
 (Get-ChildItem .cursor\skills -Directory -ErrorAction SilentlyContinue).Count
+(Get-ChildItem .cursor\agents -Filter "*.md" -ErrorAction SilentlyContinue).Count
 Get-ChildItem .cursor\skills -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
 
 # 6) 마지막 /start 기록 (skill 개수는 JSON에 없음)
@@ -256,7 +258,7 @@ Get-Content .cursor\state\kit-start-last.json -Raw -ErrorAction SilentlyContinue
 | `sharedSkills`가 스크립트에 **없음** | submodule이 **채널 A 전체 스킬 sync 이전** → `--remote`(또는 pull) **필요** |
 | 로컬 HEAD ≠ `origin/main` | 원격 최신 미반영 → `--remote` 또는 submodule 안 `git pull` **검토** |
 | `.cursor/skills` 폴더 **1개**뿐 (`client-project-lifecycle`만) | 위와 동일 가능성 큼 |
-| `/start` 로그에 `skill-folders=1` (터미널·훅 stdout) | sync는 됐으나 **옛 스크립트** |
+| `/start` 로그에 `skill-folders=1` 또는 `agents=0` (터미널·훅 stdout) | sync는 됐으나 **옛 스크립트** |
 | 위가 모두 정상인데 UI만 1개 | [문제 해결](#문제-해결) — Cursor reload, **파일 탐색기** `.cursor/skills` 기준 |
 
 `kit-start-last.json`의 `message`에 “sync 완료”만 있어도 **스킬 개수는 증명하지 않는다.**
@@ -291,7 +293,7 @@ cd ..\..
 powershell -NoProfile -ExecutionPolicy Bypass -File vendor\cursor-workspace-kit\scripts\Invoke-KitStart.ps1 -WorkspaceRoot .
 ```
 
-터미널에 `skill-folders=10` 근처가 보이면 채널 A 전체 스킬 복사로 보면 된다.
+터미널에 `skill-folders=10`·`agents=6` 근처가 보이면 채널 A 전체 스킬·에이전트 복사로 보면 된다.
 
 **팀 공유:** submodule SHA를 부모 제품 repo에 남기려면 `git add vendor/cursor-workspace-kit` 후 commit. 로컬만 쓸 때는 생략 가능.
 
