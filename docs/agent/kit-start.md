@@ -75,7 +75,13 @@
 git submodule add https://github.com/Hyun-Kim95/cursor-workspace-kit.git vendor/cursor-workspace-kit
 ```
 
-clone: `git clone --recurse-submodules ...` 또는 `git submodule update --init`.
+| 상황 | 명령 |
+|------|------|
+| clone 직후·submodule 비어 있음 | `git submodule update --init` (부모가 pin한 SHA) |
+| **일상 kit 갱신** | **`/kit-start`** / **`/start`** (submodule 안 `git pull` + sync) |
+| submodule이 원격 `main`보다 뒤처진 것 같을 때 | **보통 `/kit-start`·`/start`가 자동 실행** — [Submodule 최신화](product-onboarding.md#submodule-최신화--start-vs-submodule-update---remote). 수동: `git submodule update --init --remote <kitPath>` |
+
+`Invoke-KitStart.ps1`은 등록된 submodule이고 갱신이 필요하면 `submodule update --init --remote` 후 pull·sync 한다. `kit-start-last.json`의 `submoduleRemoteSync`로 적용 여부를 확인한다.
 
 ## kit 레포 vs 제품 레포 훅
 

@@ -89,7 +89,8 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `scripts/import-from-user-cursor.ps1` | `~/.cursor` → `shared/` (일회/재동기화) |
 | `scripts/sync-kit.ps1` | kit 레포 전체 sync (`self` 모드) |
 | `scripts/sync-kit-product.ps1` | 제품 `.cursor/` 채널 A/B sync |
-| `scripts/Invoke-KitStart.ps1` | `/start` 백엔드: pull + sync + 상태 기록 |
+| `scripts/Invoke-KitStart.ps1` | `/start` 백엔드: (submodule 시 필요하면) `submodule update --init --remote` + pull + sync |
+| [`product-onboarding.md`](product-onboarding.md#submodule-최신화--start-vs-submodule-update---remote) | submodule `--remote` 필요 여부·확인 체크리스트 |
 | `scripts/Invoke-KitStartSetting.ps1` | `/start-setting` 백엔드: submodule·설정·훅·첫 sync |
 | `scripts/Kit-HookCommon.ps1` | 훅 UTF-8 stdout · PS 5.1 JSON · `Get-KitHarnessConfig` · harness 헬퍼 |
 | `scripts/sync-hooks.ps1` | `shared/hooks/*` → `.cursor/hooks/` (harness 3파일; kit 전용 훅 유지) |

@@ -42,7 +42,7 @@
 
 - kit 레포: [`scripts/sync-hooks.ps1`](../../scripts/sync-hooks.ps1) — `sync-kit.ps1` 마지막에 호출. 기존 Obsidian·`kit-start` 훅은 유지한다.
 - 제품 채널 **B**: [`scripts/sync-kit-product.ps1`](../../scripts/sync-kit-product.ps1) — 위 3파일만 화이트리스트 복사 (`kit-start-on-prompt.ps1` 덮어쓰기 금지).
-- 제품 채널 **A**: harness 훅 자동 sync 없음 — submodule에서 수동 복사 또는 B 권장.
+- 제품 채널 **A**·**B**: `/start` 시 harness 훅 3파일 + `kit-start-on-prompt.ps1` 복사. `hooks.json` 슬롯은 `/start-setting`.
 - `/start-setting`: [`Invoke-KitStartSetting.ps1`](../../scripts/Invoke-KitStartSetting.ps1)의 `Ensure-HarnessHookScripts` / `Ensure-HarnessHooksJson`이 훅 파일·`hooks.json` 슬롯을 idempotent merge한다.
 
 ## Shell guard (`beforeShellExecution`)

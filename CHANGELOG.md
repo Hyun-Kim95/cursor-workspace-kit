@@ -5,6 +5,8 @@
 ### Added
 
 - `kit-start` skill + `/kit-start` hook alias — autocomplete distinct from `start-feature`
+- `product-onboarding.md` — submodule `update --init --remote` when to use, verification checklist, vs daily `/start`
+- `Invoke-KitStart.ps1` — auto `git submodule update --init --remote` when submodule kit is behind or stale (`Kit-HookCommon.ps1`)
 
 ### Changed
 

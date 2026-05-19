@@ -65,8 +65,18 @@ function Invoke-GitPullKit {
         $pulled = $false
         if ($behind -gt 0) {
             & git pull --ff-only $Remote $Branch 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) { throw "git pull --ff-only $Remote $Branch failed (exit $LASTEXITCODE). Resolve conflicts manually." }
+            if ($LASTEXITCODE -ne 0) {
+                & git checkout $Branch 2>&1 | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    & git pull --ff-only $Remote $Branch 2>&1 | Out-Null
+                }
+            }
+            if ($LASTEXITCODE -ne 0) {
+                throw "git pull --ff-only $Remote $Branch failed (exit $LASTEXITCODE). From product root try: git submodule update --init --remote <kitPath>"
+            }
             $pulled = $true
+            $behindRaw2 = git rev-list "HEAD..$ref" --count 2>$null
+            if ($LASTEXITCODE -eq 0) { $behind = [int]($behindRaw2.Trim()) }
         }
         return @{ Behind = $behind; Pulled = $pulled; Ref = $ref }
     }
@@ -107,9 +117,6 @@ try {
         }
         "submodule" {
             $kitRoot = Join-Path $WorkspaceRoot $kitPath
-            if (-not (Test-Path -LiteralPath $kitRoot)) {
-                throw "Kit submodule path not found: $kitRoot. Run: git submodule update --init"
-            }
             $gitDir = $kitRoot
         }
         "embedded" {
@@ -120,6 +127,33 @@ try {
             }
         }
         default { throw "Unknown kitRepoMode: $mode" }
+    }
+
+    $submoduleRemoteSync = $null
+    if ($mode -eq "submodule") {
+        $hasSubmodule = Test-WorkspaceHasKitSubmodule -WorkspaceRoot $WorkspaceRoot -KitPath $kitPath
+        $runRemoteUpdate = $false
+        if ($hasSubmodule) {
+            if (-not (Test-Path -LiteralPath $kitRoot) -or -not (Test-Path -LiteralPath (Join-Path $kitRoot "scripts\Invoke-KitStart.ps1"))) {
+                $runRemoteUpdate = $true
+            }
+            else {
+                $need = Get-KitSubmoduleSyncNeed -KitRoot $kitRoot -Remote $remote -Branch $branch
+                $runRemoteUpdate = $need.Needs
+            }
+        }
+        if ($runRemoteUpdate) {
+            $submoduleRemoteSync = Invoke-WorkspaceKitSubmoduleRemoteUpdate -WorkspaceRoot $WorkspaceRoot -KitPath $kitPath
+            if (-not $submoduleRemoteSync.Ok -and -not $submoduleRemoteSync.Skipped) {
+                throw $submoduleRemoteSync.Message
+            }
+        }
+        if (-not (Test-Path -LiteralPath $kitRoot)) {
+            throw "Kit submodule path not found: $kitRoot. Run: git submodule update --init or /start-setting"
+        }
+        if (-not (Test-Path -LiteralPath (Join-Path $kitRoot "scripts\Invoke-KitStart.ps1"))) {
+            throw "Kit scripts missing under $kitRoot. Run: git submodule update --init --remote $kitPath"
+        }
     }
 
     $beforeSha = Get-GitHead -GitDir $gitDir
@@ -156,9 +190,12 @@ try {
         "Behind $($pullResult.Behind) commit(s) on $($pullResult.Ref)."
     )
     if ($pullResult.Pulled) { $summary += "Pulled latest." } else { $summary += "Already up to date." }
+    if ($null -ne $submoduleRemoteSync -and $submoduleRemoteSync.Ok) {
+        $summary += "Submodule remote sync applied."
+    }
     $summary += $syncMessage
 
-    Write-KitStartState -StatePath $statePath -Ok $true -Fields @{
+    $stateFields = @{
         kitRepoMode = $mode
         channel     = $channel
         kitPath     = $kitPath
@@ -171,6 +208,11 @@ try {
         syncOk      = $syncOk
         message     = ($summary -join " ")
     }
+    if ($null -ne $submoduleRemoteSync) {
+        $stateFields.submoduleRemoteSync = $submoduleRemoteSync.Ok
+        if ($submoduleRemoteSync.Message) { $stateFields.submoduleRemoteSyncMessage = $submoduleRemoteSync.Message }
+    }
+    Write-KitStartState -StatePath $statePath -Ok $true -Fields $stateFields
 
     Write-Host ($summary -join " ")
     exit 0

@@ -183,15 +183,130 @@ Copy-Item -Path "D:\path\to\cursor-workspace-kit\shared\skills\*" -Destination $
 
 ---
 
+## Submodule 최신화 — `/start` vs `submodule update --remote`
+
+### 일상 (기본)
+
+**매일**은 채팅 **`/kit-start <할 일>`** 또는 **`/start <할 일>`** 만으로 충분하다.
+
+[`Invoke-KitStart.ps1`](../../scripts/Invoke-KitStart.ps1)이 제품이 **등록된 git submodule**이면, 필요할 때 자동으로:
+
+```powershell
+git submodule update --init --remote <kitPath>
+```
+
+을 실행한 뒤 submodule 안 `git pull` + `sync-kit-product`를 한다.
+
+**자동 `--remote` 판단(요약):** submodule 미초기화·`origin/<branch>`보다 뒤처짐·`sync-kit-product.ps1`에 `sharedSkills` 없음(옛 kit) 등.  
+결과는 `.cursor/state/kit-start-last.json`의 `submoduleRemoteSync`, `submoduleRemoteSyncMessage`에 남는다.
+
+수동 `git submodule update --init --remote`는 **훅 없이** 점검·복구할 때만 쓴다.
+
+### `git submodule update --init --remote`가 필요할 수 있는 경우
+
+| 상황 | 설명 |
+|------|------|
+| `/start` 없이 kit만 올리려 할 때 | 훅·sync 전에 submodule 작업 트리를 원격 `main` tip으로 맞춤 |
+| `/start` 후에도 스킬·스크립트가 옛 동작일 때 | submodule이 **옛 커밋**에 머물렀거나, `pull`이 fetch 없이 “이미 최신”으로 끝난 경우 |
+| clone 후 `--init`만 했을 때 | `update --init`은 **부모가 pin한 SHA**만 가져옴. 원격 최신이 아닐 수 있음 |
+| 다른 PC에서 오래된 제품 clone | 부모 repo의 submodule SHA가 낮은 채로 clone |
+
+**필요 없는 경우:** `/start`가 성공했고, `kit-start-last.json`에 `submoduleRemoteSync: true`가 있거나, 아래 [확인 체크리스트](#submodule-확인-체크리스트)가 모두 통과할 때.
+
+### 해당 경우인지 확인 — Submodule 확인 체크리스트
+
+제품 레포 **루트**에서 실행한다. `kitPath`는 `.cursor-kit.json`의 값(기본 `vendor/cursor-workspace-kit`)에 맞춘다.
+
+```powershell
+# 1) kitPath (기본값 예시)
+$kitPath = "vendor/cursor-workspace-kit"
+if (Test-Path .cursor-kit.json) {
+  $cfg = Get-Content .cursor-kit.json -Raw | ConvertFrom-Json
+  if ($cfg.kitPath) { $kitPath = $cfg.kitPath }
+}
+
+# 2) submodule 존재·스크립트
+Test-Path (Join-Path $kitPath "scripts\Invoke-KitStart.ps1")
+Test-Path (Join-Path $kitPath "scripts\sync-kit-product.ps1")
+
+# 3) 채널 A 전체 스킬 sync 스크립트 포함 여부 (257f212 이후)
+Select-String -Path (Join-Path $kitPath "scripts\sync-kit-product.ps1") -Pattern "sharedSkills" -Quiet
+# True 여야 channel A에서 shared/skills 전체 복사
+
+# 4) 로컬 submodule HEAD vs 원격 main
+Push-Location $kitPath
+git fetch origin
+$local = (git rev-parse HEAD).Trim()
+$remote = (git rev-parse origin/main).Trim()
+Pop-Location
+"$local"
+"$remote"
+# 두 SHA가 다르면 submodule 작업 트리가 원격 main보다 뒤처짐 → --remote 또는 submodule 안 git pull 검토
+
+# 5) 제품에 복사된 스킬 폴더 수 (채널 A 기대: shared 9 + lifecycle 등 10개 전후)
+(Get-ChildItem .cursor\skills -Directory -ErrorAction SilentlyContinue).Count
+Get-ChildItem .cursor\skills -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+
+# 6) 마지막 /start 기록 (skill 개수는 JSON에 없음)
+Get-Content .cursor\state\kit-start-last.json -Raw -ErrorAction SilentlyContinue
+```
+
+| 확인 결과 | 판단 |
+|-----------|------|
+| `sharedSkills`가 스크립트에 **없음** | submodule이 **채널 A 전체 스킬 sync 이전** → `--remote`(또는 pull) **필요** |
+| 로컬 HEAD ≠ `origin/main` | 원격 최신 미반영 → `--remote` 또는 submodule 안 `git pull` **검토** |
+| `.cursor/skills` 폴더 **1개**뿐 (`client-project-lifecycle`만) | 위와 동일 가능성 큼 |
+| `/start` 로그에 `skill-folders=1` (터미널·훅 stdout) | sync는 됐으나 **옛 스크립트** |
+| 위가 모두 정상인데 UI만 1개 | [문제 해결](#문제-해결) — Cursor reload, **파일 탐색기** `.cursor/skills` 기준 |
+
+`kit-start-last.json`의 `message`에 “sync 완료”만 있어도 **스킬 개수는 증명하지 않는다.**
+
+### 명령 (예외 시)
+
+`kitPath`가 `vendor/cursor-workspace-kit`이 아니면 경로를 바꾼다.
+
+```powershell
+# 제품 레포 루트
+git submodule update --init --remote vendor/cursor-workspace-kit
+```
+
+동등한 방법 (submodule 안에서 pull):
+
+```powershell
+cd vendor\cursor-workspace-kit
+git checkout main
+git pull origin main
+cd ..\..
+```
+
+그다음 **반드시** sync 한 번 더:
+
+```text
+/kit-start 동기화 확인
+```
+
+또는:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File vendor\cursor-workspace-kit\scripts\Invoke-KitStart.ps1 -WorkspaceRoot .
+```
+
+터미널에 `skill-folders=10` 근처가 보이면 채널 A 전체 스킬 복사로 보면 된다.
+
+**팀 공유:** submodule SHA를 부모 제품 repo에 남기려면 `git add vendor/cursor-workspace-kit` 후 commit. 로컬만 쓸 때는 생략 가능.
+
+---
+
 ## 문제 해결
 
 | 증상 | 확인 |
 |------|------|
+| `/start` 했는데 스킬 폴더 1개·옛 템플릿 | [Submodule 최신화](#submodule-최신화--start-vs-submodule-update---remote) 체크리스트 → `--remote` 또는 submodule `git pull` |
 | `/start` 대신 `start-feature`만 실행됨 | 자동완성 Tab 주의 → **`/kit-start `** 또는 **`/start `** 직접 입력, 또는 스킬 **`kit-start`** |
 | `/start-setting`이 아무 일도 안 함 | 제품에 `hooks.json`·훅 파일 있는지 → 없으면 **2단계** PowerShell 먼저 |
 | `Missing .cursor-kit.json` | 2단계 또는 `/start-setting` 재실행 |
 | pull 실패 | `kit-start-last.json` · 네트워크·git 인증 |
-| submodule 비어 있음 | `git submodule update --init` |
+| submodule 비어 있음 | `git submodule update --init` (최초). 최신 main은 [위 절](#submodule-최신화--start-vs-submodule-update---remote) |
 | 한글 오류 깨짐 | [`kit-start.md`](kit-start.md) Windows PowerShell 5.1 절 |
 
 ---

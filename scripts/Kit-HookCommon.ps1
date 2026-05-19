@@ -426,3 +426,83 @@ function Invoke-QualityGateCommand {
         Summary  = $tail
     }
 }
+
+function Test-WorkspaceHasKitSubmodule {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$WorkspaceRoot,
+        [Parameter(Mandatory = $true)]
+        [string]$KitPath
+    )
+    $gitmodules = Join-Path $WorkspaceRoot ".gitmodules"
+    if (-not (Test-Path -LiteralPath $gitmodules)) { return $false }
+    $norm = ($KitPath -replace '\\', '/').TrimEnd('/')
+    $raw = Get-Content -LiteralPath $gitmodules -Raw -Encoding UTF8
+    return ($raw -match [regex]::Escape($norm))
+}
+
+function Get-KitSubmoduleSyncNeed {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$KitRoot,
+        [string]$Remote = "origin",
+        [string]$Branch = "main"
+    )
+    if (-not (Test-Path -LiteralPath (Join-Path $KitRoot ".git"))) {
+        return @{ Needs = $true; Reason = "missing-git-dir" }
+    }
+
+    Push-Location $KitRoot
+    try {
+        & git fetch $Remote 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            return @{ Needs = $true; Reason = "fetch-failed" }
+        }
+
+        $ref = "$Remote/$Branch"
+        $behindRaw = git rev-list "HEAD..$ref" --count 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            return @{ Needs = $true; Reason = "cannot-compare-to-remote" }
+        }
+        $behind = [int]($behindRaw.Trim())
+        if ($behind -gt 0) {
+            return @{ Needs = $true; Reason = "behind-remote"; Behind = $behind }
+        }
+
+        $syncScript = Join-Path $KitRoot "scripts\sync-kit-product.ps1"
+        if (Test-Path -LiteralPath $syncScript) {
+            $text = Get-Content -LiteralPath $syncScript -Raw -Encoding UTF8
+            if ($text -notmatch 'sharedSkills') {
+                return @{ Needs = $true; Reason = "stale-sync-script" }
+            }
+        }
+
+        return @{ Needs = $false; Reason = "up-to-date" }
+    }
+    finally { Pop-Location }
+}
+
+function Invoke-WorkspaceKitSubmoduleRemoteUpdate {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$WorkspaceRoot,
+        [Parameter(Mandatory = $true)]
+        [string]$KitPath
+    )
+    if (-not (Test-Path -LiteralPath (Join-Path $WorkspaceRoot ".git"))) {
+        throw "Workspace is not a git repository: $WorkspaceRoot"
+    }
+    if (-not (Test-WorkspaceHasKitSubmodule -WorkspaceRoot $WorkspaceRoot -KitPath $KitPath)) {
+        return @{ Ok = $false; Skipped = $true; Message = "Kit path is not a registered submodule; skipped submodule update --remote." }
+    }
+
+    Push-Location $WorkspaceRoot
+    try {
+        & git submodule update --init --remote $KitPath 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "git submodule update --init --remote $KitPath failed (exit $LASTEXITCODE)"
+        }
+        return @{ Ok = $true; Skipped = $false; Message = "submodule update --init --remote $KitPath" }
+    }
+    finally { Pop-Location }
+}
