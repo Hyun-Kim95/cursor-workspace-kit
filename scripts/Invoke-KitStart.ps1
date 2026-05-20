@@ -56,23 +56,22 @@ function Invoke-GitPullKit {
     }
     Push-Location $GitDir
     try {
-        & git fetch $Remote 2>&1 | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw "git fetch $Remote failed (exit $LASTEXITCODE)" }
+        $fetchExit = Invoke-GitNativeQuiet fetch $Remote
+        if ($fetchExit -ne 0) { throw "git fetch $Remote failed (exit $fetchExit)" }
         $ref = "$Remote/$Branch"
         $behindRaw = git rev-list "HEAD..$ref" --count 2>$null
         if ($LASTEXITCODE -ne 0) { throw "Cannot compare HEAD to $ref. Check branch name and remote." }
         $behind = [int]($behindRaw.Trim())
         $pulled = $false
         if ($behind -gt 0) {
-            & git pull --ff-only $Remote $Branch 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) {
-                & git checkout $Branch 2>&1 | Out-Null
-                if ($LASTEXITCODE -eq 0) {
-                    & git pull --ff-only $Remote $Branch 2>&1 | Out-Null
+            $pullExit = Invoke-GitNativeQuiet pull --ff-only $Remote $Branch
+            if ($pullExit -ne 0) {
+                if ((Invoke-GitNativeQuiet checkout $Branch) -eq 0) {
+                    $pullExit = Invoke-GitNativeQuiet pull --ff-only $Remote $Branch
                 }
             }
-            if ($LASTEXITCODE -ne 0) {
-                throw "git pull --ff-only $Remote $Branch failed (exit $LASTEXITCODE). From product root try: git submodule update --init --remote <kitPath>"
+            if ($pullExit -ne 0) {
+                throw "git pull --ff-only $Remote $Branch failed (exit $pullExit). From product root try: git submodule update --init --remote <kitPath>"
             }
             $pulled = $true
             $behindRaw2 = git rev-list "HEAD..$ref" --count 2>$null

@@ -441,6 +441,32 @@ function Test-WorkspaceHasKitSubmodule {
     return ($raw -match [regex]::Escape($norm))
 }
 
+function Invoke-GitNativeQuiet {
+    <#
+    Run git without treating stderr progress (e.g. "From https://...") as a terminating
+    error when $ErrorActionPreference is Stop (PowerShell 5.1 + native commands).
+    Returns git exit code; stdout/stderr are discarded.
+    #>
+    param(
+        [Parameter(Mandatory = $true, ValueFromRemainingArguments = $true)]
+        [string[]]$GitArgs
+    )
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        if ($GitArgs.Count -eq 0) {
+            & git 2>&1 | Out-Null
+        }
+        else {
+            & git @GitArgs 2>&1 | Out-Null
+        }
+        return $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $prevEap
+    }
+}
+
 function Get-KitSubmoduleSyncNeed {
     param(
         [Parameter(Mandatory = $true)]
@@ -454,8 +480,7 @@ function Get-KitSubmoduleSyncNeed {
 
     Push-Location $KitRoot
     try {
-        & git fetch $Remote 2>&1 | Out-Null
-        if ($LASTEXITCODE -ne 0) {
+        if ((Invoke-GitNativeQuiet fetch $Remote) -ne 0) {
             return @{ Needs = $true; Reason = "fetch-failed" }
         }
 
@@ -498,9 +523,9 @@ function Invoke-WorkspaceKitSubmoduleRemoteUpdate {
 
     Push-Location $WorkspaceRoot
     try {
-        & git submodule update --init --remote $KitPath 2>&1 | Out-Null
-        if ($LASTEXITCODE -ne 0) {
-            throw "git submodule update --init --remote $KitPath failed (exit $LASTEXITCODE)"
+        $exit = Invoke-GitNativeQuiet submodule update --init --remote $KitPath
+        if ($exit -ne 0) {
+            throw "git submodule update --init --remote $KitPath failed (exit $exit)"
         }
         return @{ Ok = $true; Skipped = $false; Message = "submodule update --init --remote $KitPath" }
     }

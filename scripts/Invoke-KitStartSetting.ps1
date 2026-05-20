@@ -71,18 +71,17 @@ function Ensure-KitSubmodule {
     try {
         if (Test-Path -LiteralPath ".gitmodules") {
             $subPath = $RelativeKitPath -replace '/', '\'
-            & git submodule update --init --recursive $subPath 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) {
-                & git submodule update --init --recursive 2>&1 | Out-Null
+            if ((Invoke-GitNativeQuiet submodule update --init --recursive $subPath) -ne 0) {
+                Invoke-GitNativeQuiet submodule update --init --recursive | Out-Null
             }
         }
         if (-not (Test-KitRootReady -Root $kitRoot)) {
             if (Test-Path -LiteralPath $RelativeKitPath) {
                 throw "Path exists but kit scripts missing: $kitRoot. Remove the folder or fix submodule, then retry."
             }
-            & git submodule add $RepoUrl $RelativeKitPath 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) {
-                throw "git submodule add failed (exit $LASTEXITCODE). Commit or stash changes, then retry."
+            $addExit = Invoke-GitNativeQuiet submodule add $RepoUrl $RelativeKitPath
+            if ($addExit -ne 0) {
+                throw "git submodule add failed (exit $addExit). Commit or stash changes, then retry."
             }
         }
     }

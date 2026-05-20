@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `Invoke-GitNativeQuiet` in `Kit-HookCommon.ps1` — git fetch/pull stderr (`From https://...`) no longer aborts `/start` on PowerShell 5.1 with `$ErrorActionPreference Stop`
+
 ### Changed
 
 - Channel A `sync-kit-product`: sync **`shared/agents`** to product `.cursor/agents` on `/start` (same as skills; no ReplaceAll wipe)
