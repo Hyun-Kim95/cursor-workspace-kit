@@ -21,6 +21,8 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `product-ui-core-global.mdc` | 상태 UI·접근성·공통 UX |
 | `emergent-rule-capture-global.mdc` | 운영 규칙 후보 수집 |
 | `working-principles.mdc` | 실행 계획·분담·HUMAN·DoD |
+| `encoding-utf8-global.mdc` | UTF-8 저장·읽기 (에이전트·GitHub 깨짐 방지) |
+| `product-monetization-default.mdc` | 계획·PRD 기본: 사업자 없음, 수익 광고·후원만 |
 | `20-web-vs-app.mdc` | 웹 vs 앱 UX |
 | `30-table-pagination.mdc` | 테이블·필터·페이지네이션 |
 | `40-dark-mode.mdc` | 다크/라이트·토큰 |
@@ -93,7 +95,9 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `scripts/Invoke-KitStart.ps1` | `/start` 백엔드: (submodule 시 필요하면) `submodule update --init --remote` + pull + sync |
 | [`product-onboarding.md`](product-onboarding.md#submodule-최신화--start-vs-submodule-update---remote) | submodule `--remote` 필요 여부·확인 체크리스트 |
 | `scripts/Invoke-KitStartSetting.ps1` | `/start-setting` 백엔드: submodule·설정·훅·첫 sync |
-| `scripts/Kit-HookCommon.ps1` | 훅 UTF-8 stdout · PS 5.1 JSON · `Get-KitHarnessConfig` · harness 헬퍼 |
+| `scripts/Kit-HookCommon.ps1` | 훅 UTF-8 stdout · `Read/Write-KitUtf8File` · PS 5.1 JSON · harness 헬퍼 |
+| `scripts/Ensure-ProductEncodingAssets.ps1` | 제품 루트 `.editorconfig`·`.gitattributes` (없을 때만) |
+| `project-kit/.editorconfig`, `project-kit/.gitattributes` | 제품 인코딩 템플릿 |
 | `scripts/sync-hooks.ps1` | `shared/hooks/*` → `.cursor/hooks/` (harness 3파일; kit 전용 훅 유지) |
 | `scripts/Test-KitHarnessConfig.ps1` | Harness config 수동 검증 |
 | `scripts/Test-GuardShellHarness.ps1` | Shell guard 훅 수동 검증 |
@@ -114,6 +118,11 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `.cursor/state/shell-guard.log` | shell guard warn 로그 (로컬) |
 
 제품 레포 템플릿: `project-kit/.cursor-kit.json.example`, `project-kit/.cursor/hooks*`
+
+## 인코딩·제품 전제
+
+- UTF-8: [`encoding.md`](encoding.md) · `encoding-utf8-global.mdc` · `Ensure-ProductEncodingAssets.ps1`
+- 수익·사업자 기본값: [`product-assumptions.md`](product-assumptions.md) · `product-monetization-default.mdc`
 
 ## 버전
 

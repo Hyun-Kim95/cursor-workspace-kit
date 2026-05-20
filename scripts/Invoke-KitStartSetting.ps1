@@ -38,7 +38,12 @@ function Write-SettingState {
         at = (Get-Date).ToString("o")
     }
     foreach ($k in $Fields.Keys) { $obj[$k] = $Fields[$k] }
-    $obj | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $StatePath -Encoding UTF8
+    if (Get-Command Write-KitJsonFile -ErrorAction SilentlyContinue) {
+        Write-KitJsonFile -Path $StatePath -Object $obj -Depth 6
+    }
+    else {
+        $obj | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $StatePath -Encoding UTF8
+    }
 }
 
 function Test-KitRootReady {
@@ -314,6 +319,15 @@ try {
         throw "Invoke-KitStart.ps1 failed (exit $LASTEXITCODE). See .cursor/state/kit-start-last.json"
     }
     [void]$steps.Add("sync: OK (channel $(Get-ConfigChannel -Root $WorkspaceRoot -Default $Channel))")
+
+    $encodingScript = Join-Path $kitRoot "scripts\Ensure-ProductEncodingAssets.ps1"
+    if (Test-Path -LiteralPath $encodingScript) {
+        & powershell -NoProfile -ExecutionPolicy Bypass -File $encodingScript -WorkspaceRoot $WorkspaceRoot -KitRoot $kitRoot
+        if ($LASTEXITCODE -ne 0) {
+            throw "Ensure-ProductEncodingAssets.ps1 failed (exit $LASTEXITCODE)"
+        }
+        [void]$steps.Add("encoding-assets: OK")
+    }
 
     $summary = "Kit start-setting OK. " + ($steps -join "; ") + " Next: use /start <task> daily."
     Write-SettingState -StatePath $statePath -Ok $true -Fields @{

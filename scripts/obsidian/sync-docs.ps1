@@ -283,7 +283,7 @@ if ([string]::IsNullOrWhiteSpace($ConfigPath)) {
         throw "Config file not found: $ConfigPath"
     }
 
-    $config = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
+    $config = Get-Content -LiteralPath $ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
     if (-not $config.repositories -or $config.repositories.Count -eq 0) {
         throw "No repositories configured in $ConfigPath"
     }

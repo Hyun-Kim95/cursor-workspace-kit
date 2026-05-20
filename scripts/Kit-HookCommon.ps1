@@ -1,9 +1,49 @@
 # Shared helpers for Cursor hooks on Windows PowerShell 5.1 (UTF-8 stdout, no ConvertFrom-Json -Depth)
 
+function Get-KitUtf8NoBomEncoding {
+    if (-not $script:KitUtf8NoBom) {
+        $script:KitUtf8NoBom = New-Object System.Text.UTF8Encoding $false
+    }
+    return $script:KitUtf8NoBom
+}
+
+function Read-KitUtf8File {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+    return [System.IO.File]::ReadAllText($Path, (Get-KitUtf8NoBomEncoding))
+}
+
+function Write-KitUtf8File {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+        [Parameter(Mandatory = $true)]
+        [string]$Content
+    )
+    $dir = Split-Path -Parent $Path
+    if ($dir -and -not (Test-Path -LiteralPath $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    }
+    [System.IO.File]::WriteAllText($Path, $Content, (Get-KitUtf8NoBomEncoding))
+}
+
+function Write-KitJsonFile {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+        [Parameter(Mandatory = $true)]
+        [object]$Object,
+        [int]$Depth = 5
+    )
+    Write-KitUtf8File -Path $Path -Content ($Object | ConvertTo-Json -Depth $Depth)
+}
+
 function Initialize-KitHookConsole {
     # Cursor reads hook stdout as UTF-8; default console on Korean Windows is often CP949.
     try {
-        $utf8 = New-Object System.Text.UTF8Encoding $false
+        $utf8 = Get-KitUtf8NoBomEncoding
         [Console]::InputEncoding = $utf8
         [Console]::OutputEncoding = $utf8
         $global:OutputEncoding = $utf8

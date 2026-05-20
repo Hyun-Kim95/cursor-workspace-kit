@@ -27,6 +27,8 @@
 - 같은 내용을 Rules, Skills, Agents 파일에 중복 정의하지 않는다.
 - 규칙이 많을 때의 초점 맞추기·한 줄 요약은 `docs/agent/rules-context-notes.md`를 참고한다.
 - 규칙·스킬·에이전트 파일을 고칠 때의 정합 점검은 `docs/agent/rules-maintenance-checklist.md`를 참고한다. SSOT·배포는 `docs/agent/kit-inventory.md`, `docs/agent/rules-deploy.md`, `docs/agent/skills-agents-deploy.md`를 본다.
+- 텍스트 파일(문서·설정·소스)은 `shared/rules/encoding-utf8-global.mdc`와 `docs/agent/encoding.md`에 따라 **UTF-8(BOM 없음 기본)** 로 저장한다.
+- 계획·PRD·범위 정리 시 수익·사업자 전제는 `shared/rules/product-monetization-default.mdc`와 `docs/agent/product-assumptions.md`를 따른다(기본: 사업자 없음, 광고·후원만).
 
 ## 규칙 우선순위 (충돌 시)
 

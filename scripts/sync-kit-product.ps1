@@ -94,6 +94,28 @@ function Copy-KitStartHookScript {
     return 1
 }
 
+# Channel A: project-kit rules only + these shared globals (planning/ops defaults).
+$script:SharedGlobalRuleNames = @(
+    "encoding-utf8-global.mdc"
+    "product-monetization-default.mdc"
+)
+
+function Copy-SharedGlobalRules {
+    param(
+        [string]$SharedRulesDir,
+        [string]$DestDir
+    )
+    $n = 0
+    Ensure-Dir -Path $DestDir
+    foreach ($name in $script:SharedGlobalRuleNames) {
+        $src = Join-Path $SharedRulesDir $name
+        if (-not (Test-Path -LiteralPath $src)) { continue }
+        Copy-Item -LiteralPath $src -Destination (Join-Path $DestDir $name) -Force
+        $n++
+    }
+    return $n
+}
+
 function Copy-HarnessHookScripts {
     param(
         [string]$KitRoot,
@@ -120,6 +142,7 @@ $agentsCount = 0
 
 if ($Channel -eq "A") {
     $rulesCount = Copy-MdcFiles -SourceDir $projectKitRules -DestDir $rulesDest
+    $rulesCount += Copy-SharedGlobalRules -SharedRulesDir $sharedRules -DestDir $rulesDest
     if (Test-Path -LiteralPath $sharedSkills) {
         $skillsCount = Copy-SkillFolders -SourceDir $sharedSkills -DestDir $skillsDest
     }
@@ -147,4 +170,10 @@ else {
     $hooksCount = Copy-HarnessHookScripts -KitRoot $KitRoot -HooksDest $hooksDest
 
     Write-Host "sync-kit-product (channel B): rules=$rulesCount skills=$skillsCount agents=$agentsCount kit-start-hook=$startHookCount harness-hooks=$hooksCount"
+}
+
+$encodingScript = Join-Path $KitRoot "scripts\Ensure-ProductEncodingAssets.ps1"
+if (Test-Path -LiteralPath $encodingScript) {
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $encodingScript -WorkspaceRoot $WorkspaceRoot -KitRoot $KitRoot
+    if ($LASTEXITCODE -ne 0) { throw "Ensure-ProductEncodingAssets.ps1 failed (exit $LASTEXITCODE)" }
 }

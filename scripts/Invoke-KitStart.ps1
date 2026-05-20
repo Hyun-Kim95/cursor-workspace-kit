@@ -32,7 +32,12 @@ function Write-KitStartState {
         at = (Get-Date).ToString("o")
     }
     foreach ($k in $Fields.Keys) { $obj[$k] = $Fields[$k] }
-    $obj | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $StatePath -Encoding UTF8
+    if (Get-Command Write-KitJsonFile -ErrorAction SilentlyContinue) {
+        Write-KitJsonFile -Path $StatePath -Object $obj -Depth 5
+    }
+    else {
+        $obj | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $StatePath -Encoding UTF8
+    }
 }
 
 function Get-GitHead {

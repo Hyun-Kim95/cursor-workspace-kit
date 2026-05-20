@@ -52,6 +52,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Invoke-KitStartSetti
 2. 제품 루트 `.cursor-kit.json` (없을 때만, 채널 A 기본)
 3. 제품 `.cursor/hooks/kit-start-on-prompt.ps1` + `hooks.json` (없을 때만)
 4. 첫 sync (`Invoke-KitStart`)
+5. (없을 때만) 루트 `.editorconfig`·`.gitattributes` · global rules(`encoding-utf8-global`, `product-monetization-default`) — [`encoding.md`](encoding.md), [`product-assumptions.md`](product-assumptions.md)
 
 결과 파일: 제품의 [`.cursor/state/kit-start-setting-last.json`](../.cursor/state/kit-start-setting-last.json)
 

@@ -46,7 +46,7 @@ try {
         if (-not (Test-Path -LiteralPath $Path)) {
             return $false
         }
-        $content = Get-Content -LiteralPath $Path -Raw
+        $content = Get-Content -LiteralPath $Path -Raw -Encoding UTF8
         return ($content -match 'sync-docs\.ps1' -and $content -match 'write-commit-journal')
     }
 

@@ -120,5 +120,6 @@ Cursor 훅은 Windows에서 기본 `powershell`(5.1)로 실행된다.
 
 ## 관련 문서
 
+- [encoding.md](encoding.md) — UTF-8·제품 `.editorconfig`·에이전트 규칙
 - [product-onboarding.md](product-onboarding.md) — 제품 1회 설정·채널 A 마이그레이션
 - [kit-inventory.md](kit-inventory.md) — 스크립트·상태 파일 목록

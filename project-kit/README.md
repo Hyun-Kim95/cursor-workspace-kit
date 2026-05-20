@@ -29,6 +29,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Invoke-KitStartSetti
 
 - [`.cursor-kit.json.example`](.cursor-kit.json.example)
 - [`.cursor/hooks.json.example`](.cursor/hooks.json.example)
+- [`.editorconfig`](.editorconfig), [`.gitattributes`](.gitattributes) — 제품 루트에 없을 때만 자동 복사 ([`encoding.md`](../docs/agent/encoding.md))
 
 ## 포함 (SSOT)
 

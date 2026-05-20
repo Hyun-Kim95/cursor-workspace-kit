@@ -38,8 +38,10 @@ powershell -NoProfile -File scripts/sync-kit.ps1
 
 | 위치 | 복사 대상 |
 |------|-----------|
-| Cursor User Rules | `shared/rules/*.mdc` 전체 (또는 마크다운으로 동일 내용) |
-| 제품 `.cursor/rules/` | `project-kit/.cursor/rules/60`, `64`, `70` |
+| Cursor User Rules | `shared/rules/*.mdc` 전체 (또는 마크다운으로 동일 내용) — UX·작업 원칙 등 |
+| 제품 `.cursor/rules/` (`/start` sync) | `project-kit` 게이트 rules(60, 64, 70) **+** `encoding-utf8-global`, `product-monetization-default` (`sync-kit-product.ps1`의 global whitelist) |
+
+제품 레포만 열어도 global 두 규칙이 적용되도록, 채널 A에서도 위 whitelist는 **제품 `.cursor/rules/`에 복사**한다. 나머지 `shared/rules`는 User Rules에 두는 전제는 그대로다.
 
 `shared/optional/locale-ko.mdc`는 팀 정책에 따라 User Rules 또는 생략.
 
@@ -56,6 +58,12 @@ powershell -NoProfile -File scripts/sync-kit.ps1
 1. `shared/`, `project-kit/`, `scripts/sync-kit.ps1` 복사 또는 submodule.
 2. clone 후 `powershell -NoProfile -File scripts/sync-kit.ps1`.
 3. `AGENTS.md`를 루트에 둔다.
+
+## 인코딩·제품 전제 (제품·에이전트)
+
+- UTF-8: `encoding-utf8-global.mdc` · 템플릿 `project-kit/.editorconfig`, `.gitattributes` → [`encoding.md`](encoding.md)
+- 수익·사업자 기본: `product-monetization-default.mdc` → [`product-assumptions.md`](product-assumptions.md)
+- 채널 A sync: 위 두 global rule + project-kit rules (`sync-kit-product.ps1`)
 
 ## 버전 고정
 
