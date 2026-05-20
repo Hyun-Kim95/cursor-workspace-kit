@@ -66,6 +66,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Invoke-KitStartSetti
 /start-setting
 ```
 
+슬래시 목록에서는 스킬 **`start-setting`** 으로도 선택할 수 있다. 훅 실행을 확실히 하려면 채팅 맨 앞에 `/start-setting`(또는 `/kit-start-setting`)이 오도록 보낸다.
+
 이미 2단계에서 설정됐으면 대부분 `exists` + sync만 다시 돈다. 문제 없으면 OK.
 3. 이후 매일:
 
@@ -305,7 +307,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File vendor\cursor-workspace-kit\
 |------|------|
 | `/start` 했는데 스킬 폴더 1개·옛 템플릿 | [Submodule 최신화](#submodule-최신화--start-vs-submodule-update---remote) 체크리스트 → `--remote` 또는 submodule `git pull` |
 | `/start` 대신 `start-feature`만 실행됨 | 자동완성 Tab 주의 → **`/kit-start `** 또는 **`/start `** 직접 입력, 또는 스킬 **`kit-start`** |
-| `/start-setting`이 아무 일도 안 함 | 제품에 `hooks.json`·훅 파일 있는지 → 없으면 **2단계** PowerShell 먼저 |
+| `/start-setting`이 아무 일도 안 함 | 제품에 `hooks.json`·훅 파일 있는지 → 없으면 **2단계** PowerShell 먼저. 슬래시만 고르면 훅 미실행 → 맨 앞 `/start-setting` 직접 입력 |
 | `Missing .cursor-kit.json` | 2단계 또는 `/start-setting` 재실행 |
 | pull 실패 | `kit-start-last.json` · 네트워크·git 인증 |
 | submodule 비어 있음 | `git submodule update --init` (최초). 최신 main은 [위 절](#submodule-최신화--start-vs-submodule-update---remote) |

@@ -50,6 +50,7 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `plan-feature` | 모호한 요청 → 요구·정책 정리 |
 | `context-organization` | Gate 비변 선행 3단 러브릭 |
 | `kit-start` | kit pull·sync (`/start`, `/kit-start` 훅; `start-feature`와 별개) |
+| `start-setting` | 제품 1회 온보딩 (`/start-setting`, `/kit-start-setting` 훅; `kit-start`와 별개) |
 | `start-feature` | Gate 1 후 구현·검증 |
 | `parallel-delivery` | Gate 2 후 FE/BE 병렬 |
 | `verify-change` | 구현 검증·회귀 |

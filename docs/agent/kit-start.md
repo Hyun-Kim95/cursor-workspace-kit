@@ -8,8 +8,9 @@
 
 | 명령 | 용도 | 빈도 |
 |------|------|------|
-| `/start-setting` | submodule·설정·훅·첫 sync **자동 온보딩** | 제품 레포 **1회** (또는 재설정) |
+| `/start-setting` · `/kit-start-setting` | submodule·설정·훅·첫 sync **자동 온보딩** | 제품 레포 **1회** (또는 재설정) |
 | `/start <지시>` · `/kit-start <지시>` | kit `pull` + sync 후 작업 | **매일** |
+| 스킬 **`start-setting`** | 자동완성용; 동작은 `/start-setting` 훅과 동일(`kit-start-setting-last.json`) | 온보딩 전용 |
 | 스킬 **`kit-start`** | 자동완성용; 동작은 위 접두어와 동일(훅 + `kit-start-last.json`) | `/start`와 같음 |
 
 예:
@@ -27,6 +28,7 @@
 - Cursor `/` 목록의 **`start-feature`** 는 **기능 구현** 스킬이다. kit pull/sync가 **아니다**.
 - `/sta…` 입력 시 `start-feature`로 Tab 되면 **취소**하고 **`/kit-start `** 또는 **`/start `** 를 직접 입력하거나, 목록에서 스킬 **`kit-start`** 를 고른다.
 - `/start`만 쓰면 목록에 안 보일 수 있다(훅 전용 문자열). **`kit-start` 스킬**은 [`shared/skills/kit-start/`](../../shared/skills/kit-start/SKILL.md) sync 후 표시된다.
+- **`/start-setting`** 은 스킬 **`start-setting`** ([`shared/skills/start-setting/`](../../shared/skills/start-setting/SKILL.md))으로 슬래시 목록에 뜬다. `/kit-start-setting`도 동일 훅으로 처리된다.
 - [`AGENTS.md`](../../AGENTS.md) — 에이전트는 `.cursor/state/kit-start-last.json`을 먼저 읽는다.
 
 ## 동작 요약

@@ -130,7 +130,7 @@ try {
     $prompt = Get-PromptText -Payload $payload
     if ([string]::IsNullOrWhiteSpace($prompt)) { exit 0 }
 
-    $isSetting = ($prompt -match '^\s*/start-setting(\s+|$)')
+    $isSetting = ($prompt -match '^\s*/(?:kit-)?start-setting(\s+|$)')
     $isKitStart = ($prompt -match '^\s*/kit-start(\s+|$)')
     $isStart = (-not $isSetting) -and (-not $isKitStart) -and ($prompt -match '^\s*/start(\s+|$)')
     if (-not $isSetting -and -not $isStart -and -not $isKitStart) { exit 0 }
