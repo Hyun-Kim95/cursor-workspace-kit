@@ -13,8 +13,8 @@
 |------|------------|
 | `product-ui-core-global.mdc` | 상태 UI·접근성·공통 UX 최소 원칙 |
 | `emergent-rule-capture-global.mdc` | 운영 규칙 후보 수집·승인 후 SSOT 반영 |
-| `working-principles.mdc` | 실행 계획·분담·HUMAN·DoD·커밋 안전·게이트 경계 |
-| `20-web-vs-app.mdc` | 웹 테이블/명시 탐색 vs 앱 스크롤·리스트 |
+| `working-principles.mdc` | 실행 계획·분담·HUMAN·DoD·커밋 안전·게이트 경계·DB 운영 기본값 |
+| `20-web-vs-app.mdc` | 웹 테이블/명시 탐색 vs 앱 스크롤·리스트·신규 모바일 스택 기본값 |
 | `30-table-pagination.mdc` | 테이블 필터·15건·하단 페이지네이션 |
 | `40-dark-mode.mdc` | 다크/라이트·토큰·대비·전환 유지 |
 | `50-index-css-contract.mdc` | 전역 스타일·Stitch 등 합의 |

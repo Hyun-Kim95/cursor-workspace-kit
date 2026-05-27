@@ -20,10 +20,10 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 |------|------------|
 | `product-ui-core-global.mdc` | 상태 UI·접근성·공통 UX |
 | `emergent-rule-capture-global.mdc` | 운영 규칙 후보 수집 |
-| `working-principles.mdc` | 실행 계획·분담·HUMAN·DoD |
+| `working-principles.mdc` | 실행 계획·분담·HUMAN·DoD·DB 운영 기본값 |
 | `encoding-utf8-global.mdc` | UTF-8 저장·읽기 (에이전트·GitHub 깨짐 방지) |
 | `product-monetization-default.mdc` | 계획·PRD 기본: 사업자 없음, 수익 광고·후원만 |
-| `20-web-vs-app.mdc` | 웹 vs 앱 UX |
+| `20-web-vs-app.mdc` | 웹 vs 앱 UX·신규 모바일 스택 기본값 |
 | `30-table-pagination.mdc` | 테이블·필터·페이지네이션 |
 | `40-dark-mode.mdc` | 다크/라이트·토큰 |
 | `50-index-css-contract.mdc` | 전역 스타일·Stitch |
