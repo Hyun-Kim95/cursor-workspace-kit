@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "minUserTextLength": 10,
+  "batch": {
+    "minConversationHits": 3,
+    "minDistinctConversations": 2,
+    "topClusters": 30
+  },
+  "realtime": {
+    "dedupeHours": 24,
+    "notifyDailySummary": false
+  },
+  "excludePatterns": [
+    "(?im)^\\s*규칙\\s*(후보\\s*목록|승인|반려)\\b",
+    "(?im)^\\s*/(start|kit-start|start-setting)\\b",
+    "(?im)^\\s*<user_query>\\s*</user_query>\\s*$"
+  ],
+  "topicHints": [
+    { "id": "sync", "keywords": ["sync", "sync-kit", "동기화", "배포 규칙"], "suggested_target": "verify-change" },
+    { "id": "encoding", "keywords": ["utf", "한글", "깨짐", "인코딩", "bom"], "suggested_target": "verify-change" },
+    { "id": "darkmode", "keywords": ["다크", "dark", "라이트 모드", "테마"], "suggested_target": "verify-change" },
+    { "id": "test", "keywords": ["테스트", "e2e", "회귀", "검증"], "suggested_target": "verify-change" },
+    { "id": "docs", "keywords": ["문서", "readme", "인수인계", "changelog"], "suggested_target": "document-change" },
+    { "id": "api", "keywords": ["api", "엔드포인트", "계약", "스키마"], "suggested_target": "verify-change" },
+    { "id": "ui-states", "keywords": ["로딩", "빈 상태", "오류 상태", "권한"], "suggested_target": "verify-change" }
+  ],
+  "patterns": [
+    {
+      "id": "omission-1",
+      "signal_type": "omission",
+      "regex": "(?i)(빠뜨|누락|빠졌|빠진|안\\s*했|안했|안\\s*한|안한|못\\s*했|못했|빼먹)"
+    },
+    {
+      "id": "recheck-1",
+      "signal_type": "recheck",
+      "regex": "(?i)(이것도\\s*확인|다시\\s*확인|확인해\\s*줘|확인해줘|체크해\\s*줘|체크해줘|한번\\s*더\\s*봐)"
+    },
+    {
+      "id": "repeat-fail-1",
+      "signal_type": "repeat_fail",
+      "regex": "(?i)(여전히|아직\\s*도|아직도|또\\s*틀|다시\\s*틀|그대로|안\\s*고쳐|안고쳐)"
+    },
+    {
+      "id": "scope-reopen-1",
+      "signal_type": "scope_reopen",
+      "regex": "(?i)(이것도\\s*해|추가로|더\\s*해|해\\s*줘야|해야\\s*하는데)"
+    }
+  ],
+  "default_suggested_target": "verify-change"
+}

@@ -8,7 +8,9 @@ $DestDir = Join-Path $KitRoot ".cursor\hooks"
 $whitelist = @(
     "guard-shell.ps1",
     "guard-shell.patterns.json",
-    "quality-gate.ps1"
+    "quality-gate.ps1",
+    "rule-signal-capture.ps1",
+    "rule-signal-patterns.json"
 )
 
 if (-not (Test-Path -LiteralPath $SourceDir)) {

@@ -24,6 +24,8 @@ model: inherit
 - **반응형** 동작(레이아웃 전환, 오버플로, 터치 친화) 구현
 - **페이지 간** 디자인·패턴 **일관성** 유지
 - **로딩·빈·오류·성공(또는 제품이 정한 동등한 상태)** UI 처리
+- 모바일 앱 **버전 업데이트(권장/강제) UI**는 `docs/mobile/app-update/ux-states.md`·계약(`policy-and-contract.md`)을 따른다.
+- PRD **측정=예**이면 클라이언트 `capture`·`page_view`는 `docs/product-analytics/policy-and-contract.md` **이벤트 계약 v1**을 따르고, properties에 PII를 넣지 않는다.
 - **웹/앱 UX** 차이 반영(탐색성 vs 연속 스크롤, 테이블 vs 리스트 등 프로젝트가 정한 방향)
 - **다크모드** 대응(대비, 보더, 아이콘, 그림자 가독성)
 - **테이블·필터·페이지네이션** 관련 **프로젝트 로컬** 규칙이 있으면 이를 반영

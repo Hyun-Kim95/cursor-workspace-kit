@@ -21,6 +21,9 @@ tags: [docs, vault-sync]
 - feature-user-management.md
 - admin-board-requirements.md
 - mobile-app-navigation.md
+- app-update.md (모바일 앱 버전 업데이트 — [`docs/mobile/app-update/`](../../docs/mobile/app-update/README.md) 템플릿 복사본)
+- product-analytics.md (제품 분석·이벤트 추적 — [`docs/product-analytics/`](../../docs/product-analytics/README.md) 템플릿 복사본)
+- perf-budget.json (성능 게이트 — [`docs/performance/`](../../docs/performance/README.md) 템플릿 복사본)
 ## Vault
 
 - [[cursor-workspace-kit/docs/cursor-workspace-kit-docs-hub|Hub]]

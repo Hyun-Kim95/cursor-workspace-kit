@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "platforms": {
+    "web": {
+      "enabled": false,
+      "budget": {
+        "bundleMainKbGzipMax": null,
+        "lighthousePerformanceMin": null,
+        "lcpMsMax": null,
+        "inpMsMax": null,
+        "clsMax": null
+      }
+    },
+    "app": {
+      "enabled": false,
+      "budget": {
+        "bundleMaxMb": null,
+        "coldStartMsMax": null
+      }
+    },
+    "api": {
+      "enabled": false,
+      "budget": {
+        "p95MsMax": null,
+        "p99MsMax": null,
+        "errorRate5xxMax": null
+      }
+    }
+  }
+}

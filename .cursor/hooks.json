@@ -34,9 +34,19 @@
         "timeout": 120
       },
       {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-mine-on-prompt.ps1",
+        "matcher": "UserPromptSubmit",
+        "timeout": 300
+      },
+      {
         "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-approval-gate.ps1",
         "matcher": "UserPromptSubmit",
         "timeout": 20
+      },
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-signal-capture.ps1",
+        "matcher": "UserPromptSubmit",
+        "timeout": 15
       }
     ],
     "afterFileEdit": [

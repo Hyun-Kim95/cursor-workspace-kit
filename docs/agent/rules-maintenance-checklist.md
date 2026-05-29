@@ -55,8 +55,34 @@
 - [ ] `docs/agent/delivery-loop-harness.md`·`client-project-lifecycle`의 **선택** 절과 **HUMAN 비변** 문구가 모순 없는지
 - [ ] 훅이 **차단(exit 1)** 으로 바뀌면 `working-principles.mdc` 출력/완료 규칙과 `AGENTS` 우선순위에 대한 운영 합의가 있는지
 
+## `21-app-version-update`·`docs/mobile/app-update`를 바꿀 때
+- [ ] `20-web-vs-app`·스택/탐색 UX와 **중복 정의**하지 않았는지 (21은 버전 업데이트만)
+- [ ] `60` Gate **조건**을 복붙·완화하지 않았는지 (brownfield는 **간이 점검** 링크만)
+- [ ] `plan-feature`·`start-feature`·`release-check`·`verify-change`·`client-project-lifecycle` 링크가 docs 진입점과 일치하는지
+- [ ] optional 배치: 앱 없는 제품에서 강제 적용 문구가 없는지 ([`rules-deploy.md`](rules-deploy.md))
+
+## `22-product-analytics`·`docs/product-analytics`를 바꿀 때
+- [ ] `product-monetization-default`·PII·결제 ID 배제와 **중복·모순** 없는지
+- [ ] `60` Gate **조건**을 복붙·완화하지 않았는지 (brownfield는 **간이 점검** 링크만)
+- [ ] `plan-feature`·`start-feature`·`release-check`·`verify-change`·`client-project-lifecycle`·`stage3-entry-checklist` 링크가 docs 진입점과 일치하는지
+- [ ] optional 배치: PRD 측정=아니오·미명시 제품에서 강제 적용 문구가 없는지 ([`rules-deploy.md`](rules-deploy.md))
+
+## `23-performance-gate`·`docs/performance`를 바꿀 때
+- [ ] `20-web-vs-app`·UX 분기와 **중복 정의**하지 않았는지 (23은 측정·예산·perf-last만)
+- [ ] `60` Gate **조건**을 복붙·완화하지 않았는지 (brownfield는 **간이 점검** 링크만)
+- [ ] `plan-feature`·`start-feature`·`release-check`·`verify-change`·`client-project-lifecycle` 링크가 docs 진입점과 일치하는지
+- [ ] `perf-last` 계약이 `docs/qa/perf-last.example.json`·`Invoke-PerfGate.ps1`과 일치하는지
+- [ ] optional 배치: PRD 성능 게이트=아니오·미명시 제품에서 강제 적용 문구가 없는지 ([`rules-deploy.md`](rules-deploy.md))
+
 ## User Rules UI와 중복
 - [ ] 채널 B 사용 시 User Rules에 동일 블록이 남아 있지 않은지 ([`rules-deploy.md`](rules-deploy.md))
+
+## rule-candidates 승격 (배치·신호 훅 후보 → SSOT)
+
+- [ ] 후보 `rule_text`가 **검증 가능한 의무** 문장인지(사용자 불만 문장 그대로 아님)
+- [ ] `suggested_target`에 맞는 **SSOT 경로**만 편집 (`shared/skills`, `shared/rules`, `AGENTS.md` 직접 처리 예외 등) — [`rule-candidates.md`](rule-candidates.md)
+- [ ] kit 템플릿 레포에서는 `.cursor/rules/90-runtime-rule-*.mdc` 대신 `shared/*` + `sync-kit.ps1` 우선
+- [ ] `docs/agent/kit-inventory.md`·해당 스킬 Gate 참조가 모순 없는지
 
 ## shared/skills·agents를 바꿀 때
 - [ ] `docs/agent/kit-inventory.md` 표가 최신인지

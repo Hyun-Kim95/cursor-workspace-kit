@@ -45,6 +45,12 @@ powershell -NoProfile -File scripts/sync-kit.ps1
 
 `shared/optional/locale-ko.mdc`는 팀 정책에 따라 User Rules 또는 생략.
 
+`shared/optional/21-app-version-update.mdc`는 **모바일 앱을 배포하는 제품/팀**만 opt-in한다. 앱이 없는 레포에서는 sync 후 `.cursor/rules`에서 해당 파일을 제거하거나, 채널 A User Rules에 넣지 않는다. 상세 템플릿: [`docs/mobile/app-update/`](../../docs/mobile/app-update/README.md).
+
+`shared/optional/22-product-analytics.mdc`는 PRD **측정·분석=예**인 제품/팀만 opt-in한다. 측정=아니오·미명시 레포에서는 sync 후 `.cursor/rules`에서 제거하거나, 채널 A User Rules에 넣지 않는다. 상세: [`docs/product-analytics/`](../../docs/product-analytics/README.md).
+
+`shared/optional/23-performance-gate.mdc`는 PRD **성능 게이트=예**인 제품/팀만 opt-in한다. 성능 게이트=아니오·미명시 레포에서는 sync 후 `.cursor/rules`에서 제거하거나, 채널 A User Rules에 넣지 않는다. 상세: [`docs/performance/`](../../docs/performance/README.md).
+
 ## 신규 제품 레포에 kit 붙이기
 
 ### 최소 세트 (고객 게이트만)

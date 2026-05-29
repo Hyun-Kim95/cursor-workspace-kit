@@ -24,11 +24,16 @@ model: inherit
 - 가정, 미확정 항목, 확인 필요사항 정리
 - 화면 단위 또는 기능 단위 범위 정리
 - 정책과 예외사항 정리
+- PRD **측정=예**이면 측정 목표·North Star 퍼널·이벤트 후보·프라이버시 절 포함 (`docs/product-analytics/policy-and-contract.md` 참조)
+- PRD **성능 게이트=예**이면 비기능·성능 절·플랫폼별 `enabled`(web/app/api)·예산 PLACEHOLDER 포함 (`docs/performance/policy-and-contract.md` 참조)
 - 구현 가능한 단위로 작업 분해
 
 ## 산출과 게이트
 - Gate 1을 통과할 수 있는 수준의 범위·정책·화면 단위 정의를 남긴다.
 - 미확정 항목은 병렬 구현 전에 해소해야 하는지 표시한다.
+
+## 기본 전제 (수익·사업자)
+- 계획·PRD 초안부터 `.cursor/rules/product-monetization-default.mdc`를 따른다: **사업자 없음**, 수익은 **광고·후원** 수준만 기본. 유료 결제·구독·사업자 정산은 사용자가 명시하기 전까지 범위·핵심 기능에 넣지 않는다. 상세: `docs/agent/product-assumptions.md`.
 
 ## 작업 원칙
 - 성급하게 구현으로 들어가지 말고 먼저 구조화한다.

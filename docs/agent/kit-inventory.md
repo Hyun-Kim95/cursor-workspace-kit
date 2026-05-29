@@ -20,7 +20,7 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 |------|------------|
 | `product-ui-core-global.mdc` | 상태 UI·접근성·공통 UX |
 | `emergent-rule-capture-global.mdc` | 운영 규칙 후보 수집 |
-| `working-principles.mdc` | 실행 계획·분담·HUMAN·DoD·DB 운영 기본값 |
+| `working-principles.mdc` | 실행 계획·분담·HUMAN·DoD·조사·소통·실패 대응·DB 운영 기본값 |
 | `encoding-utf8-global.mdc` | UTF-8 저장·읽기 (에이전트·GitHub 깨짐 방지) |
 | `product-monetization-default.mdc` | 계획·PRD 기본: 사업자 없음, 수익 광고·후원만 |
 | `20-web-vs-app.mdc` | 웹 vs 앱 UX·신규 모바일 스택 기본값 |
@@ -34,6 +34,28 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | 파일 | 한 줄 목적 |
 |------|------------|
 | `locale-ko.mdc` | 응답 한국어 (선택) |
+| `21-app-version-update.mdc` | 모바일 앱 버전 업데이트 권장/강제 (선택, 앱 있는 제품) |
+| `22-product-analytics.mdc` | 제품 분석·이벤트 추적 (선택, PRD 측정=예) |
+| `23-performance-gate.mdc` | 성능 게이트 web/app/api (선택, PRD 성능 게이트=예) |
+
+## docs/mobile
+
+| 경로 | 한 줄 목적 |
+|------|------------|
+| [`docs/mobile/app-update/`](../../docs/mobile/app-update/README.md) | 버전 업데이트 정책·API·UX·greenfield/brownfield 체크리스트 |
+
+## docs/product-analytics
+
+| 경로 | 한 줄 목적 |
+|------|------------|
+| [`docs/product-analytics/`](../../docs/product-analytics/README.md) | 제품 분석·이벤트 추적 정책·계약·greenfield/brownfield·릴리스 체크리스트 |
+
+## docs/performance
+
+| 경로 | 한 줄 목적 |
+|------|------------|
+| [`docs/performance/`](../../docs/performance/README.md) | 성능 게이트 web/app/api·perf-budget·perf-last·체크리스트 |
+| [`scripts/perf/`](../../scripts/perf/README.md) | Invoke-PerfGate.ps1 스텁 (실측 없음) |
 
 ## project-kit/.cursor/rules
 
@@ -98,11 +120,14 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `scripts/Kit-HookCommon.ps1` | 훅 UTF-8 stdout · `Read/Write-KitUtf8File` · PS 5.1 JSON · harness 헬퍼 |
 | `scripts/Ensure-ProductEncodingAssets.ps1` | 제품 루트 `.editorconfig`·`.gitattributes` (없을 때만) |
 | `project-kit/.editorconfig`, `project-kit/.gitattributes` | 제품 인코딩 템플릿 |
-| `scripts/sync-hooks.ps1` | `shared/hooks/*` → `.cursor/hooks/` (harness 3파일; kit 전용 훅 유지) |
+| `scripts/sync-hooks.ps1` | `shared/hooks/*` → `.cursor/hooks/` (harness 5파일; kit 전용 훅 유지) |
 | `scripts/Test-KitHarnessConfig.ps1` | Harness config 수동 검증 |
 | `scripts/Test-GuardShellHarness.ps1` | Shell guard 훅 수동 검증 |
 | `scripts/Test-QualityGateHarness.ps1` | Quality gate 훅 수동 검증 |
-| `shared/hooks/` | harness 훅 SSOT (`guard-shell.ps1`, `guard-shell.patterns.json`, `quality-gate.ps1`) |
+| [`scripts/agent/Invoke-TranscriptRuleMining.ps1`](../../scripts/agent/Invoke-TranscriptRuleMining.ps1) | 과거 JSONL 암묵적 보정 신호 배치 마이닝 |
+| [`scripts/agent/Test-TranscriptRuleMining.ps1`](../../scripts/agent/Test-TranscriptRuleMining.ps1) | 마이닝 스모크 (fixture) |
+| [`docs/agent/rule-candidates.md`](rule-candidates.md) | 운영 규칙 후보·승격·ndjson 스키마 |
+| `shared/hooks/` | harness 훅 SSOT (`guard-shell`, `quality-gate`, `rule-signal-capture`, `rule-signal-patterns`) |
 
 ## 훅·상태
 
@@ -111,6 +136,8 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `.cursor/hooks/kit-start-on-prompt.ps1` | `beforeSubmitPrompt` — `/start` 트리거 |
 | `.cursor/hooks/guard-shell.ps1` | `beforeShellExecution` — shell guard |
 | `.cursor/hooks/quality-gate.ps1` | `afterAgentResponse` — 짧은 lint/tsc |
+| `.cursor/hooks/rule-signal-capture.ps1` | `beforeSubmitPrompt` — 암묵적 보정 신호 후보 |
+| `.cursor/state/rule-mined-report.json` | 배치 마이닝 집계 (로컬, gitignore) |
 | `.cursor/hooks/sync-kit-on-session.ps1` | `sessionStart` — 로컬 sync (fail-open) |
 | `.cursor/state/kit-start-last.json` | 마지막 `/start` 결과 (에이전트·디버그) |
 | `.cursor/state/kit-start-setting-last.json` | 마지막 `/start-setting` 온보딩 결과 |

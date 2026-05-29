@@ -1,5 +1,6 @@
 # Cursor — local session state (do not commit)
 .cursor/state/
+# rule-mined-report.* lives under .cursor/state/ (covered above)
 .cursor/quality-gate.json
 .cursor/guard-shell.local.json
 
@@ -8,6 +9,11 @@ docs/agent/rule-candidates.ndjson
 
 # Machine-local Obsidian ingest config (copy from _config/obsidian-repos.example.json)
 _config/obsidian-repos.json
+.obsidian-ingest.json
+
+# Local harness / stdin test sandboxes (not kit SSOT)
+_guard-test/
+_readstdin.ps1
 
 # Secrets and environment
 .env

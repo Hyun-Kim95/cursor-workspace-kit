@@ -32,6 +32,12 @@ tags: [docs, vault-sync]
 - [ ] 화면 스펙과 API 계약의 용어/상태값 정합 확인
 - [ ] FE/BE 병렬 진행 시 작업 분할과 인터페이스 책임 구분 완료
 
+### 3b) 측정·분석 (선택 — PRD 측정=예일 때만)
+
+- [ ] 이벤트 계약 v1 경로·버전: ``
+- [ ] PRD North Star 퍼널과 이벤트 1:1 매핑 확인
+- [ ] PII·동의 정책 PRD 반영 (`docs/product-analytics/policy-and-contract.md`)
+
 ## 4) 리스크/오픈 이슈
 
 - [ ] 미확정 항목 목록 작성

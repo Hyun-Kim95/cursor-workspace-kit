@@ -1,0 +1,46 @@
+---
+description: 성능 게이트(웹·앱·API) — PRD에서 성능 게이트=예로 명시한 경우만
+alwaysApply: false
+---
+
+<!-- SSOT: shared/optional/23-performance-gate.mdc | deploy: docs/agent/rules-deploy.md (optional) -->
+
+# 23-performance-gate
+
+## 목적
+비기능 **성능 예산·측정·perf-last** 게이트를 **PRD에서 명시 opt-in**한 제품에 공통 원칙을 제공한다.
+
+## 적용 대상
+- PRD 또는 동등 문서에 **성능 게이트=예** (또는 비기능·성능 절에 동등 표기)
+- web / app / api 중 **포함된 플랫폼만** `perf-budget.json`에서 `enabled: true`
+
+## 미적용
+- 성능 게이트=아니오·미명시
+- Gate 1 필수 산출로 `perf:ci`·Lighthouse 구현을 **요구하지 않음**
+
+## 상세 SSOT
+- `docs/performance/` (진입: `README.md`)
+
+## 신규 (greenfield)
+- PRD NFR → `perf-budget.json` → `perf:ci` → 단계 6 루프
+- 절차: `greenfield-checklist.md`
+
+## 기존 운영 (brownfield)
+- 인벤토리 후 **갭만** 보완
+- Gate 1은 `.cursor/rules/60-delivery-gates.mdc` **간이 점검**으로 대체 가능
+- 절차: `brownfield-checklist.md`
+
+## 원칙 (요약)
+- **활성 플랫폼만** `perf-last.json` `ok`에 반영 (web/app/api 조합 가능)
+- 측정 실패 시 **추측 최적화 금지** — `working-principles.mdc` **조사·소통·실패 대응**
+- 무작위 재시도 전 로그·`perf-last`·budget으로 원인 조사
+- 완료 선언: 제품 harness에 `perf-last.ok: false` 시 완료 금지 **권고** (`policy-and-contract.md`)
+
+## 범위 밖 (kit 기본)
+- Lighthouse·k6 **구현 스니펫**·임계값 확정 (PLACEHOLDER는 docs만)
+- 브라우저 스크린샷 UI 검증
+
+## 관계
+- 웹/앱 UX·스택: `20-web-vs-app.mdc` (본 규칙과 중복 정의하지 않음)
+- harness: `delivery-loop-harness.md` (`lifecyclePhase: perf`)
+- 릴리스: `release-check` → `docs/performance/release-checklist.md`

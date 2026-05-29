@@ -15,3 +15,4 @@ alwaysApply: true
 - 먼저 후보로 기록하고, 근거(문제 상황/반복성/영향 범위)를 남긴다.
 - 사용자 승인 후에만 정식 규칙으로 반영한다.
 - 승인 전에는 임시 가이드로만 사용하고 강제 규칙처럼 취급하지 않는다.
+- 명시적·암묵적 수집·배치 마이닝·승격 절차: [`docs/agent/rule-candidates.md`](../../docs/agent/rule-candidates.md) (후보만; SSOT는 승인 후 `shared/*` + sync).

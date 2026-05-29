@@ -1,0 +1,7 @@
+{"role":"user","message":{"content":[{"type":"text","text":"<user_query>\n로그인 화면 구현했는데 다크모드 빠뜨렸어. 이것도 확인해줘.\n</user_query>"}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"다크모드 토큰을 index.css에 반영하겠습니다."}]}}
+{"role":"user","message":{"content":[{"type":"text","text":"<user_query>\n여전히 틀렸어. 로딩 상태도 없어.\n</user_query>"}]}}
+{"role":"assistant","message":{"content":[{"type":"text","text":"로딩 UI를 추가합니다."}]}}
+{"role":"user","message":{"content":[{"type":"text","text":"<user_query>\nrules 수정했는데 sync-kit 안 했네. 누락이야.\n</user_query>"}]}}
+{"role":"user","message":{"content":[{"type":"text","text":"<user_query>\n규칙 후보 목록\n</user_query>"}]}}
+{"role":"user","message":{"content":[{"type":"text","text":"<user_query>\n/start docs 업데이트\n</user_query>"}]}}

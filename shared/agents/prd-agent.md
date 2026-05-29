@@ -24,6 +24,8 @@ model: inherit
 - 가정, 미확정 항목, 확인 필요사항 정리
 - 화면 단위 또는 기능 단위 범위 정리
 - 정책과 예외사항 정리
+- PRD **측정=예**이면 측정 목표·North Star 퍼널·이벤트 후보·프라이버시 절 포함 (`docs/product-analytics/policy-and-contract.md` 참조)
+- PRD **성능 게이트=예**이면 비기능·성능 절·플랫폼별 `enabled`(web/app/api)·예산 PLACEHOLDER 포함 (`docs/performance/policy-and-contract.md` 참조)
 - 구현 가능한 단위로 작업 분해
 
 ## 산출과 게이트

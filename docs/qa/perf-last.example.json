@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "version": 1,
+  "updatedAt": "",
+  "command": "",
+  "platforms": {
+    "web": {
+      "enabled": false,
+      "skipped": true,
+      "ok": true,
+      "metrics": {}
+    },
+    "app": {
+      "enabled": false,
+      "skipped": true,
+      "ok": true,
+      "metrics": {}
+    },
+    "api": {
+      "enabled": false,
+      "skipped": true,
+      "ok": true,
+      "metrics": {}
+    }
+  }
+}

@@ -1,0 +1,40 @@
+---
+description: 모바일 앱 버전 업데이트(권장/강제) 원칙 — 앱 없는 프로젝트는 적용하지 않음
+alwaysApply: false
+---
+
+<!-- SSOT: shared/optional/21-app-version-update.mdc | deploy: docs/agent/rules-deploy.md (optional) -->
+
+# 21-app-version-update
+
+## 목적
+배포 모바일 앱에서 버전 업데이트를 **권장(recommended)** 과 **강제(required)** 두 단계로 안내하는 공통 원칙을 정의한다.
+
+## 적용 대상
+- Android/iOS 등 **스토어 배포 모바일 앱**이 있는 프로젝트
+- 웹만·백엔드만·CLI만인 프로젝트에는 **적용하지 않음**
+
+## 상세 SSOT
+- `docs/mobile/app-update/` (진입: `README.md`)
+
+## 신규 앱
+- 첫 스토어 릴리스 전에 버전 정책·버전 API·권장/강제 UX를 포함한다.
+- 절차: `greenfield-checklist.md`
+
+## 기존 운영 앱
+- 전면 재설계하지 않는다. 인벤토리 후 **갭만** 보완한다.
+- Gate 1은 `.cursor/rules/60-delivery-gates.mdc` **간이 점검**으로 대체 가능.
+- 절차: `brownfield-checklist.md`
+
+## 원칙 (요약)
+- 서버 API 1개로 `updateLevel`(`none` | `recommended` | `required`)을 내려준다.
+- `required`는 앱 사용 차단·스토어 이동만 허용한다.
+- `recommended`는 닫기 가능; 재표시 정책은 PRD에 명시한다.
+- API 실패 시 fail-open/closed는 **PRD·HUMAN**으로 확정; 규칙에서 단정하지 않는다.
+
+## 범위 밖 (kit 기본)
+- Remote Config **단독** 운영 — 필요 시 제품 ADR
+- Flutter/Expo 구현 스니펫·관리자 UI
+
+## 관계
+- 웹/앱 UX·스택: `20-web-vs-app.mdc` (본 규칙과 중복 정의하지 않음)

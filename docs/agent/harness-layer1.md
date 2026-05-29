@@ -60,9 +60,18 @@
 
 Cursor에서 에이전트가 `git add -A`를 실행하려 할 때, `shellGuard.mode: block`이면 차단 메시지가 보여야 한다.
 
+## Rule signals (운영 규칙 후보)
+
+- **명시적:** `afterAgentResponse` — [`rule-candidate-capture.ps1`](../../.cursor/hooks/rule-candidate-capture.ps1) (assistant `규칙 후보:` 등)
+- **암묵적 (실시간):** `beforeSubmitPrompt` — [`rule-signal-capture.ps1`](../../shared/hooks/rule-signal-capture.ps1) (`rule-approval-gate` **뒤**, timeout 15s). 사용자 보정 문구만 기록, 기본은 조용히 `docs/agent/rule-candidates.ndjson`에 append
+- **암묵적 (배치):** [`scripts/agent/Invoke-TranscriptRuleMining.ps1`](../../scripts/agent/Invoke-TranscriptRuleMining.ps1) — 로컬 `agent-transcripts` 집계 → `.cursor/state/rule-mined-report.*`
+- **채팅 트리거:** `beforeSubmitPrompt` — [`rule-mine-on-prompt.ps1`](../../.cursor/hooks/rule-mine-on-prompt.ps1) (`/kit-rule-mine`, `규칙 마이닝`, timeout 300s)
+- 패턴 SSOT: [`shared/hooks/rule-signal-patterns.json`](../../shared/hooks/rule-signal-patterns.json) (`sync-hooks.ps1`로 `.cursor/hooks/` 복사)
+- 승인·SSOT 승격: [`rule-candidates.md`](rule-candidates.md) · [`rule-approval-gate.ps1`](../../.cursor/hooks/rule-approval-gate.ps1)
+
 ## Quality gate (`afterAgentResponse`)
 
-- 이벤트: `afterAgentResponse` — `rule-candidate-capture` **뒤** (timeout 25s)
+- 이벤트: `afterAgentResponse` — `rule-candidate-capture` **뒤**, `quality-gate` (timeout 25s)
 - 설정: [`project-kit/.cursor/quality-gate.json.example`](../../project-kit/.cursor/quality-gate.json.example) → 제품 `.cursor/quality-gate.json` (gitignore)
 - `harness.qualityGate.mode: off` 또는 설정 파일 없음 → 조용히 skip
 - `onlyWhen` (예: `deliveryLoopEnabled` + `lifecyclePhases`)이 있으면 [`.cursor/state/delivery-ralph.json`](../qa/delivery-loop-state.example.json) 조건을 만족할 때만 실행 — 기본 소음 방지
@@ -71,6 +80,26 @@ Cursor에서 에이전트가 `git add -A`를 실행하려 할 때, `shellGuard.m
 - 긴 테스트·전체 루프는 [`delivery-loop-harness.md`](delivery-loop-harness.md) · [`Invoke-DeliveryLoop.ps1`](../../scripts/delivery/Invoke-DeliveryLoop.ps1)
 
 `guard-delivery-loop` ↔ `quality-gate-last` **필수 연동은 없음** (선택 보조).
+
+## Performance gate (`perf-last`, 선택)
+
+- SSOT: [`docs/performance/README.md`](../performance/README.md) — web / app / api `enabled`, **제품 미정 시 전부 false**
+- 예산: `docs/requirements/perf-budget.json` (템플릿 [`perf-budget.template.json`](../performance/perf-budget.template.json))
+- 산출: `.cursor/state/perf-last.json` (예시 [`perf-last.example.json`](../qa/perf-last.example.json))
+- kit 스텁: [`scripts/perf/Invoke-PerfGate.ps1`](../../scripts/perf/Invoke-PerfGate.ps1) — 실측 없음, 계약·파일 쓰기만
+- **긴 측정**(Lighthouse·k6·전체 `perf:ci`)은 quality-gate 훅(25s)이 아니라 `Invoke-DeliveryLoop.ps1` + `lifecyclePhase: perf` ([`delivery-loop-harness.md`](delivery-loop-harness.md))
+- `quality-gate.json`에 짧은 smoke만 넣을 때 예 (제품 구현 후):
+
+```json
+{
+  "id": "perf-smoke",
+  "shell": "npm run perf:ci",
+  "maxSeconds": 18,
+  "required": false
+}
+```
+
+- 완료 선언: `perf-last.ok: false` 시 완료 금지 **권고** (`docs/performance/policy-and-contract.md`). `AGENTS.md`·`quality-gate-last`와 동일 패턴, kit AGENTS 필수 변경 없음.
 
 ## 수동 검증
 
@@ -97,3 +126,4 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-QualityGateHarn
 - [`delivery-loop-harness.md`](delivery-loop-harness.md) — 검증 루프(선택)
 - [`kit-inventory.md`](kit-inventory.md)
 - [`product-onboarding.md`](product-onboarding.md) — 제품 harness 활성화
+- [`docs/performance/README.md`](../performance/README.md) — 성능 게이트 템플릿
