@@ -66,7 +66,7 @@
 
 ### 배치 마이닝 (`/kit-rule-mine`)
 
-PowerShell을 직접 열지 않아도 된다. 채팅 맨 앞에 입력하면 [`rule-mine-on-prompt.ps1`](../../.cursor/hooks/rule-mine-on-prompt.ps1)이 스크립트를 실행한다 (`/start`와 동일 패턴).
+PowerShell을 직접 열지 않아도 된다. 채팅 맨 앞에 입력하면 [`rule-mine-on-prompt.ps1`](../../.cursor/hooks/rule-mine-on-prompt.ps1)이 스크립트를 실행한다 (`/start`와 동일 패턴). **슬래시 목록**에는 스킬 **`kit-rule-mine`** ([`shared/skills/kit-rule-mine/`](../../shared/skills/kit-rule-mine/SKILL.md))을 선택해도 된다.
 
 | 입력 | 동작 |
 |------|------|

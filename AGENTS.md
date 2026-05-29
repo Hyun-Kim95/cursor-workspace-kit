@@ -82,6 +82,8 @@
 
 이후 일상 작업은 **`/start <할 일>`** 또는 **`/kit-start <할 일>`**(자동완성·스킬 `kit-start`)을 사용한다. **`start-feature`·`kit-start`와 혼동하지 않는다.**
 
+과거 대화에서 운영 규칙 후보를 배치 집계할 때는 스킬 **`kit-rule-mine`** 또는 **`/kit-rule-mine`**(·`/rule-mine`)을 사용한다. 상세: [`docs/agent/rule-candidates.md`](docs/agent/rule-candidates.md).
+
 ## `/start` · `/kit-start` (kit 최신화)
 
 사용자 메시지가 **`/start` 또는 `/kit-start`로 시작**하거나 스킬 **`kit-start`** 로 kit 갱신이 요청되면(예: `/start docs/requirements에 PRD 초안`):
