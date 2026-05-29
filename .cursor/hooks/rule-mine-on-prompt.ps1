@@ -3,8 +3,10 @@ $ErrorActionPreference = "Stop"
 
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $commonPath = Join-Path $projectRoot "scripts\Kit-HookCommon.ps1"
+$ruleCommonPath = Join-Path $projectRoot "scripts\agent\RuleSignalCommon.ps1"
 if (-not (Test-Path -LiteralPath $commonPath)) { exit 0 }
 . $commonPath
+if (Test-Path -LiteralPath $ruleCommonPath) { . $ruleCommonPath }
 Initialize-KitHookConsole
 
 function Get-AllStringValues {
@@ -49,6 +51,17 @@ try {
     $isMine = ($prompt -match '(?im)^\s*/(?:kit-)?rule-mine(\s+|$)')
     $isMineKo = (-not $isMine) -and ($prompt -match '(?im)^\s*규칙\s*마이닝(\s+|$)')
     if (-not $isMine -and -not $isMineKo) { exit 0 }
+
+    $cooldown = Get-RuleMineCooldownCheck -WorkspaceRoot $projectRoot -Prompt $prompt
+    if (-not $cooldown.Proceed) {
+        Write-HookJson -Object @{
+            continue       = $false
+            permission     = "deny"
+            user_message   = [string]$cooldown.UserMessage
+            agent_message  = "rule-mine cooldown: last run $($cooldown.DaysSince) day(s) ago; use force to rescan."
+        }
+        exit 2
+    }
 
     $import = ($prompt -match '(?im)\bimport\b') -or ($prompt -match '후보\s*병합|ndjson')
     $sinceDays = 0
@@ -112,8 +125,8 @@ try {
     }
 
     Write-HookJson -Object @{
-        continue         = $true
-        user_message     = ($lines -join "`n")
+        continue           = $true
+        user_message       = ($lines -join "`n")
         additional_context = "rule-mine: $($lines[0]). 에이전트는 리포트 요약·HUMAN 검토를 돕고, SSOT 반영은 승인 후 shared/* 만."
     }
     exit 0

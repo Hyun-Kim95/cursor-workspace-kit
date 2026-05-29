@@ -6,6 +6,10 @@
     "minDistinctConversations": 2,
     "topClusters": 30
   },
+  "mining": {
+    "cooldownDays": 30,
+    "cooldownHintDays": 30
+  },
   "realtime": {
     "dedupeHours": 24,
     "notifyDailySummary": false

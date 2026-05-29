@@ -164,3 +164,88 @@ function Write-RuleCandidateNdjsonLine {
     }
     Add-Content -LiteralPath $Path -Value ($Candidate | ConvertTo-Json -Compress) -Encoding UTF8
 }
+
+function Get-RuleMineCooldownDays {
+    param([string]$WorkspaceRoot)
+    $defaultDays = 30
+    try {
+        $config = Get-RuleSignalPatterns -WorkspaceRoot $WorkspaceRoot
+        if ($null -ne $config.mining -and $null -ne $config.mining.cooldownDays) {
+            $d = [int]$config.mining.cooldownDays
+            if ($d -gt 0) { return $d }
+        }
+    }
+    catch { }
+    return $defaultDays
+}
+
+function Test-RuleMineForceBypass {
+    param([string]$Prompt)
+    if ([string]::IsNullOrWhiteSpace($Prompt)) { return $false }
+    if ($Prompt -match '(?im)\bforce\b') { return $true }
+    # Korean markers via code points (avoid regex source encoding issues on Windows PS 5)
+    $gangje = -join ([char[]](0xAC15, 0xC81C))
+    $jaesilhaeng = -join ([char[]](0xC7AC, 0xC2E4, 0xD589))
+    $dasi = -join ([char[]](0xB2E4, 0xC2DC))
+    $silhaeng = -join ([char[]](0xC2E4, 0xD589))
+    if ($Prompt.Contains($gangje)) { return $true }
+    if ($Prompt.Contains($jaesilhaeng)) { return $true }
+    if ($Prompt.Contains("$dasi $silhaeng") -or $Prompt.Contains("${dasi}$silhaeng")) { return $true }
+    return $false
+}
+
+function Get-RuleMineCooldownCheck {
+    param(
+        [string]$WorkspaceRoot,
+        [string]$Prompt
+    )
+
+    $result = @{
+        Proceed       = $true
+        DaysSince     = -1
+        CooldownDays  = (Get-RuleMineCooldownDays -WorkspaceRoot $WorkspaceRoot)
+        LastRunAt     = ""
+        UserMessage   = ""
+    }
+
+    if (Test-RuleMineForceBypass -Prompt $Prompt) {
+        return $result
+    }
+
+    $statePath = Join-Path $WorkspaceRoot ".cursor\state\rule-mine-last.json"
+    if (-not (Test-Path -LiteralPath $statePath)) {
+        return $result
+    }
+
+    try {
+        $raw = Read-KitUtf8File -Path $statePath
+        $st = $raw | ConvertFrom-Json
+        $lastRaw = [string]$st.generated_at
+        if ([string]::IsNullOrWhiteSpace($lastRaw)) { return $result }
+
+        $lastRun = [datetime]::MinValue
+        if (-not [datetime]::TryParse($lastRaw, [ref]$lastRun)) { return $result }
+
+        $daysSince = [int][math]::Floor(((Get-Date) - $lastRun).TotalDays)
+        $result.DaysSince = $daysSince
+        $result.LastRunAt = $lastRun.ToString("yyyy-MM-dd")
+
+        if ($daysSince -lt $result.CooldownDays) {
+            $remain = $result.CooldownDays - $daysSince
+            $result.Proceed = $false
+            $result.UserMessage = @(
+                "마지막 규칙 마이닝은 $daysSince일 전($($result.LastRunAt))에 실행되었습니다.",
+                "권장 재실행 간격은 $($result.CooldownDays)일입니다(약 $remain일 후).",
+                "지금 전체 스캔을 다시 하려면 채팅에 다음 중 하나를 입력하세요:",
+                "  /kit-rule-mine force",
+                "  /kit-rule-mine import force",
+                "  규칙 마이닝 강제",
+                "",
+                "최근 리포트만 보려면 .cursor/state/rule-mined-report.md 를 열거나, 에이전트에게 요약을 요청하세요."
+            ) -join "`n"
+        }
+    }
+    catch { }
+
+    return $result
+}

@@ -16,6 +16,18 @@
 
 미승격(예): `document-change` 대상 `omission|docs`, 제품 UI `repeat_fail|test` — 제품/PRD 작업 시 해당 스킬·Gate로 처리.
 
+## 2차 승격 (2026-05-29)
+
+[`rule-candidates-promotion-preview.md`](rule-candidates-promotion-preview.md) 기준 SSOT 반영.
+
+| 대상 | 추가 내용 |
+|------|-----------|
+| `shared/skills/verify-change/SKILL.md` | 11·12 — 완료/미완/다음 액션 보고, 「여전히/아직」 선언 전 체크리스트 |
+| `shared/skills/document-change/SKILL.md` | `### 0)` — 요구·문서·구현 삼각 spot check |
+| `working-principles` scope_reopen | **생략** (전역 비대화 방지) |
+
+`rule-candidates.ndjson` 27건 전부 `rejected` 처리(중복·승격 반영·제품 전용). `sync-kit.ps1` 실행.
+
 ## 재측정
 
 30일 후 동일 스크립트 재실행 → 동일 `cluster_key` 빈도 감소 여부 확인.

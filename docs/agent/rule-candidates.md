@@ -73,7 +73,10 @@ PowerShell을 직접 열지 않아도 된다. 채팅 맨 앞에 입력하면 [`r
 | `/kit-rule-mine` 또는 `/rule-mine` | 전체 projects 스캔 → `.cursor/state/rule-mined-report.md` |
 | `/kit-rule-mine import` | 위 + `rule-candidates.ndjson` 병합 |
 | `/kit-rule-mine 90` 또는 `규칙 마이닝 90일` | 최근 90일만 |
+| `/kit-rule-mine force` · `규칙 마이닝 강제` | **쿨다운(기본 30일) 무시** 후 전체 스캔 |
 | `규칙 마이닝` | `/kit-rule-mine`과 동일 |
+
+**쿨다운:** [`.cursor/state/rule-mine-last.json`](../../.cursor/state/rule-mine-last.json)의 `generated_at` 기준으로 **30일**(`shared/hooks/rule-signal-patterns.json` → `mining.cooldownDays`) 미만이면 스캔하지 않고, **며칠 지났는지**와 **`/kit-rule-mine force` 안내**만 표시한다.
 
 완료 후 `.cursor/state/rule-mine-last.json` 요약이 훅 메시지로 전달된다. 대량 스캔은 **수 분** 걸릴 수 있다(훅 timeout 300s).
 
