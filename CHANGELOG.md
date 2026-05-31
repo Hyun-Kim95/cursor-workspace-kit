@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- `docs/qa/integration-consumption-gate.md` — 생성·소비 DoD SSOT (횡단 자산·kit·공유 패키지)
+- `60-delivery-gates` Gate 1 비고·Gate 3 소비 조건; `stage3-entry-checklist` §6·`product-onboarding` 소비 확인 절
+
+### Changed
+
+- `AGENTS.md`, `start-feature`·`parallel-delivery`·`kit-start`, frontend/backend-agent — integration-consumption-gate 링크
+- `rules-maintenance-checklist` — integration·stage3·60 삼자 정합 점검
+
 ### Fixed
 
 - `Invoke-GitNativeQuiet` in `Kit-HookCommon.ps1` — git fetch/pull stderr (`From https://...`) no longer aborts `/start` on PowerShell 5.1 with `$ErrorActionPreference Stop`

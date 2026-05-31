@@ -76,7 +76,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Invoke-KitStartSetti
 /start 오늘 할 일: ...
 ```
 
-### (선택) 4단계 — `AGENTS.md`
+### 4단계 — 소비 확인 (kit 사용)
+
+**submodule·sync·훅 설치(생성)만으로 kit 도입 완료로 보지 않는다.** 소비 증거 기준: [`integration-consumption-gate.md`](../qa/integration-consumption-gate.md) (kit 연동 절).
+
+- [ ] 제품 워크스페이스에서 **`/start` 한 번 이상** 실행 후 실제 할 일 수행(스킬·규칙이 작업에 반영됨)
+- [ ] [`.cursor/state/kit-start-last.json`](../../.cursor/state/kit-start-last.json) `ok: true` 확인 (`false`이면 sync·submodule 점검 후 재시도)
+- [ ] (권장) 제품 루트 `AGENTS.md`에 `/start`·상태 JSON 선독 규칙 — 아래 (선택) 5단계
+
+### (선택) 5단계 — `AGENTS.md`
 
 kit [`AGENTS.md`](../../AGENTS.md)를 참고해 제품 루트에 두고, `/start`·`/start-setting` 시 상태 JSON 선독 규칙을 넣는다. **자동 생성되지 않는다.**
 

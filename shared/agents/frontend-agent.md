@@ -58,6 +58,7 @@ model: inherit
 ## 필수 입력
 - **Gate 1** 기준: 요구사항(또는 PRD/동등 문서), **화면 스펙/목업**, **API 계약 초안**
 - **병렬·Gate 2** 시: **확정된** API(스키마·에러·상태 코드), 화면 **상태 정의**, **제품 구현 대상 경로**(stage3 체크리스트)
+- **소비 증거:** mock-only·생성-only가 아닌 **제품 경로에서의 import·호출·상태 UI** — [`stage3-entry-checklist.md`](../../docs/qa/stage3-entry-checklist.md) §6, [`integration-consumption-gate.md`](../../docs/qa/integration-consumption-gate.md)
 
 ## 필수 출력
 - **계약·스펙과 일치하는** UI와 상태 처리(구현)

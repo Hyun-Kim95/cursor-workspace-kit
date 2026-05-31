@@ -69,6 +69,7 @@
 - Gate 1~3, 병렬 조건, DoD는 `.cursor/rules/60-delivery-gates.mdc`를 SSOT로 따른다.
 - 디자인 승인과 구현 착수 승인 통합 규칙은 `.cursor/rules/70-client-lifecycle-default.mdc`를 따른다.
 - 고객 E2E에서 **디자인 선택 후**는 [`docs/qa/stage3-entry-checklist.md`](docs/qa/stage3-entry-checklist.md) → Gate 2 → 구현(`parallel-delivery` / `start-feature`)이며, **선택 후 mock-only 재목업은 기본 금지**(예외는 사용자 명시·문서 기록).
+- **횡단 자산**(공유 패키지·kit·내부 SDK 등)은 **생성**과 **소비** 완료를 분리한다. Gate 3·소비 증거: [`docs/qa/integration-consumption-gate.md`](docs/qa/integration-consumption-gate.md).
 - 본 파일에는 게이트 세부 불릿을 중복 정의하지 않는다.
 - 검증 구간에서 [`.cursor/state/quality-gate-last.json`](.cursor/state/quality-gate-last.json)이 있고 `ok`가 `false`이면 해당 변경에 대해 **완료·검증 완료 선언을 하지 않는다** ([`docs/agent/harness-layer1.md`](docs/agent/harness-layer1.md)).
 

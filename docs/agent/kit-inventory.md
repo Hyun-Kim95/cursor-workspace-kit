@@ -57,6 +57,14 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | [`docs/performance/`](../../docs/performance/README.md) | 성능 게이트 web/app/api·perf-budget·perf-last·체크리스트 |
 | [`scripts/perf/`](../../scripts/perf/README.md) | Invoke-PerfGate.ps1 스텁 (실측 없음) |
 
+## docs/qa
+
+| 경로 | 한 줄 목적 |
+|------|------------|
+| [`docs/qa/stage3-entry-checklist.md`](../../docs/qa/stage3-entry-checklist.md) | 디자인 선택 후 Gate 2·제품 구현 착수 체크리스트 |
+| [`docs/qa/integration-consumption-gate.md`](../../docs/qa/integration-consumption-gate.md) | 횡단 자산·kit·공유 패키지 생성·소비 DoD SSOT |
+| [`docs/qa/reviewer-gate-rubric.md`](../../docs/qa/reviewer-gate-rubric.md) | 리뷰어 GATE 루브릭 (선택) |
+
 ## project-kit/.cursor/rules
 
 | 파일 | 한 줄 목적 |

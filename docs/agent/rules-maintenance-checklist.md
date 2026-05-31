@@ -36,6 +36,12 @@
 - [ ] Gate 1 `비고`( `64` / `context-organization` )와 문구가 함께 읽혀도 Gate **조건**이 바뀌는 것이 아님이 분명한지
 - [ ] project-kit 수정 후 sync 실행
 
+## `integration-consumption-gate`·`60` Gate 3·stage3·kit 온보딩을 바꿀 때
+- [ ] **생성/소비**·**첫 소비자**·**소비 증거** 용어가 `docs/qa/integration-consumption-gate.md`·`60` Gate 1 비고·Gate 3 불릿·`stage3-entry-checklist` §6·`product-onboarding` 소비 확인 절에서 **삼자 정합**인지
+- [ ] mock-only 금지·제품 구현 경로 문구와 **생성-only 금지**가 모순 없이 읽히는지
+- [ ] kit **4단계 소비 확인**과 **(선택) 5단계 AGENTS** 번호·역할이 `product-onboarding`에서 혼동 없는지
+- [ ] `AGENTS.md` 게이트 요약·`start-feature`·`parallel-delivery`·`kit-start`·frontend/backend-agent 링크가 문서 SSOT를 가리키는지
+
 ## `64-context-organization.mdc`를 바꿀 때
 - [ ] `60`의 Gate 1/2/3 **정의·적용**을 **복붙**하거나 완화하지 않았는지(경계·용어·권한만)
 - [ ] `70`·`client-project-lifecycle` HUMAN **우선**·`context-organization` **선행**이 모순 없이 읽히는지

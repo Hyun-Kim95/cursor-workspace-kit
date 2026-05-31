@@ -25,6 +25,8 @@ alwaysApply: true
 
 **비고:** `context-organization` 스킬은 Gate 1 **조건**을 **바꾸지 않는** 선행 러브릭으로만 쓴다.
 
+**비고(횡단 자산·공유 패키지·kit):** 공유 패키지·내부 SDK·디자인 토큰 패키지·kit submodule·sync 등 **횡단 자산** 작업 시 PRD(또는 동등 문서)에 **첫 소비자 1곳**과 **소비 경로**를 명시한다. 생성/소비 분리·소비 증거는 [`docs/qa/integration-consumption-gate.md`](../../docs/qa/integration-consumption-gate.md)를 따른다.
+
 ## Gate 2 — 프론트·백엔드 병렬 진행
 다음이 고정된 뒤에만 `parallel-delivery`에 해당하는 병렬 구현을 진행한다.
 
@@ -46,6 +48,7 @@ alwaysApply: true
 - 웹/앱·반응형·다크모드 영향 점검(해당 시)
 - 회귀 위험 검토(`verify-change` 또는 `qa-agent`)
 - 전달용 변경 요약·영향 범위 정리는 **권장**한다(`document-change` 또는 `docs-agent` 활용).
+- **횡단 자산·공유 패키지·kit 연동** 범위에서는 [`docs/qa/integration-consumption-gate.md`](../../docs/qa/integration-consumption-gate.md)의 **소비 완료** 조건을 포함한다. **생성만** 완료(패키지 publish, submodule add, sync 1회, mock/스펙만 존재)이면 해당 변경은 **Gate 3 미충족**이다. Gate 1에서 식별한 **첫 소비자**에 대한 **소비 증거**(경로·PR·스모크)가 없으면 완료 선언하지 않는다.
 
 ### 문서 반영 운영(권고)
 - 정책·권한·대외 API·사용자 플로우 변경이 있는 경우 문서 반영 우선순위를 높인다.

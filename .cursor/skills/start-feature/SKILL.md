@@ -24,6 +24,7 @@ description: Gate 1 확인 후 구현·검증·문서화; 필요 시 parallel-de
 7. 디자인 토큰, 테마, 다크모드 일관성이 중요하면 `design-system-agent`를 사용한다.
 8. 구현 후 `qa-agent`로 요구사항 충족 여부와 회귀 위험을 검토한다. (Gate 3의 일부)
 9. 마지막으로 `docs-agent`를 사용해 변경사항을 정리한다. (Gate 3의 일부)
+10. 공유 패키지·횡단 모듈·kit 연동 범위는 Gate 3 전 [`docs/qa/integration-consumption-gate.md`](../../../docs/qa/integration-consumption-gate.md)의 **소비 증거**를 확인한다(생성-only 완료 금지).
 
 ## 출력/보고 형식
 - 사용자 입력은 문장형 지시를 기본으로 해석한다.

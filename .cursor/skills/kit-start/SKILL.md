@@ -37,7 +37,7 @@ description: kit 템플릿 pull·sync(/start·/kit-start 훅). start-feature(기
 
 ## 온보딩
 
-최초 1회: 스킬 **`start-setting`** · `/start-setting` · `/kit-start-setting` 또는 `scripts/Invoke-KitStartSetting.ps1`. 상세: `docs/agent/product-onboarding.md`.
+최초 1회: 스킬 **`start-setting`** · `/start-setting` · `/kit-start-setting` 또는 `scripts/Invoke-KitStartSetting.ps1`. 상세: `docs/agent/product-onboarding.md`. **submodule·sync(생성) ≠ kit 사용(소비)** — 소비 확인: [`docs/qa/integration-consumption-gate.md`](../../../docs/qa/integration-consumption-gate.md), `product-onboarding.md` 4단계.
 
 ## 관련
 
