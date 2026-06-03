@@ -122,7 +122,7 @@ function Copy-HarnessHookScripts {
         [string]$HooksDest
     )
     $sharedHooks = Join-Path $KitRoot "shared\hooks"
-    $hookWhitelist = @("guard-shell.ps1", "guard-shell.patterns.json", "quality-gate.ps1")
+    $hookWhitelist = @("guard-shell.ps1", "guard-shell.patterns.json", "quality-gate.ps1", "dev-server-harness.ps1")
     $n = 0
     if (-not (Test-Path -LiteralPath $sharedHooks)) { return 0 }
     Ensure-Dir -Path $HooksDest

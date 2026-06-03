@@ -7,7 +7,7 @@
 | 단계 | 내용 | 상태 |
 |------|------|------|
 | 1 | `.cursor-kit.json` `harness` + [`Get-KitHarnessConfig`](../../scripts/Kit-HookCommon.ps1) | 구현됨 |
-| 2 | `guard-shell.ps1`, `quality-gate.ps1`, `hooks.json` 슬롯, sync·온보딩 | 구현됨 |
+| 2 | `guard-shell.ps1`, `quality-gate.ps1`, `dev-server-harness.ps1`, `hooks.json` 슬롯, sync·온보딩 | 구현됨 |
 
 ## `.cursor-kit.json` — `harness`
 
@@ -22,8 +22,14 @@
 | `harness.qualityGate.configFile` | lint/tsc 명령 정의 | `.cursor/quality-gate.json` |
 | `harness.qualityGate.stateFile` | 마지막 실행 결과 | `.cursor/state/quality-gate-last.json` |
 | `harness.qualityGate.runOn` | 훅 이벤트 목록 | `["afterAgentResponse"]` |
+| `harness.devServerCleanup.mode` | `off` \| `warn` \| `kill` | `off` |
+| `harness.devServerCleanup.registryFile` | 에이전트 dev 서버 등록 | `.cursor/state/agent-dev-servers.json` |
+| `harness.devServerCleanup.keepFile` | 유지(예외) 포트·사유 | `.cursor/state/dev-server-keep.json` |
+| `harness.devServerCleanup.logPath` | 정리 로그 | `.cursor/state/dev-server-cleanup.log` |
 
 `Get-KitHarnessConfig -WorkspaceRoot <루트>`는 위 값을 정규화한 hashtable을 반환한다. 훅·스크립트는 이 함수만 사용한다.
+
+에이전트 행동 규칙(기본 종료·예외 시 사유): [`shared/rules/dev-server-cleanup-global.mdc`](../../shared/rules/dev-server-cleanup-global.mdc) (`sync-rules.ps1` → `.cursor/rules/`).
 
 ### 파싱·fail-open
 
@@ -39,6 +45,7 @@
 | [`shared/hooks/guard-shell.ps1`](../../shared/hooks/guard-shell.ps1) | `.cursor/hooks/guard-shell.ps1` |
 | [`shared/hooks/guard-shell.patterns.json`](../../shared/hooks/guard-shell.patterns.json) | `.cursor/hooks/guard-shell.patterns.json` |
 | [`shared/hooks/quality-gate.ps1`](../../shared/hooks/quality-gate.ps1) | `.cursor/hooks/quality-gate.ps1` |
+| [`shared/hooks/dev-server-harness.ps1`](../../shared/hooks/dev-server-harness.ps1) | `.cursor/hooks/dev-server-harness.ps1` |
 
 - kit 레포: [`scripts/sync-hooks.ps1`](../../scripts/sync-hooks.ps1) — `sync-kit.ps1` 마지막에 호출. 기존 Obsidian·`kit-start` 훅은 유지한다.
 - 제품 채널 **B**: [`scripts/sync-kit-product.ps1`](../../scripts/sync-kit-product.ps1) — 위 3파일만 화이트리스트 복사 (`kit-start-on-prompt.ps1` 덮어쓰기 금지).
@@ -80,6 +87,19 @@ Cursor에서 에이전트가 `git add -A`를 실행하려 할 때, `shellGuard.m
 - 긴 테스트·전체 루프는 [`delivery-loop-harness.md`](delivery-loop-harness.md) · [`Invoke-DeliveryLoop.ps1`](../../scripts/delivery/Invoke-DeliveryLoop.ps1)
 
 `guard-delivery-loop` ↔ `quality-gate-last` **필수 연동은 없음** (선택 보조).
+
+## Dev server cleanup (`afterShellExecution` · `afterAgentResponse` · `stop`)
+
+- **기본 정책:** 에이전트가 연 로컬 dev 서버는 작업 마무리 시 **종료** (`mode: kill`). 예외만 assistant 응답에 사유와 함께 표기.
+- 이벤트: `afterShellExecution`(등록) → `afterAgentResponse`(keep 파싱, `quality-gate` **뒤**) → `stop`(정리)
+- 스크립트: [`dev-server-harness.ps1`](../../shared/hooks/dev-server-harness.ps1)
+- `mode: off` → 훅 no-op (규칙만 적용). `warn` → 로그만. `kill` → 등록 포트 LISTEN 프로세스 종료(keep 제외)
+- **예외(유지) 한 줄** (에이전트 마무리 문장):
+  - `dev-server-keep: 3000 — 사용자가 브라우저에서 직접 확인 예정`
+  - `서버 유지 (포트 3000): 다음 턴에서 동일 HMR 세션으로 이어야 함`
+- 채팅: `서버 유지` / `dev 서버 끄지 마` → 유지. `dev 서버 정리` → 즉시 종료(에이전트가 Shell로 처리).
+- 제품 예시: [`project-kit/.cursor-kit.json.example`](../../project-kit/.cursor-kit.json.example) — `devServerCleanup.mode: kill`
+- 훅 크래시·파싱 실패 → fail-open (종료 안 함). 등록·keep 파일은 `.cursor/state/` (gitignore).
 
 ## Performance gate (`perf-last`, 선택)
 

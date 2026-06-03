@@ -9,6 +9,7 @@ $whitelist = @(
     "guard-shell.ps1",
     "guard-shell.patterns.json",
     "quality-gate.ps1",
+    "dev-server-harness.ps1",
     "rule-signal-capture.ps1",
     "rule-signal-patterns.json"
 )

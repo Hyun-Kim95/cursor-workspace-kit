@@ -201,7 +201,7 @@ function Ensure-HarnessHookScripts {
 
     $destDir = Join-Path $Root ".cursor\hooks"
     $srcDir = Join-Path $KitRoot "shared\hooks"
-    $whitelist = @("guard-shell.ps1", "guard-shell.patterns.json", "quality-gate.ps1")
+    $whitelist = @("guard-shell.ps1", "guard-shell.patterns.json", "quality-gate.ps1", "dev-server-harness.ps1")
     if (-not (Test-Path -LiteralPath $srcDir)) { return "skip (no shared/hooks)" }
 
     if (-not (Test-Path -LiteralPath $destDir)) {
@@ -264,9 +264,26 @@ function Ensure-HarnessHooksJson {
         timeout = 25
     }
 
+    $dsShellEntry = @{
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1"
+        matcher = "npm run dev|pnpm dev|yarn dev|next dev|vite|uvicorn|flask run|ng serve|expo start"
+        timeout = 15
+    }
+    $dsKeepEntry = @{
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1"
+        timeout = 15
+    }
+    $dsStopEntry = @{
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1"
+        timeout = 30
+    }
+
     $r1 = Merge-HookEntryIntoJson -HooksPath $hooksPath -EventName "beforeShellExecution" -NewEntry $shellEntry -ScriptMarker "guard-shell.ps1"
     $r2 = Merge-HookEntryIntoJson -HooksPath $hooksPath -EventName "afterAgentResponse" -NewEntry $qgEntry -ScriptMarker "quality-gate.ps1"
-    return "$r1; $r2"
+    $r3 = Merge-HookEntryIntoJson -HooksPath $hooksPath -EventName "afterShellExecution" -NewEntry $dsShellEntry -ScriptMarker "dev-server-harness.ps1#afterShellExecution"
+    $r4 = Merge-HookEntryIntoJson -HooksPath $hooksPath -EventName "afterAgentResponse" -NewEntry $dsKeepEntry -ScriptMarker "dev-server-harness.ps1#afterAgentResponse"
+    $r5 = Merge-HookEntryIntoJson -HooksPath $hooksPath -EventName "stop" -NewEntry $dsStopEntry -ScriptMarker "dev-server-harness.ps1#stop"
+    return "$r1; $r2; $r3; $r4; $r5"
 }
 
 function Get-ConfigChannel {

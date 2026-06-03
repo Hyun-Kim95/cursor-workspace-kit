@@ -1,0 +1,29 @@
+---
+description: 에이전트가 연 로컬 dev 서버는 작업 마무리 시 기본 종료. 예외만 사유와 함께 명시.
+alwaysApply: true
+---
+
+# dev-server-cleanup-global
+
+## 기본
+- Shell로 연 **로컬 개발 서버**(npm/pnpm/yarn `dev`, `next dev`, `vite`, `nuxt dev`, `uvicorn --reload` 등)는 작업·검증을 마칠 때 **기본적으로 종료**한다.
+- 백그라운드(`block_until_ms: 0`)로 연 서버도 **마지막 응답 전**에 종료하거나, 프로젝트 harness(`devServerCleanup`)가 등록한 포트를 정리할 수 있게 둔다.
+
+## 예외(유지) — 특별한 이유가 있을 때만
+서버를 끄지 않을 때는 마무리 문장에 **반드시 한 줄**을 넣고 **이유**를 적는다.
+
+- **필수(훅 인식):** `dev-server-keep: <포트> - <이유>` (`:` 구분도 가능)
+- 사람이 읽기 쉬운 보조 한 줄: `서버 유지 (포트 <포트>): <이유>` — 가능하면 위 `dev-server-keep` 줄과 **함께** 적는다.
+
+예: 사용자가 브라우저에서 직접 확인 예정, 다음 턴에서 동일 HMR 세션으로 이어야 함.
+
+## 완료 보고
+- **기본:** `Dev 서버: 종료함 (포트 …)` 또는 `Dev 서버: 연 적 없음`
+- **유지 시:** 위 keep 형식 + 어떤 포트를 왜 남겼는지
+
+## 사용자 지시 우선
+- 채팅에서 `서버 유지` / `dev 서버 끄지 마` → 해당 턴·세션은 유지(keep 형식 권장).
+- `dev 서버 정리` / `포트 정리` → 즉시 종료.
+
+## harness
+- `.cursor-kit.json`의 `harness.devServerCleanup.mode`가 `kill`이면 `stop` 훅이 등록 포트를 정리한다(keep에 기록된 포트 제외). 상세: `docs/agent/harness-layer1.md`.

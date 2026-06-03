@@ -93,14 +93,36 @@ function Get-KitHarnessDefaultConfig {
             PatternsFile = ".cursor/hooks/guard-shell.patterns.json"
             LogPath      = ".cursor/state/shell-guard.log"
         }
-        QualityGate  = @{
+        QualityGate      = @{
             Mode       = "off"
             ConfigFile = ".cursor/quality-gate.json"
             StateFile  = ".cursor/state/quality-gate-last.json"
             RunOn      = @("afterAgentResponse")
         }
-        ParseOk      = $true
-        ParseMessage = ""
+        DevServerCleanup = @{
+            Mode         = "off"
+            RegistryFile = ".cursor/state/agent-dev-servers.json"
+            KeepFile     = ".cursor/state/dev-server-keep.json"
+            LogPath      = ".cursor/state/dev-server-cleanup.log"
+        }
+        ParseOk          = $true
+        ParseMessage     = ""
+    }
+}
+
+function Normalize-DevServerCleanupMode {
+    param(
+        [string]$Value,
+        [string]$Label
+    )
+    $allowed = @("off", "warn", "kill")
+    $m = if ($Value) { $Value.Trim().ToLowerInvariant() } else { "" }
+    if ($allowed -contains $m) {
+        return @{ Mode = $m; Warning = $null }
+    }
+    return @{
+        Mode    = "off"
+        Warning = "Invalid $Label '$Value'; using off."
     }
 }
 
@@ -214,6 +236,24 @@ function Get-KitHarnessConfig {
                         [void]$runOn.Add([string]$item)
                     }
                     $result.QualityGate.RunOn = @($runOn.ToArray())
+                }
+            }
+
+            if (Test-JsonPropertyPresent -Object $h -Name "devServerCleanup") {
+                $ds = $h.devServerCleanup
+                if (Test-JsonPropertyPresent -Object $ds -Name "mode") {
+                    $norm = Normalize-DevServerCleanupMode -Value ([string]$ds.mode) -Label "harness.devServerCleanup.mode"
+                    $result.DevServerCleanup.Mode = $norm.Mode
+                    if ($norm.Warning) { [void]$warnings.Add($norm.Warning) }
+                }
+                if (Test-JsonPropertyPresent -Object $ds -Name "registryFile") {
+                    $result.DevServerCleanup.RegistryFile = [string]$ds.registryFile
+                }
+                if (Test-JsonPropertyPresent -Object $ds -Name "keepFile") {
+                    $result.DevServerCleanup.KeepFile = [string]$ds.keepFile
+                }
+                if (Test-JsonPropertyPresent -Object $ds -Name "logPath") {
+                    $result.DevServerCleanup.LogPath = [string]$ds.logPath
                 }
             }
         }
@@ -570,4 +610,324 @@ function Invoke-WorkspaceKitSubmoduleRemoteUpdate {
         return @{ Ok = $true; Skipped = $false; Message = "submodule update --init --remote $KitPath" }
     }
     finally { Pop-Location }
+}
+
+function Test-DevServerShellCommand {
+    param([Parameter(Mandatory = $true)][string]$Command)
+    if ([string]::IsNullOrWhiteSpace($Command)) { return $false }
+    $patterns = @(
+        'npm\s+run\s+dev\b',
+        'pnpm\s+(run\s+)?dev\b',
+        'yarn\s+dev\b',
+        'bun\s+run\s+dev\b',
+        'next\s+dev\b',
+        '\bvite\b',
+        'nuxt\s+dev\b',
+        'astro\s+dev\b',
+        'uvicorn\b',
+        'flask\s+run\b',
+        'rails\s+s\b',
+        'dotnet\s+run\b',
+        'ng\s+serve\b',
+        'expo\s+start\b'
+    )
+    foreach ($rx in $patterns) {
+        if ($Command -match $rx) { return $true }
+    }
+    return $false
+}
+
+function Get-DevServerPortsFromText {
+    param([string]$Text)
+    $ports = New-Object System.Collections.Generic.HashSet[int]
+    if ([string]::IsNullOrWhiteSpace($Text)) { return @() }
+
+    $rxList = @(
+        '(?i)(?:localhost|127\.0\.0\.1):(\d{2,5})',
+        '(?i)--port[=\s]+(\d{2,5})',
+        '(?i)(?:^|\s)-p\s+(\d{2,5})(?:\s|$)',
+        '(?i)port\s+(\d{2,5})\b',
+        '(?i)PORT=(\d{2,5})'
+    )
+    foreach ($rx in $rxList) {
+        [regex]::Matches($Text, $rx) | ForEach-Object {
+            $n = 0
+            if ([int]::TryParse($_.Groups[1].Value, [ref]$n) -and $n -ge 1024 -and $n -le 65535) {
+                [void]$ports.Add($n)
+            }
+        }
+    }
+    return @($ports | Sort-Object)
+}
+
+function Get-DevServerRegistryPath {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectRoot,
+        [Parameter(Mandatory = $true)][hashtable]$DevServerConfig
+    )
+    return Join-Path $ProjectRoot ($DevServerConfig.RegistryFile -replace '/', '\')
+}
+
+function Get-DevServerKeepPath {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectRoot,
+        [Parameter(Mandatory = $true)][hashtable]$DevServerConfig
+    )
+    return Join-Path $ProjectRoot ($DevServerConfig.KeepFile -replace '/', '\')
+}
+
+function Read-DevServerRegistry {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return @{ version = 1; servers = @() }
+    }
+    try {
+        $doc = Read-KitUtf8File -Path $Path | ConvertFrom-Json
+        $list = New-Object System.Collections.ArrayList
+        if ($null -ne $doc.servers) {
+            foreach ($s in @($doc.servers)) { [void]$list.Add($s) }
+        }
+        return @{ version = 1; servers = @($list.ToArray()) }
+    }
+    catch {
+        return @{ version = 1; servers = @() }
+    }
+}
+
+function Write-DevServerRegistry {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][array]$Servers
+    )
+    Write-KitJsonFile -Path $Path -Object @{ version = 1; servers = $Servers } -Depth 6
+}
+
+function Read-DevServerKeepRegistry {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return @{ version = 1; keeps = @() }
+    }
+    try {
+        $doc = Read-KitUtf8File -Path $Path | ConvertFrom-Json
+        $list = New-Object System.Collections.ArrayList
+        if ($null -ne $doc.keeps) {
+            foreach ($k in @($doc.keeps)) { [void]$list.Add($k) }
+        }
+        return @{ version = 1; keeps = @($list.ToArray()) }
+    }
+    catch {
+        return @{ version = 1; keeps = @() }
+    }
+}
+
+function Write-DevServerKeepRegistry {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][array]$Keeps
+    )
+    Write-KitJsonFile -Path $Path -Object @{ version = 1; keeps = $Keeps } -Depth 6
+}
+
+function Get-HookConversationId {
+    param($HookInput)
+    if ($null -eq $HookInput) { return "" }
+    if (Test-JsonPropertyPresent -Object $HookInput -Name "conversation_id") {
+        return [string]$HookInput.conversation_id
+    }
+    return ""
+}
+
+function Register-DevServerFromShellHook {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectRoot,
+        [Parameter(Mandatory = $true)][hashtable]$DevServerConfig,
+        $HookInput
+    )
+    $command = Get-ShellCommandFromHookInput -HookInput $HookInput
+    if (-not (Test-DevServerShellCommand -Command $command)) { return }
+
+    $output = ""
+    if (Test-JsonPropertyPresent -Object $HookInput -Name "output") {
+        $output = [string]$HookInput.output
+    }
+    $ports = Get-DevServerPortsFromText -Text "$command`n$output"
+    if ($ports.Count -eq 0) { return }
+
+    $convId = Get-HookConversationId -HookInput $HookInput
+    $cwd = ""
+    if (Test-JsonPropertyPresent -Object $HookInput -Name "cwd") { $cwd = [string]$HookInput.cwd }
+
+    $regPath = Get-DevServerRegistryPath -ProjectRoot $ProjectRoot -DevServerConfig $DevServerConfig
+    $doc = Read-DevServerRegistry -Path $regPath
+    $servers = New-Object System.Collections.ArrayList
+    foreach ($s in @($doc.servers)) {
+        $drop = $false
+        if ($convId -and (Test-JsonPropertyPresent -Object $s -Name "conversationId") -and ([string]$s.conversationId -eq $convId)) {
+            $existingPort = 0
+            if (Test-JsonPropertyPresent -Object $s -Name "port") { $existingPort = [int]$s.port }
+            if ($ports -contains $existingPort) { $drop = $true }
+        }
+        if (-not $drop) { [void]$servers.Add($s) }
+    }
+    $ts = (Get-Date).ToString("o")
+    foreach ($port in $ports) {
+        [void]$servers.Add(@{
+            conversationId = $convId
+            port           = $port
+            command        = $command
+            cwd            = $cwd
+            registeredAt   = $ts
+        })
+    }
+    Write-DevServerRegistry -Path $regPath -Servers @($servers.ToArray())
+}
+
+function Add-DevServerKeepFromAgentText {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectRoot,
+        [Parameter(Mandatory = $true)][hashtable]$DevServerConfig,
+        [Parameter(Mandatory = $true)][string]$ConversationId,
+        [Parameter(Mandatory = $true)][string]$Text
+    )
+    if ([string]::IsNullOrWhiteSpace($Text)) { return @() }
+
+    $found = New-Object System.Collections.ArrayList
+    # ASCII-only patterns (PS 5.1 + UTF-8 no BOM safe). Korean alias in dev-server-cleanup-global.mdc.
+    $patterns = @(
+        '(?im)dev-server-keep:\s*(\d{2,5})\s*[^\d\r\n]+\s*(.+?)(?:\r?\n|$)'
+    )
+    foreach ($rx in $patterns) {
+        [regex]::Matches($Text, $rx) | ForEach-Object {
+            $port = [int]$_.Groups[1].Value
+            $reason = $_.Groups[2].Value.Trim()
+            if ($port -lt 1024 -or $port -gt 65535) { return }
+            if ([string]::IsNullOrWhiteSpace($reason)) { return }
+            [void]$found.Add(@{ port = $port; reason = $reason })
+        }
+    }
+    if ($found.Count -eq 0) { return @() }
+
+    $keepPath = Get-DevServerKeepPath -ProjectRoot $ProjectRoot -DevServerConfig $DevServerConfig
+    $doc = Read-DevServerKeepRegistry -Path $keepPath
+    $keeps = New-Object System.Collections.ArrayList
+    foreach ($k in @($doc.keeps)) {
+        if ($ConversationId -and (Test-JsonPropertyPresent -Object $k -Name "conversationId") -and ([string]$k.conversationId -eq $ConversationId)) {
+            $existingPort = 0
+            if (Test-JsonPropertyPresent -Object $k -Name "port") { $existingPort = [int]$k.port }
+            $dup = $false
+            foreach ($f in @($found)) {
+                if ($f.port -eq $existingPort) { $dup = $true; break }
+            }
+            if ($dup) { continue }
+        }
+        [void]$keeps.Add($k)
+    }
+    $ts = (Get-Date).ToString("o")
+    foreach ($f in @($found)) {
+        [void]$keeps.Add(@{
+            conversationId = $ConversationId
+            port           = $f.port
+            reason         = $f.reason
+            recordedAt     = $ts
+        })
+    }
+    Write-DevServerKeepRegistry -Path $keepPath -Keeps @($keeps.ToArray())
+    return @($found)
+}
+
+function Stop-DevServerListeningPort {
+    param([Parameter(Mandatory = $true)][int]$Port)
+    $pids = New-Object System.Collections.Generic.HashSet[int]
+    try {
+        Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
+            ForEach-Object { [void]$pids.Add([int]$_.OwningProcess) }
+    }
+    catch { }
+    if ($pids.Count -eq 0) {
+        $lines = netstat -ano -p tcp 2>$null | Where-Object { $_ -match ":\s*$Port\s+" }
+        foreach ($line in $lines) {
+            if ($line -match '\s+(\d+)\s*$') {
+                [void]$pids.Add([int]$Matches[1])
+            }
+        }
+    }
+    foreach ($procId in $pids) {
+        if ($procId -le 0) { continue }
+        Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Invoke-DevServerCleanup {
+    param(
+        [Parameter(Mandatory = $true)][string]$ProjectRoot,
+        [Parameter(Mandatory = $true)][hashtable]$DevServerConfig,
+        [Parameter(Mandatory = $true)][string]$Mode,
+        [string]$ConversationId = ""
+    )
+    if ($Mode -eq "off") { return @() }
+
+    $regPath = Get-DevServerRegistryPath -ProjectRoot $ProjectRoot -DevServerConfig $DevServerConfig
+    $keepPath = Get-DevServerKeepPath -ProjectRoot $ProjectRoot -DevServerConfig $DevServerConfig
+    $doc = Read-DevServerRegistry -Path $regPath
+    $keepDoc = Read-DevServerKeepRegistry -Path $keepPath
+
+    $keepPorts = New-Object System.Collections.Generic.HashSet[int]
+    foreach ($k in @($keepDoc.keeps)) {
+        $keepConv = ""
+        if (Test-JsonPropertyPresent -Object $k -Name "conversationId") {
+            $keepConv = [string]$k.conversationId
+        }
+        if ($keepConv -and $ConversationId -and ($keepConv -ne $ConversationId)) { continue }
+        if ($keepConv -and -not $ConversationId) { continue }
+        if (Test-JsonPropertyPresent -Object $k -Name "port") {
+            [void]$keepPorts.Add([int]$k.port)
+        }
+    }
+
+    $actions = New-Object System.Collections.ArrayList
+    $remaining = New-Object System.Collections.ArrayList
+    foreach ($s in @($doc.servers)) {
+        $matchConv = $true
+        if ($ConversationId) {
+            $matchConv = $false
+            if (Test-JsonPropertyPresent -Object $s -Name "conversationId") {
+                $matchConv = ([string]$s.conversationId -eq $ConversationId)
+            }
+        }
+        if (-not $matchConv) {
+            [void]$remaining.Add($s)
+            continue
+        }
+        $port = 0
+        if (Test-JsonPropertyPresent -Object $s -Name "port") { $port = [int]$s.port }
+        if ($port -le 0) {
+            [void]$remaining.Add($s)
+            continue
+        }
+        if ($keepPorts.Contains($port)) {
+            $reason = ""
+            foreach ($k in @($keepDoc.keeps)) {
+                if (([int]$k.port) -eq $port) {
+                    if (Test-JsonPropertyPresent -Object $k -Name "reason") { $reason = [string]$k.reason }
+                    break
+                }
+            }
+            [void]$actions.Add("keep port $port ($reason)")
+            [void]$remaining.Add($s)
+            continue
+        }
+        if ($Mode -eq "warn") {
+            [void]$actions.Add("would kill port $port")
+            [void]$remaining.Add($s)
+            continue
+        }
+        Stop-DevServerListeningPort -Port $port
+        [void]$actions.Add("killed port $port")
+    }
+
+    Write-DevServerRegistry -Path $regPath -Servers @($remaining.ToArray())
+    if ($actions.Count -gt 0) {
+        Write-HarnessLog -ProjectRoot $ProjectRoot -RelativeLogPath $DevServerConfig.LogPath -Message ($actions -join "; ")
+    }
+    return @($actions)
 }
