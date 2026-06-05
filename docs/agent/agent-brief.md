@@ -28,7 +28,8 @@
 - 선행 조건(있다면): stage3 체크리스트, Gate 2
 
 ## 5) Expected Outputs
-- 산출물 파일/모듈
+- 산출물 파일/모듈 (코드 변경 경로 또는 `docs/` SSOT md)
+- **독립 검증 산출:** `docs/qa/verify-{날짜 또는 slug}.md` (`qa-agent` 채점·이슈 목록)
 - 검증 결과(테스트/체크리스트)
 - 사용자 전달용 요약
 
@@ -36,6 +37,7 @@
 - 기능/요구사항 충족 기준
 - 상태 처리 기준(기본/로딩/빈/오류/권한)
 - 회귀 위험 점검 기준
+- **생성·검증 분리:** `qa-agent` **BLOCKER 0**, 불합격 항목 0 (판정은 메인이 재해석하지 않음)
 
 ## 7) Open Questions
 - 현재 확정되지 않은 사항
@@ -46,3 +48,16 @@
 ## 8) Handoff Notes
 - 다음 담당자에게 전달할 핵심 변경점
 - 알려진 제한/리스크
+
+## 9) Verifier Handoff (생성·검증 분리)
+
+메인이 산출을 마친 뒤 `qa-agent`에 넘길 때 아래만 전달한다. 생성 대화·작성 reasoning은 포함하지 않는다.
+
+| 필드 | 내용 |
+|------|------|
+| `artifactPaths` | 검증 대상 파일·모듈 경로 (예: `docs/requirements/business-plan.md`, 변경된 `src/...`) |
+| `rubricRef` | Gate 3, `docs/qa/reviewer-gate-rubric.md`, 작업별 체크리스트 경로 또는 요약 |
+| `forbidden` | 금지 조건 (예: 칭찬·완화, 생성 맥락 참조, 산출물 수정) |
+
+**코드 예:** 변경 파일 목록 + Gate 3·상태 UI 루브릭  
+**문서 예:** `docs/requirements/business-plan.md` + 투자자 관점 체크리스트 + 항목별 0점 가능

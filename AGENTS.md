@@ -103,6 +103,7 @@
 - 버그 수정 요청이면 `bugfix-flow`를 우선 고려한다.
 - 요구사항이 모호하거나 기획 정리가 먼저 필요하면 `plan-feature`를 우선 고려한다. (같은 선행을 3단 러브릭으로 쪼개려면 `context-organization`을 쓸 수 있으며, 둘 다 `60`·`70`·`75`·`AGENTS`에 종속이고, 러프한 아이디어/기획·스펙 부재일 때는 `plan-feature`·`context-organization` → Gate 1 충족 시 `start-feature` 순을 따른다.)
 - 구현 후 품질 확인이 필요하면 `verify-change`를 사용한다. (Gate 3 종료 검증)
+- **생성·검증 분리(기본):** 메인이 산출(코드·`docs/` 문서) → `qa-agent` 독립 검증(파일·루브릭만 handoff, [`docs/agent/agent-brief.md`](docs/agent/agent-brief.md) 9절) → 메인은 판정 인용만. self-verify·검증 완료 선언은 메인 금지. 상세: `start-feature`·`verify-change`·`qa-agent`.
 - 변경사항 공유나 문서 정리가 필요하면 `document-change`를 사용한다. (병렬 중 계약 변경 시에도 수시 적용)
 - 배포 전 확인이 필요하면 `release-check`를 사용한다.
 

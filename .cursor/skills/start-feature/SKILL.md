@@ -22,9 +22,23 @@ description: Gate 1 확인 후 구현·검증·문서화; 필요 시 parallel-de
 5. UI+API가 모두 필요하고 Gate 2를 이미 충족했다면 `parallel-delivery`로 병렬 진행을 우선 고려한다.
 6. 그 외에는 UI 작업에 `frontend-agent`, API/DB/서비스에 `backend-agent`를 순차·병렬에 맞게 사용한다.
 7. 디자인 토큰, 테마, 다크모드 일관성이 중요하면 `design-system-agent`를 사용한다.
-8. 구현 후 `qa-agent`로 요구사항 충족 여부와 회귀 위험을 검토한다. (Gate 3의 일부)
+8. **생성·검증 분리** 절차를 따른다(아래 섹션). 구현·문서 산출 직후 메인이 self-verify하지 않고 `qa-agent` 독립 검증을 거친 뒤 `verify-change`로 Gate 3를 마무리한다.
 9. 마지막으로 `docs-agent`를 사용해 변경사항을 정리한다. (Gate 3의 일부)
 10. 공유 패키지·횡단 모듈·kit 연동 범위는 Gate 3 전 [`docs/qa/integration-consumption-gate.md`](../../../docs/qa/integration-consumption-gate.md)의 **소비 증거**를 확인한다(생성-only 완료 금지).
+
+## 생성·검증 분리
+
+메인(또는 `frontend-agent`/`backend-agent`)이 **생성**하고, **검증**은 `qa-agent`에만 맡긴다. 코드·문서(`docs/` SSOT) 모두 동일 계약을 따른다.
+
+1. **산출물 경로 정리** — 변경 파일·모듈 또는 `docs/` 하위 md 목록을 명시한다.
+2. **메인 self-verify 금지** — 「기준 충족」「검증 완료」를 메인이 선언하지 않는다.
+3. **`qa-agent` 필수 호출** — handoff는 [`docs/agent/agent-brief.md`](../../../docs/agent/agent-brief.md) **9) Verifier Handoff** 형식:
+   - `artifactPaths`: 검증 대상 경로만
+   - `rubricRef`: Gate 3·상태 UI 또는 `docs/qa/reviewer-gate-rubric.md` 등
+   - `forbidden`: 생성 reasoning·「전반적으로 양호」 완화
+4. **`verify-change`** — `qa-agent` 판정을 인용해 Gate 3·harness를 확인한다. 메인은 판정을 재해석·완화하지 않는다.
+
+검증 산출 저장 권장: `docs/qa/verify-{날짜 또는 slug}.md`
 
 ## 출력/보고 형식
 - 사용자 입력은 문장형 지시를 기본으로 해석한다.
