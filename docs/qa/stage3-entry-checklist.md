@@ -38,6 +38,13 @@ tags: [docs, vault-sync]
 - [ ] PRD North Star 퍼널과 이벤트 1:1 매핑 확인
 - [ ] PII·동의 정책 PRD 반영 (`docs/product-analytics/policy-and-contract.md`)
 
+### 3c) 보안 게이트 (선택 — PRD 보안 게이트=예일 때만)
+
+- [ ] `docs/requirements/security-policy.json` 경로·티어(strict 권장): ``
+- [ ] 활성 축(secrets/dependencies/sast/authz/transport/data) PRD·API 계약 정합
+- [ ] 인증·권한·민감 데이터·로그 금지 필드 PRD 반영 (`docs/security/policy-and-contract.md`)
+- [ ] `security:ci` 구현 계획·harness(`shellGuard` block, quality-gate 예시) 합의
+
 ## 4) 리스크/오픈 이슈
 
 - [ ] 미확정 항목 목록 작성

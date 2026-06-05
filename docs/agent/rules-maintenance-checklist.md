@@ -80,6 +80,13 @@
 - [ ] `perf-last` 계약이 `docs/qa/perf-last.example.json`·`Invoke-PerfGate.ps1`과 일치하는지
 - [ ] optional 배치: PRD 성능 게이트=아니오·미명시 제품에서 강제 적용 문구가 없는지 ([`rules-deploy.md`](rules-deploy.md))
 
+## `24-security-gate`·`docs/security`를 바꿀 때
+- [ ] `60` 인증·권한 Gate·`product-analytics` PII와 **중복·모순** 없는지
+- [ ] `60` Gate **조건**을 복붙·완화하지 않았는지 (brownfield는 **간이 점검** 링크만)
+- [ ] `plan-feature`·`start-feature`·`release-check`·`verify-change`·`client-project-lifecycle` 링크가 docs 진입점과 일치하는지
+- [ ] `security-last` 계약이 `docs/qa/security-last.example.json`·`Invoke-SecurityGate.ps1`과 일치하는지
+- [ ] optional 배치: PRD 보안 게이트=아니오·미명시 제품에서 강제 적용 문구가 없는지 ([`rules-deploy.md`](rules-deploy.md))
+
 ## User Rules UI와 중복
 - [ ] 채널 B 사용 시 User Rules에 동일 블록이 남아 있지 않은지 ([`rules-deploy.md`](rules-deploy.md))
 

@@ -28,6 +28,7 @@
 | `21-app-version-update.mdc` | 모바일 앱 버전 업데이트 권장/강제 (선택) |
 | `22-product-analytics.mdc` | 제품 분석·이벤트 추적 (선택, PRD 측정=예) |
 | `23-performance-gate.mdc` | 성능 게이트 web/app/api (선택, PRD 성능 게이트=예) |
+| `24-security-gate.mdc` | 보안 게이트 6축·strict (선택, PRD 보안 게이트=예) |
 
 ### project-kit/.cursor/rules
 
@@ -46,5 +47,6 @@
 | `docs/mobile/app-update/` | 앱 버전 업데이트 템플릿 (정책·API·체크리스트) |
 | `docs/product-analytics/` | 제품 분석·이벤트 추적 템플릿 (PRD·계약·체크리스트) |
 | `docs/performance/` | 성능 게이트 템플릿 (web/app/api·perf-budget·perf-last) |
+| `docs/security/` | 보안 게이트 템플릿 (6축·security-policy·security-last·strict) |
 
 총괄 오케스트레이션과 **직접 처리 가능한 예외** 목록(SSOT)은 저장소 루트의 `AGENTS.md`를 본다.

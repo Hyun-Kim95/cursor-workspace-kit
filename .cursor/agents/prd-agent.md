@@ -26,6 +26,7 @@ model: inherit
 - 정책과 예외사항 정리
 - PRD **측정=예**이면 측정 목표·North Star 퍼널·이벤트 후보·프라이버시 절 포함 (`docs/product-analytics/policy-and-contract.md` 참조)
 - PRD **성능 게이트=예**이면 비기능·성능 절·플랫폼별 `enabled`(web/app/api)·예산 PLACEHOLDER 포함 (`docs/performance/policy-and-contract.md` 참조)
+- PRD **보안 게이트=예**이면 비기능·보안 절·티어(strict 권장)·축별 `enabled`·인증·권한·민감 데이터 PLACEHOLDER 포함 (`docs/security/policy-and-contract.md` 참조)
 - 구현 가능한 단위로 작업 분해
 
 ## 산출과 게이트

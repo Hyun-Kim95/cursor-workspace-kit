@@ -1,0 +1,49 @@
+---
+description: 보안 게이트(시크릿·의존성·SAST·인증·전송·데이터) — PRD에서 보안 게이트=예로 명시한 경우만
+alwaysApply: false
+---
+
+<!-- SSOT: shared/optional/24-security-gate.mdc | deploy: docs/agent/rules-deploy.md (optional) -->
+
+# 24-security-gate
+
+## 목적
+비기능 **보안 정책·스캔·security-last** 게이트를 **PRD에서 명시 opt-in**한 제품에 공통 원칙을 제공한다. **엄격(strict)** 티어는 해킹·정보 탈취 위험을 줄이기 위한 최소 기준을 포함한다.
+
+## 적용 대상
+- PRD 또는 동등 문서에 **보안 게이트=예** (또는 비기능·보안 절에 동등 표기)
+- 티어 **strict** 권장: 6축 활성, 4B 보안 축 필수, BLOCKER 0
+- `security-policy.json`에서 활성화한 축만 `security-last.json` `ok`에 반영
+
+## 미적용
+- 보안 게이트=아니오·미명시
+- Gate 1 필수 산출로 `security:ci`·gitleaks 구현을 **요구하지 않음** (정책·축 설계만 PRD에 가능)
+
+## 상세 SSOT
+- `docs/security/` (진입: `README.md`)
+
+## 신규 (greenfield)
+- PRD 보안 절 → `security-policy.json` → `security:ci` → 4B·릴리스 루프
+- 절차: `greenfield-checklist.md`
+
+## 기존 운영 (brownfield)
+- 인벤토리 후 **갭만** 보완
+- Gate 1은 `.cursor/rules/60-delivery-gates.mdc` **간이 점검**으로 대체 가능
+- 절차: `brownfield-checklist.md`
+
+## 원칙 (요약)
+- **활성 축만** `security-last.json` `ok`에 반영
+- 스캔·수동 점검 실패 시 **추측 패치 금지** — `working-principles.mdc` **조사·소통·실패 대응**
+- 엄격: 시크릿·high/critical CVE·인증 우회·PII 로그 유출은 **BLOCKER**
+- 완료 선언: 제품 harness에 `security-last.ok: false` 또는 `blockers` 비어 있지 않으면 완료 금지 **권고** (`policy-and-contract.md`)
+
+## 범위 밖 (kit 기본)
+- 침투 테스트·버그 바운티 운영
+- WAF·SIEM·SOC 구축 스니펫
+- 법규 준수(GDPR 등) 전체 컨설팅 — PRD·팀 법무와 별도
+
+## 관계
+- 인증·권한 Gate 1·2: `60-delivery-gates.mdc` (본 규칙과 중복 정의하지 않음)
+- harness: `harness-layer1.md`, `delivery-loop-harness.md` (`lifecyclePhase: verify`)
+- 릴리스: `release-check` → `docs/security/release-checklist.md`
+- 4B 엄격: `strict-axis-checklist.md`

@@ -51,6 +51,8 @@ powershell -NoProfile -File scripts/sync-kit.ps1
 
 `shared/optional/23-performance-gate.mdc`는 PRD **성능 게이트=예**인 제품/팀만 opt-in한다. 성능 게이트=아니오·미명시 레포에서는 sync 후 `.cursor/rules`에서 제거하거나, 채널 A User Rules에 넣지 않는다. 상세: [`docs/performance/`](../../docs/performance/README.md).
 
+`shared/optional/24-security-gate.mdc`는 PRD **보안 게이트=예**인 제품/팀만 opt-in한다. 보안 게이트=아니오·미명시 레포에서는 sync 후 `.cursor/rules`에서 제거하거나, 채널 A User Rules에 넣지 않는다. 상세: [`docs/security/`](../../docs/security/README.md).
+
 ## 신규 제품 레포에 kit 붙이기
 
 ### 최소 세트 (고객 게이트만)

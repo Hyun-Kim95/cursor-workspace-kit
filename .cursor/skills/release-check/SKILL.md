@@ -54,6 +54,7 @@ description: 배포 직전 최종 점검 절차를 수행해 누락과 릴리즈
 - 예외 발생 시 화면이 중단되지 않고 복구 가능한 경로를 제공하는지 확인한다.
 - PRD **측정=예**이면 `docs/product-analytics/release-checklist.md` **릴리스 3항**(env·동의·PII·샘플 이벤트)을 확인한다.
 - PRD **성능 게이트=예**이면 `docs/performance/release-checklist.md` **릴리스 3항**(`perf-last.json`·활성 플랫폼·회귀)을 확인한다.
+- PRD **보안 게이트=예**이면 `docs/security/release-checklist.md` **릴리스 3항**(`security-last.json`·유출·권한·잔여 리스크)을 확인한다.
 
 ### 5) 필요한 문서/변경 요약 준비 여부 확인
 
@@ -97,6 +98,7 @@ description: 배포 직전 최종 점검 절차를 수행해 누락과 릴리즈
 - [ ] (모바일 앱) app-update 릴리스 3항 확인 완료
 - [ ] (측정=예) product-analytics 릴리스 3항 확인 완료
 - [ ] (성능 게이트=예) performance 릴리스 3항 확인 완료
+- [ ] (보안 게이트=예) security 릴리스 3항 확인 완료
 - [ ] 콘솔/네트워크/예외 처리 누락 없음
 - [ ] 문서/변경 요약 준비 완료
 - [ ] 필요 시 qa-agent/docs-agent 협업 완료

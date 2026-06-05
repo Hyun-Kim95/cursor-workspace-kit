@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "tier": "strict",
+  "checks": {
+    "secrets": {
+      "enabled": false,
+      "policy": {
+        "maxFindings": 0,
+        "tools": ["gitleaks"]
+      }
+    },
+    "dependencies": {
+      "enabled": false,
+      "policy": {
+        "auditLevel": "high",
+        "maxHigh": 0,
+        "maxCritical": 0
+      }
+    },
+    "sast": {
+      "enabled": false,
+      "policy": {
+        "maxBlockerFindings": 0,
+        "tools": ["semgrep"]
+      }
+    },
+    "authz": {
+      "enabled": false,
+      "policy": {
+        "manualReviewRequired": true
+      }
+    },
+    "transport": {
+      "enabled": false,
+      "policy": {
+        "tlsRequired": true,
+        "securityHeadersRequired": true
+      }
+    },
+    "data": {
+      "enabled": false,
+      "policy": {
+        "piiInLogsAllowed": false,
+        "encryptionAtRestRequired": null
+      }
+    }
+  }
+}

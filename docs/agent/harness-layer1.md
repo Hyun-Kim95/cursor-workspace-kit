@@ -121,6 +121,27 @@ Cursor에서 에이전트가 `git add -A`를 실행하려 할 때, `shellGuard.m
 
 - 완료 선언: `perf-last.ok: false` 시 완료 금지 **권고** (`docs/performance/policy-and-contract.md`). `AGENTS.md`·`quality-gate-last`와 동일 패턴, kit AGENTS 필수 변경 없음.
 
+## Security gate (`security-last`, 선택)
+
+- SSOT: [`docs/security/README.md`](../security/README.md) — secrets / dependencies / sast / authz / transport / data `enabled`, **제품 미정 시 전부 false**
+- 정책: `docs/requirements/security-policy.json` (템플릿 [`security-policy.template.json`](../security/security-policy.template.json))
+- 산출: `.cursor/state/security-last.json` (예시 [`security-last.example.json`](../qa/security-last.example.json))
+- kit 스텁: [`scripts/security/Invoke-SecurityGate.ps1`](../../scripts/security/Invoke-SecurityGate.ps1) — 실스캔 없음, strict는 `ok: false` + 구현 안내
+- **긴 스캔**(gitleaks·semgrep·전체 `security:ci`)은 quality-gate 훅(25s)이 아니라 `Invoke-DeliveryLoop.ps1` + `lifecyclePhase: verify` ([`delivery-loop-harness.md`](delivery-loop-harness.md))
+- quality-gate 예시: [`project-kit/.cursor/quality-gate.security.example.json`](../../project-kit/.cursor/quality-gate.security.example.json)
+- `quality-gate.json`에 짧은 smoke만 넣을 때 예 (제품 구현 후):
+
+```json
+{
+  "id": "security-smoke",
+  "shell": "npm run security:ci",
+  "maxSeconds": 22,
+  "required": false
+}
+```
+
+- 완료 선언: `security-last.ok: false` 또는 `blockers` 비어 있지 않으면 완료 금지 **권고** (`docs/security/policy-and-contract.md`).
+
 ## 수동 검증
 
 ```powershell
@@ -147,3 +168,4 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-QualityGateHarn
 - [`kit-inventory.md`](kit-inventory.md)
 - [`product-onboarding.md`](product-onboarding.md) — 제품 harness 활성화
 - [`docs/performance/README.md`](../performance/README.md) — 성능 게이트 템플릿
+- [`docs/security/README.md`](../security/README.md) — 보안 게이트 템플릿 (엄격 strict)

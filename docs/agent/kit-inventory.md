@@ -37,6 +37,7 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `21-app-version-update.mdc` | 모바일 앱 버전 업데이트 권장/강제 (선택, 앱 있는 제품) |
 | `22-product-analytics.mdc` | 제품 분석·이벤트 추적 (선택, PRD 측정=예) |
 | `23-performance-gate.mdc` | 성능 게이트 web/app/api (선택, PRD 성능 게이트=예) |
+| `24-security-gate.mdc` | 보안 게이트 6축·strict (선택, PRD 보안 게이트=예) |
 
 ## docs/mobile
 
@@ -56,6 +57,13 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 |------|------------|
 | [`docs/performance/`](../../docs/performance/README.md) | 성능 게이트 web/app/api·perf-budget·perf-last·체크리스트 |
 | [`scripts/perf/`](../../scripts/perf/README.md) | Invoke-PerfGate.ps1 스텁 (실측 없음) |
+
+## docs/security
+
+| 경로 | 한 줄 목적 |
+|------|------------|
+| [`docs/security/`](../../docs/security/README.md) | 보안 게이트 6축·security-policy·security-last·엄격 체크리스트 |
+| [`scripts/security/`](../../scripts/security/README.md) | Invoke-SecurityGate.ps1 스텁 (실스캔 없음) |
 
 ## docs/qa
 

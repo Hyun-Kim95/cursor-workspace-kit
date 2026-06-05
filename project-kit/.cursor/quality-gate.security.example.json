@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "enabled": true,
+  "onlyWhen": {
+    "deliveryLoopEnabled": true,
+    "lifecyclePhases": ["verify", "blocker_loop"]
+  },
+  "commands": [
+    {
+      "id": "deps-audit",
+      "shell": "npm audit --audit-level=high",
+      "maxSeconds": 22,
+      "required": false
+    },
+    {
+      "id": "secret-scan",
+      "shell": "npx --yes gitleaks detect --source . --no-git -v",
+      "maxSeconds": 22,
+      "required": false
+    }
+  ],
+  "onFailure": "warn"
+}

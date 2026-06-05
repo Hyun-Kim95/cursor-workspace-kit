@@ -1,0 +1,47 @@
+{
+  "ok": true,
+  "version": 1,
+  "tier": "strict",
+  "updatedAt": "",
+  "command": "",
+  "checks": {
+    "secrets": {
+      "enabled": false,
+      "skipped": true,
+      "ok": true,
+      "findings": 0
+    },
+    "dependencies": {
+      "enabled": false,
+      "skipped": true,
+      "ok": true,
+      "findings": {}
+    },
+    "sast": {
+      "enabled": false,
+      "skipped": true,
+      "ok": true,
+      "findings": 0
+    },
+    "authz": {
+      "enabled": false,
+      "skipped": true,
+      "ok": true
+    },
+    "transport": {
+      "enabled": false,
+      "skipped": true,
+      "ok": true
+    },
+    "data": {
+      "enabled": false,
+      "skipped": true,
+      "ok": true
+    }
+  },
+  "blockers": [],
+  "manualReview": {
+    "authz": "pending",
+    "owasp": "pending"
+  }
+}
