@@ -117,6 +117,37 @@ function Resolve-ObsidianInstallScript {
     return $null
 }
 
+function Copy-KitSlashCommands {
+    param(
+        [string]$KitRoot,
+        [string]$CommandsDest
+    )
+
+    $sources = @(
+        (Join-Path $KitRoot "project-kit\.cursor\commands"),
+        (Join-Path $KitRoot ".cursor\commands")
+    )
+
+    $n = 0
+    foreach ($srcDir in $sources) {
+        if (-not (Test-Path -LiteralPath $srcDir)) { continue }
+        if (-not (Test-Path -LiteralPath $CommandsDest)) {
+            New-Item -ItemType Directory -Path $CommandsDest -Force | Out-Null
+        }
+        Get-ChildItem -LiteralPath $srcDir -Filter "*.md" -File -ErrorAction SilentlyContinue | ForEach-Object {
+            $dest = Join-Path $CommandsDest $_.Name
+            if (Test-Path -LiteralPath $dest) {
+                $srcResolved = (Resolve-Path -LiteralPath $_.FullName).Path
+                $destResolved = (Resolve-Path -LiteralPath $dest).Path
+                if ($srcResolved -ieq $destResolved) { return }
+            }
+            Copy-Item -LiteralPath $_.FullName -Destination $dest -Force
+            $n++
+        }
+    }
+    return $n
+}
+
 function Test-ObsidianAvailable {
     param(
         [string]$WorkspaceRoot,
@@ -232,4 +263,7 @@ if ($obsidianOk) {
     }
 }
 
-Write-Host "sync-kit-product-hooks: copied $copied hook file(s); hooks.json: $($mergeResults -join '; '); obsidian: $obsidianPostCommit"
+$commandsDest = Join-Path $WorkspaceRoot ".cursor\commands"
+$commandsCopied = Copy-KitSlashCommands -KitRoot $KitRoot -CommandsDest $commandsDest
+
+Write-Host "sync-kit-product-hooks: copied $copied hook file(s); commands=$commandsCopied; hooks.json: $($mergeResults -join '; '); obsidian: $obsidianPostCommit"

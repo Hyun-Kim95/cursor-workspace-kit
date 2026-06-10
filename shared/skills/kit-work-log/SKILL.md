@@ -1,6 +1,7 @@
 ---
 name: kit-work-log
-description: 날짜별 작업 일지를 docs/work-log/YYYY-MM-DD.md에 작성·append(/kit-work-log·/work-log 훅). document-change·changelog·커밋 저널과 구분. 슬래시 자동완성은 본 스킬.
+description: 날짜별 작업 일지를 docs/work-log/YYYY-MM-DD.md에 작성·append. 사용자가 /kit-work-log, /work-log, 작업 일지를 입력할 때 사용. document-change·changelog·커밋 저널과 구분.
+disable-model-invocation: true
 ---
 
 # kit-work-log

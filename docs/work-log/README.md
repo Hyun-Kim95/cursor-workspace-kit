@@ -38,7 +38,7 @@ tags: [docs, work-log, vault-sync]
 작업 일지
 ```
 
-에이전트는 [`kit-work-log`](../../shared/skills/kit-work-log/SKILL.md) 스킬을 따른다. 상세 변경 설명이 필요하면 [`document-change`](../../shared/skills/document-change/SKILL.md) 섹션을 참고해 보강한다.
+에이전트는 [`kit-work-log`](../../shared/skills/kit-work-log/SKILL.md) 스킬을 따른다. 채팅 `/` 입력 시 **`kit-work-log`** 가 자동완성에 뜬다(스킬 + `.cursor/commands/kit-work-log.md`). 상세 변경 설명이 필요하면 [`document-change`](../../shared/skills/document-change/SKILL.md) 섹션을 참고해 보강한다.
 
 ### 날짜 지정 (선택)
 
