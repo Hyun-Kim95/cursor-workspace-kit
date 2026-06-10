@@ -5,5 +5,6 @@
   "hubFileStem": "ascii-hub-filename-without-md-optional",
   "syncMode": "safe",
   "vaultRoot": "D:\\Obsidian\\projects",
-  "docsPaths": ["docs"]
+  "docsPaths": ["docs"],
+  "commitJournal": false
 }

@@ -73,15 +73,29 @@ powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\obsidian\sync-doc
 - 1회 실행 시 모드 지정: `-SyncMode mirror`
 - 레포별 고정은 `.obsidian-ingest.json`의 `syncMode`(`safe|mirror`)로 설정
 
-## 4) 커밋 저널 자동 생성
+## 4) 커밋 저널 (선택, 기본 꺼짐)
 
-커밋 훅 설치:
+기본값은 **저널을 쓰지 않음** (`commitJournal: false`). 일별 맥락은 [`docs/work-log/`](../work-log/README.md) + `kit-work-log`를 권장한다.
+
+저널을 다시 쓰려면 `.obsidian-ingest.json`에 `"commitJournal": true` 후 훅 재설치:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\obsidian\install-hook.ps1" -TargetRepo "." -CommitJournal
+```
+
+`commitJournal: true`이면 커밋마다 `D:\Obsidian\projects\<slug>\journal\`에 노트가 생성된다.
+
+볼트에 쌓인 저널 일괄 삭제:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\obsidian\Remove-VaultCommitJournals.ps1" -RemoveEmptyJournalDirs
+```
+
+커밋 훅 설치(문서 sync만, 기본):
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\obsidian\install-hook.ps1" -TargetRepo "."
 ```
-
-이후 커밋마다 `D:\Obsidian\projects\<slug>\journal\`에 노트가 생성된다.
 
 커밋 저널 frontmatter:
 - `type: commit-journal`

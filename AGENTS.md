@@ -105,6 +105,7 @@
 - 구현 후 품질 확인이 필요하면 `verify-change`를 사용한다. (Gate 3 종료 검증)
 - **생성·검증 분리(기본):** 메인이 산출(코드·`docs/` 문서) → `qa-agent` 독립 검증(파일·루브릭만 handoff, [`docs/agent/agent-brief.md`](docs/agent/agent-brief.md) 9절) → 메인은 판정 인용만. self-verify·검증 완료 선언은 메인 금지. 상세: `start-feature`·`verify-change`·`qa-agent`.
 - 변경사항 공유나 문서 정리가 필요하면 `document-change`를 사용한다. (병렬 중 계약 변경 시에도 수시 적용)
+- 세션·하루 마무리 시 작업 일지가 필요하면 `kit-work-log` 또는 `/kit-work-log`를 사용한다. (`docs/work-log/YYYY-MM-DD.md`)
 - 배포 전 확인이 필요하면 `release-check`를 사용한다.
 
 ## 직접 처리 가능한 예외

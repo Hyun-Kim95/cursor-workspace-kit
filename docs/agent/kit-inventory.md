@@ -91,6 +91,7 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `context-organization` | Gate 비변 선행 3단 러브릭 |
 | `kit-start` | kit pull·sync (`/start`, `/kit-start` 훅; `start-feature`와 별개) |
 | `kit-rule-mine` | 트랜스크립트 규칙 배치 마이닝 (`/kit-rule-mine` 훅; `kit-start`·`start-feature`와 별개) |
+| `kit-work-log` | 날짜별 작업 일지 (`docs/work-log/`; `/kit-work-log`·`/work-log` 훅) |
 | `start-setting` | 제품 1회 온보딩 (`/start-setting`, `/kit-start-setting` 훅; `kit-start`와 별개) |
 | `start-feature` | Gate 1 후 구현·검증 |
 | `parallel-delivery` | Gate 2 후 FE/BE 병렬 |
@@ -131,6 +132,7 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `scripts/import-from-user-cursor.ps1` | `~/.cursor` → `shared/` (일회/재동기화) |
 | `scripts/sync-kit.ps1` | kit 레포 전체 sync (`self` 모드) |
 | `scripts/sync-kit-product.ps1` | 제품 `.cursor/` 채널 A/B sync |
+| `scripts/Sync-KitProductHooks.ps1` | 제품 훅 스크립트·`hooks.json`·Obsidian post-commit (`/start` 시 호출) |
 | `scripts/Invoke-KitStart.ps1` | `/start` 백엔드: (submodule 시 필요하면) `submodule update --init --remote` + pull + sync |
 | [`product-onboarding.md`](product-onboarding.md#submodule-최신화--start-vs-submodule-update---remote) | submodule `--remote` 필요 여부·확인 체크리스트 |
 | `scripts/Invoke-KitStartSetting.ps1` | `/start-setting` 백엔드: submodule·설정·훅·첫 sync |

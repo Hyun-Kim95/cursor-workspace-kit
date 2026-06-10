@@ -79,19 +79,21 @@ function Copy-AgentFiles {
     return $n
 }
 
-function Copy-KitStartHookScript {
+function Invoke-SyncKitProductHooks {
     param(
-        [string]$KitRoot,
-        [string]$HooksDest
+        [string]$WorkspaceRoot,
+        [string]$KitRoot
     )
-    $src = Join-Path $KitRoot ".cursor\hooks\kit-start-on-prompt.ps1"
-    if (-not (Test-Path -LiteralPath $src)) {
-        $src = Join-Path $KitRoot "project-kit\.cursor\hooks\kit-start-on-prompt.ps1"
+    $hooksSync = Join-Path $KitRoot "scripts\Sync-KitProductHooks.ps1"
+    if (-not (Test-Path -LiteralPath $hooksSync)) {
+        Write-Host "sync-kit-product-hooks: skip (Sync-KitProductHooks.ps1 not found)"
+        return
     }
-    if (-not (Test-Path -LiteralPath $src)) { return 0 }
-    Ensure-Dir -Path $HooksDest
-    Copy-Item -LiteralPath $src -Destination (Join-Path $HooksDest "kit-start-on-prompt.ps1") -Force
-    return 1
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $hooksSync `
+        -WorkspaceRoot $WorkspaceRoot -KitRoot $KitRoot
+    if ($LASTEXITCODE -ne 0) {
+        throw "Sync-KitProductHooks.ps1 failed (exit $LASTEXITCODE)"
+    }
 }
 
 # Channel A: project-kit rules only + these shared globals (planning/ops defaults).
@@ -116,26 +118,6 @@ function Copy-SharedGlobalRules {
     return $n
 }
 
-function Copy-HarnessHookScripts {
-    param(
-        [string]$KitRoot,
-        [string]$HooksDest
-    )
-    $sharedHooks = Join-Path $KitRoot "shared\hooks"
-    $hookWhitelist = @("guard-shell.ps1", "guard-shell.patterns.json", "quality-gate.ps1", "dev-server-harness.ps1")
-    $n = 0
-    if (-not (Test-Path -LiteralPath $sharedHooks)) { return 0 }
-    Ensure-Dir -Path $HooksDest
-    foreach ($name in $hookWhitelist) {
-        $src = Join-Path $sharedHooks $name
-        if (Test-Path -LiteralPath $src) {
-            Copy-Item -LiteralPath $src -Destination (Join-Path $HooksDest $name) -Force
-            $n++
-        }
-    }
-    return $n
-}
-
 $rulesCount = 0
 $skillsCount = 0
 $agentsCount = 0
@@ -147,13 +129,11 @@ if ($Channel -eq "A") {
         $skillsCount = Copy-SkillFolders -SourceDir $sharedSkills -DestDir $skillsDest
     }
     $skillsCount += Copy-SkillFolders -SourceDir $projectKitSkills -DestDir $skillsDest
-    $hooksDest = Join-Path $cursorDest "hooks"
-    $startHookCount = Copy-KitStartHookScript -KitRoot $KitRoot -HooksDest $hooksDest
-    $hooksCount = Copy-HarnessHookScripts -KitRoot $KitRoot -HooksDest $hooksDest
     if (Test-Path -LiteralPath $sharedAgents) {
         $agentsCount = Copy-AgentFiles -SourceDir $sharedAgents -DestDir $agentsDest
     }
-    Write-Host "sync-kit-product (channel A): rules=$rulesCount skill-folders=$skillsCount agents=$agentsCount kit-start-hook=$startHookCount harness-hooks=$hooksCount"
+    Invoke-SyncKitProductHooks -WorkspaceRoot $WorkspaceRoot -KitRoot $KitRoot
+    Write-Host "sync-kit-product (channel A): rules=$rulesCount skill-folders=$skillsCount agents=$agentsCount"
 }
 else {
     Ensure-Dir -Path $rulesDest
@@ -165,11 +145,8 @@ else {
     $skillsCount += Copy-SkillFolders -SourceDir $projectKitSkills -DestDir $skillsDest
     $agentsCount = Copy-AgentFiles -SourceDir $sharedAgents -DestDir $agentsDest -ReplaceAll
 
-    $hooksDest = Join-Path $cursorDest "hooks"
-    $startHookCount = Copy-KitStartHookScript -KitRoot $KitRoot -HooksDest $hooksDest
-    $hooksCount = Copy-HarnessHookScripts -KitRoot $KitRoot -HooksDest $hooksDest
-
-    Write-Host "sync-kit-product (channel B): rules=$rulesCount skills=$skillsCount agents=$agentsCount kit-start-hook=$startHookCount harness-hooks=$hooksCount"
+    Invoke-SyncKitProductHooks -WorkspaceRoot $WorkspaceRoot -KitRoot $KitRoot
+    Write-Host "sync-kit-product (channel B): rules=$rulesCount skills=$skillsCount agents=$agentsCount"
 }
 
 $encodingScript = Join-Path $KitRoot "scripts\Ensure-ProductEncodingAssets.ps1"

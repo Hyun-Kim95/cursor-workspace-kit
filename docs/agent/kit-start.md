@@ -38,6 +38,7 @@
 | 1 | `beforeSubmitPrompt` → `kit-start-on-prompt.ps1` |
 | 2 | [`scripts/Invoke-KitStart.ps1`](../../scripts/Invoke-KitStart.ps1) |
 | 3 | `.cursor-kit.json`에 따라 git pull 대상·sync 범위 결정 |
+| 3b | 제품 모드: [`Sync-KitProductHooks.ps1`](../../scripts/Sync-KitProductHooks.ps1) — 훅 스크립트·`hooks.json` merge·(Obsidian 있으면) `post-commit` journal-off 재설치 |
 | 4 | `.cursor/state/kit-start-last.json` 기록 |
 | 5 | 실패 시 `continue: false` + `user_message` (**fail-closed**) |
 
@@ -66,8 +67,8 @@
 
 | channel | 제품 `.cursor/` 반영 | 전역 `~/.cursor` |
 |---------|----------------------|------------------|
-| **A** | `project-kit` rules(60·64·70) + **`shared/skills` 전체** + **`shared/agents` 6개** + `project-kit` 스킬 + harness 훅 | (선택) User Rules·전역 `~/.cursor` — 제품 `.cursor/skills`·`.cursor/agents`가 SSOT |
-| **B** | `shared/` + `project-kit/` 전부 → rules·skills·agents + harness 훅 | 중복 제거 권장 |
+| **A** | `project-kit` rules(60·64·70) + **`shared/skills` 전체** + **`shared/agents` 6개** + `project-kit` 스킬 + **kit 관리 훅** (`kit-start`, `work-log`, harness, Obsidian 등) | (선택) User Rules·전역 `~/.cursor` — 제품 `.cursor/skills`·`.cursor/agents`가 SSOT |
+| **B** | `shared/` + `project-kit/` 전부 → rules·skills·agents + **kit 관리 훅** (위와 동일) | 중복 제거 권장 |
 
 **채널 A:** `/start`마다 공통 **스킬·에이전트**가 제품 `.cursor/`에 복사된다. 전역 `~/.cursor/skills`·`~/.cursor/agents`와 **이름이 겹치면** 중복 로드될 수 있으니, 전역을 비우거나 kit과 맞추는 것을 권장한다([`product-onboarding.md`](product-onboarding.md) 문제 해결).
 

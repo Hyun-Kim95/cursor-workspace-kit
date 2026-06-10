@@ -103,6 +103,13 @@ if (-not (Test-Path -LiteralPath $RepoRoot)) {
     throw "RepoRoot not found: $RepoRoot"
 }
 
+. (Join-Path $PSScriptRoot "Obsidian-IngestCommon.ps1")
+$ingestGate = Get-ObsidianIngestSettings -RepoPath $RepoRoot -DefaultVaultRoot $VaultRoot
+if (-not $ingestGate.CommitJournal) {
+    Write-Host "commitJournal=false; skip commit journal."
+    exit 0
+}
+
 $repoName = Split-Path -Path $RepoRoot -Leaf
 $ingestConfigPath = Join-Path $RepoRoot ".obsidian-ingest.json"
 $slug = $repoName

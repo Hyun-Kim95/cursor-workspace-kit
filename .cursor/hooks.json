@@ -1,92 +1,110 @@
-{
-  "version": 1,
-  "hooks": {
-    "sessionStart": [
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/sync-kit-on-session.ps1",
-        "timeout": 60
-      },
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/bootstrap-obsidian-once.ps1",
-        "timeout": 30
-      }
-    ],
-    "beforeShellExecution": [
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/guard-shell.ps1",
-        "timeout": 10
-      }
-    ],
-    "afterShellExecution": [
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1",
-        "matcher": "npm run dev|pnpm dev|yarn dev|next dev|vite|uvicorn|flask run|ng serve|expo start",
-        "timeout": 15
-      }
-    ],
-    "afterAgentResponse": [
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-candidate-capture.ps1",
-        "timeout": 20
-      },
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/quality-gate.ps1",
-        "timeout": 25
-      },
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1",
-        "timeout": 15
-      }
-    ],
-    "stop": [
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1",
-        "timeout": 30
-      }
-    ],
-    "beforeSubmitPrompt": [
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/kit-start-on-prompt.ps1",
-        "matcher": "UserPromptSubmit",
-        "timeout": 120
-      },
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-mine-on-prompt.ps1",
-        "matcher": "UserPromptSubmit",
-        "timeout": 300
-      },
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-approval-gate.ps1",
-        "matcher": "UserPromptSubmit",
-        "timeout": 20
-      },
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-signal-capture.ps1",
-        "matcher": "UserPromptSubmit",
-        "timeout": 15
-      }
-    ],
-    "afterFileEdit": [
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/ensure-obsidian-git-hook.ps1",
-        "matcher": "Write|TabWrite",
-        "timeout": 20
-      },
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/sync-docs-on-doc-change.ps1",
-        "matcher": "Write|TabWrite",
-        "timeout": 20
-      },
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/guard-completion-claims.ps1",
-        "matcher": "Write|TabWrite",
-        "timeout": 20
-      },
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/guard-delivery-loop.ps1",
-        "matcher": "Write|TabWrite",
-        "timeout": 20
-      }
-    ]
-  }
+﻿{
+    "version":  1,
+    "hooks":  {
+                  "sessionStart":  [
+                                       {
+                                           "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/sync-kit-on-session.ps1",
+                                           "timeout":  60
+                                       },
+                                       {
+                                           "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/bootstrap-obsidian-once.ps1",
+                                           "timeout":  30
+                                       }
+                                   ],
+                  "beforeShellExecution":  [
+                                               {
+                                                   "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/guard-shell.ps1",
+                                                   "timeout":  10
+                                               }
+                                           ],
+                  "beforeSubmitPrompt":  [
+                                             {
+                                                 "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/kit-start-on-prompt.ps1",
+                                                 "matcher":  "UserPromptSubmit",
+                                                 "timeout":  120
+                                             },
+                                             {
+                                                 "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/work-log-on-prompt.ps1",
+                                                 "matcher":  "UserPromptSubmit",
+                                                 "timeout":  15
+                                             },
+                                             {
+                                                 "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-mine-on-prompt.ps1",
+                                                 "matcher":  "UserPromptSubmit",
+                                                 "timeout":  300
+                                             },
+                                             {
+                                                 "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-approval-gate.ps1",
+                                                 "matcher":  "UserPromptSubmit",
+                                                 "timeout":  20
+                                             },
+                                             {
+                                                 "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-signal-capture.ps1",
+                                                 "matcher":  "UserPromptSubmit",
+                                                 "timeout":  15
+                                             }
+                                         ],
+                  "afterFileEdit":  [
+                                        {
+                                            "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/ensure-obsidian-git-hook.ps1",
+                                            "matcher":  "Write|TabWrite",
+                                            "timeout":  20
+                                        },
+                                        {
+                                            "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/sync-docs-on-doc-change.ps1",
+                                            "matcher":  "Write|TabWrite",
+                                            "timeout":  20
+                                        },
+                                        {
+                                            "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/guard-completion-claims.ps1",
+                                            "matcher":  "Write|TabWrite",
+                                            "timeout":  20
+                                        },
+                                        {
+                                            "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/guard-delivery-loop.ps1",
+                                            "matcher":  "Write|TabWrite",
+                                            "timeout":  20
+                                        }
+                                    ],
+                  "afterShellExecution":  [
+                                              {
+                                                  "matcher":  "npm run dev|pnpm dev|yarn dev|next dev|vite|uvicorn|flask run|ng serve|expo start",
+                                                  "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1",
+                                                  "timeout":  15
+                                              },
+                                              {
+                                                  "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1",
+                                                  "matcher":  "npm run dev|pnpm dev|yarn dev|next dev|vite|uvicorn|flask run|ng serve|expo start",
+                                                  "timeout":  15
+                                              }
+                                          ],
+                  "afterAgentResponse":  [
+                                             {
+                                                 "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1",
+                                                 "timeout":  15
+                                             },
+                                             {
+                                                 "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-candidate-capture.ps1",
+                                                 "timeout":  20
+                                             },
+                                             {
+                                                 "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/quality-gate.ps1",
+                                                 "timeout":  25
+                                             },
+                                             {
+                                                 "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1",
+                                                 "timeout":  15
+                                             }
+                                         ],
+                  "stop":  [
+                               {
+                                   "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1",
+                                   "timeout":  30
+                               },
+                               {
+                                   "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/dev-server-harness.ps1",
+                                   "timeout":  30
+                               }
+                           ]
+              }
 }

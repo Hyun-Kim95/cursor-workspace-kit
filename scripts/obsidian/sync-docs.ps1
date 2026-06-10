@@ -216,16 +216,25 @@ function Ensure-ObsidianIngestConfig {
         return
     }
 
+    $commitJournal = $false
+    if ($null -ne $cfg) {
+        $cjProp = $cfg.PSObject.Properties['commitJournal']
+        if ($null -ne $cjProp -and $null -ne $cjProp.Value) {
+            $commitJournal = [bool]$cjProp.Value
+        }
+    }
+
     $out = [pscustomobject]@{
-        slug       = $slug
-        lockSlug   = $lockSlug
-        vaultRoot  = $vaultRoot
-        docsPaths  = $docsPaths
-        syncMode   = $syncMode
+        slug          = $slug
+        lockSlug      = $lockSlug
+        vaultRoot     = $vaultRoot
+        docsPaths     = $docsPaths
+        syncMode      = $syncMode
+        commitJournal = $commitJournal
     }
     $json = $out | ConvertTo-Json -Depth 6
     Set-Content -LiteralPath $ingestPath -Value $json -Encoding utf8
-    Write-Host "Wrote or repaired: $ingestPath (slug=$slug, lockSlug=$lockSlug, syncMode=$syncMode)"
+    Write-Host "Wrote or repaired: $ingestPath (slug=$slug, lockSlug=$lockSlug, syncMode=$syncMode, commitJournal=$commitJournal)"
 }
 
 function Get-AutoRepositoryEntry {
