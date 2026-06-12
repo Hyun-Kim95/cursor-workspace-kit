@@ -134,7 +134,16 @@ try {
     }
 
     $submoduleRemoteSync = $null
+    $submoduleIndexRepair = $null
     if ($mode -eq "submodule") {
+        if ((Test-Path -LiteralPath $kitRoot) -and (Get-Command Repair-KitSubmoduleGitIndex -ErrorAction SilentlyContinue)) {
+            try {
+                $submoduleIndexRepair = Repair-KitSubmoduleGitIndex -WorkspaceRoot $WorkspaceRoot -KitPath $kitPath -KitRoot $kitRoot
+            }
+            catch {
+                $submoduleIndexRepair = @{ Repaired = $false; Message = $_.Exception.Message }
+            }
+        }
         $hasSubmodule = Test-WorkspaceHasKitSubmodule -WorkspaceRoot $WorkspaceRoot -KitPath $kitPath
         $runRemoteUpdate = $false
         if ($hasSubmodule) {
@@ -148,9 +157,6 @@ try {
         }
         if ($runRemoteUpdate) {
             $submoduleRemoteSync = Invoke-WorkspaceKitSubmoduleRemoteUpdate -WorkspaceRoot $WorkspaceRoot -KitPath $kitPath
-            if (-not $submoduleRemoteSync.Ok -and -not $submoduleRemoteSync.Skipped) {
-                throw $submoduleRemoteSync.Message
-            }
         }
         if (-not (Test-Path -LiteralPath $kitRoot)) {
             throw "Kit submodule path not found: $kitRoot. Run: git submodule update --init or /start-setting"
@@ -189,6 +195,21 @@ try {
         $syncMessage = "sync-kit-product channel $channel completed"
     }
 
+    $syncVerify = $null
+    if ($mode -ne "self" -and (Get-Command Test-KitProductSyncResult -ErrorAction SilentlyContinue)) {
+        $syncVerify = Test-KitProductSyncResult -WorkspaceRoot $WorkspaceRoot -KitRoot $kitRoot
+        if (-not $syncVerify.Ok) {
+            $parts = New-Object System.Collections.ArrayList
+            if ($syncVerify.MissingKitMarkers.Count -gt 0) {
+                [void]$parts.Add("kit missing: $($syncVerify.MissingKitMarkers -join ', ')")
+            }
+            if ($syncVerify.MissingProductPaths.Count -gt 0) {
+                [void]$parts.Add("product missing: $($syncVerify.MissingProductPaths -join ', ')")
+            }
+            throw "Kit sync verification failed after pull/sync. $($parts -join '; '). From product root: git -C $kitPath pull --ff-only origin $branch; then retry /kit-start."
+        }
+    }
+
     $summary = @(
         "Kit start OK ($mode)."
         "Behind $($pullResult.Behind) commit(s) on $($pullResult.Ref)."
@@ -196,6 +217,12 @@ try {
     if ($pullResult.Pulled) { $summary += "Pulled latest." } else { $summary += "Already up to date." }
     if ($null -ne $submoduleRemoteSync -and $submoduleRemoteSync.Ok) {
         $summary += "Submodule remote sync applied."
+    }
+    elseif ($null -ne $submoduleRemoteSync -and $submoduleRemoteSync.Skipped -and $submoduleRemoteSync.Message) {
+        $summary += "Submodule remote sync skipped: $($submoduleRemoteSync.Message)"
+    }
+    if ($null -ne $submoduleIndexRepair -and $submoduleIndexRepair.Repaired) {
+        $summary += "Submodule git index repaired."
     }
     $summary += $syncMessage
 
@@ -215,6 +242,13 @@ try {
     if ($null -ne $submoduleRemoteSync) {
         $stateFields.submoduleRemoteSync = $submoduleRemoteSync.Ok
         if ($submoduleRemoteSync.Message) { $stateFields.submoduleRemoteSyncMessage = $submoduleRemoteSync.Message }
+    }
+    if ($null -ne $submoduleIndexRepair) {
+        $stateFields.submoduleIndexRepaired = $submoduleIndexRepair.Repaired
+        if ($submoduleIndexRepair.Message) { $stateFields.submoduleIndexRepairMessage = $submoduleIndexRepair.Message }
+    }
+    if ($null -ne $syncVerify) {
+        $stateFields.syncVerified = $syncVerify.Ok
     }
     Write-KitStartState -StatePath $statePath -Ok $true -Fields $stateFields
 

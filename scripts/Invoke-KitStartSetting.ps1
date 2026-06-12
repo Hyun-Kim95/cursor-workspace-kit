@@ -154,6 +154,13 @@ try {
     $kitRoot = Ensure-KitSubmodule -Root $WorkspaceRoot -RelativeKitPath $KitPath -RepoUrl $KitRepoUrl -BootstrapPath $bootstrap
     [void]$steps.Add("submodule: OK ($KitPath)")
 
+    if (Get-Command Repair-KitSubmoduleGitIndex -ErrorAction SilentlyContinue) {
+        $indexRepair = Repair-KitSubmoduleGitIndex -WorkspaceRoot $WorkspaceRoot -KitPath $KitPath -KitRoot $kitRoot
+        if ($indexRepair.Repaired) {
+            [void]$steps.Add("submodule index: repaired ($($indexRepair.Message))")
+        }
+    }
+
     $cfgResult = Ensure-CursorKitJson -Root $WorkspaceRoot -RelativeKitPath $KitPath -ChannelName $Channel
     [void]$steps.Add(".cursor-kit.json: $cfgResult")
 

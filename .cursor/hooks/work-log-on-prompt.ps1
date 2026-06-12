@@ -3,6 +3,18 @@ $ErrorActionPreference = "Stop"
 
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $commonPath = Join-Path $projectRoot "scripts\Kit-HookCommon.ps1"
+if (-not (Test-Path -LiteralPath $commonPath)) {
+    $kitPath = "vendor/cursor-workspace-kit"
+    $configPath = Join-Path $projectRoot ".cursor-kit.json"
+    if (Test-Path -LiteralPath $configPath) {
+        try {
+            $cfg = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($cfg.kitPath) { $kitPath = [string]$cfg.kitPath }
+        }
+        catch { }
+    }
+    $commonPath = Join-Path $projectRoot (Join-Path $kitPath "scripts\Kit-HookCommon.ps1")
+}
 if (-not (Test-Path -LiteralPath $commonPath)) { exit 0 }
 . $commonPath
 Initialize-KitHookConsole

@@ -521,6 +521,104 @@ function Test-WorkspaceHasKitSubmodule {
     return ($raw -match [regex]::Escape($norm))
 }
 
+function Test-WorkspaceKitSubmoduleInGitIndex {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$WorkspaceRoot,
+        [Parameter(Mandatory = $true)]
+        [string]$KitPath
+    )
+    $norm = ($KitPath -replace '\\', '/').TrimEnd('/')
+    Push-Location $WorkspaceRoot
+    try {
+        $line = (git ls-files -s -- $norm 2>$null)
+        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($line)) { return $false }
+        return ($line.Trim() -match '^160000 ')
+    }
+    finally { Pop-Location }
+}
+
+function Repair-KitSubmoduleGitIndex {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$WorkspaceRoot,
+        [Parameter(Mandatory = $true)]
+        [string]$KitPath,
+        [Parameter(Mandatory = $true)]
+        [string]$KitRoot
+    )
+    if (-not (Test-WorkspaceHasKitSubmodule -WorkspaceRoot $WorkspaceRoot -KitPath $KitPath)) {
+        return @{ Repaired = $false; Message = "no .gitmodules entry for $KitPath" }
+    }
+    if (Test-WorkspaceKitSubmoduleInGitIndex -WorkspaceRoot $WorkspaceRoot -KitPath $KitPath) {
+        return @{ Repaired = $false; Message = "submodule already in git index" }
+    }
+    if (-not (Test-Path -LiteralPath (Join-Path $KitRoot ".git"))) {
+        return @{ Repaired = $false; Message = "kit path is not a git checkout: $KitRoot" }
+    }
+    Push-Location $KitRoot
+    try {
+        $sha = (git rev-parse HEAD 2>$null)
+        if ($LASTEXITCODE -ne 0) { throw "cannot read HEAD in kit checkout" }
+        $sha = $sha.Trim()
+    }
+    finally { Pop-Location }
+
+    $norm = ($KitPath -replace '\\', '/').TrimEnd('/')
+    Push-Location $WorkspaceRoot
+    try {
+        $cacheinfo = "160000,$sha,$norm"
+        $exit = Invoke-GitNativeQuiet update-index --add --cacheinfo $cacheinfo
+        if ($exit -ne 0) { throw "git update-index --cacheinfo failed (exit $exit)" }
+        return @{ Repaired = $true; Message = "registered $norm in git index at $sha" }
+    }
+    finally { Pop-Location }
+}
+
+$script:KitProductCapabilityMarkers = @(
+    "shared\skills\kit-work-log\SKILL.md",
+    "scripts\Sync-KitProductHooks.ps1"
+)
+
+function Get-KitRootMissingCapabilityMarkers {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$KitRoot
+    )
+    $missing = New-Object System.Collections.ArrayList
+    foreach ($rel in $script:KitProductCapabilityMarkers) {
+        if (-not (Test-Path -LiteralPath (Join-Path $KitRoot $rel))) {
+            [void]$missing.Add(($rel -replace '\\', '/'))
+        }
+    }
+    return @($missing.ToArray())
+}
+
+function Test-KitProductSyncResult {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$WorkspaceRoot,
+        [Parameter(Mandatory = $true)]
+        [string]$KitRoot
+    )
+    $missingKit = Get-KitRootMissingCapabilityMarkers -KitRoot $KitRoot
+    $missingProduct = New-Object System.Collections.ArrayList
+    $productChecks = @(
+        ".cursor\skills\kit-work-log\SKILL.md",
+        ".cursor\hooks\work-log-on-prompt.ps1"
+    )
+    foreach ($rel in $productChecks) {
+        if (-not (Test-Path -LiteralPath (Join-Path $WorkspaceRoot $rel))) {
+            [void]$missingProduct.Add(($rel -replace '\\', '/'))
+        }
+    }
+    return @{
+        Ok                  = ($missingKit.Count -eq 0 -and $missingProduct.Count -eq 0)
+        MissingKitMarkers   = $missingKit
+        MissingProductPaths = @($missingProduct.ToArray())
+    }
+}
+
 function Invoke-GitNativeQuiet {
     <#
     Run git without treating stderr progress (e.g. "From https://...") as a terminating
@@ -582,6 +680,15 @@ function Get-KitSubmoduleSyncNeed {
             }
         }
 
+        $missingMarkers = Get-KitRootMissingCapabilityMarkers -KitRoot $KitRoot
+        if ($missingMarkers.Count -gt 0) {
+            return @{
+                Needs   = $true
+                Reason  = "missing-kit-capability-markers"
+                Missing = $missingMarkers
+            }
+        }
+
         return @{ Needs = $false; Reason = "up-to-date" }
     }
     finally { Pop-Location }
@@ -601,11 +708,23 @@ function Invoke-WorkspaceKitSubmoduleRemoteUpdate {
         return @{ Ok = $false; Skipped = $true; Message = "Kit path is not a registered submodule; skipped submodule update --remote." }
     }
 
+    if (-not (Test-WorkspaceKitSubmoduleInGitIndex -WorkspaceRoot $WorkspaceRoot -KitPath $KitPath)) {
+        return @{
+            Ok      = $false
+            Skipped = $true
+            Message = "Submodule listed in .gitmodules but missing from git index; skipped submodule update --remote (vendor git pull will run)."
+        }
+    }
+
     Push-Location $WorkspaceRoot
     try {
         $exit = Invoke-GitNativeQuiet submodule update --init --remote $KitPath
         if ($exit -ne 0) {
-            throw "git submodule update --init --remote $KitPath failed (exit $exit)"
+            return @{
+                Ok      = $false
+                Skipped = $true
+                Message = "git submodule update --init --remote $KitPath failed (exit $exit); vendor git pull will run."
+            }
         }
         return @{ Ok = $true; Skipped = $false; Message = "submodule update --init --remote $KitPath" }
     }

@@ -188,7 +188,8 @@ try {
         exit 2
     }
 
-    Write-HookJson -Object @{ continue = $true }
+    $msg = Read-StateMessage -StatePath (Join-Path $projectRoot ".cursor\state\kit-start-last.json") -Fallback "Kit start OK."
+    Write-HookJson -Object @{ continue = $true; user_message = $msg }
     exit 0
 }
 catch {

@@ -30,10 +30,17 @@ description: kit 템플릿 pull·sync(/start·/kit-start 훅). start-feature(기
 
 ## 에이전트 절차
 
-1. **먼저** 제품 루트의 [`.cursor/state/kit-start-last.json`](../../state/kit-start-last.json)을 읽는다.
-2. `ok`가 `false`이면 sync 실패 — 사용자에게 `message`와 submodule·`.cursor-kit.json`·`docs/agent/kit-start.md`를 안내하고, **구현·Gate 진행을 멈춘다.**
-3. `ok`가 `true`이면 `message`, `pulled`, `channel`, (있으면) `submoduleRemoteSync`·`submoduleRemoteSyncMessage`를 **한 줄로 요약**한 뒤, 접두어(`/start`, `/kit-start`) **뒤의 지시만** 수행한다. `submoduleRemoteSync: true`이면 `git submodule update --init --remote`가 자동 적용된 것이다.
-4. 본 스킬만 호출되었고 state가 없거나 오래되었으면, 사용자에게 **`/start <할 일>`** 또는 **`/kit-start <할 일>`** 로 다시 보내 훅을 돌리라고 안내한다.
+**`/kit-start`·`/start`만 입력해도 pull+sync가 되어야 한다.** 할 일 문장은 sync 트리거가 아니라 **이후 작업 지시**다.
+
+1. 사용자 메시지가 `/kit-start` 또는 `/start`(설정 접두어 제외)이면 **먼저** [`.cursor/state/kit-start-last.json`](../../state/kit-start-last.json)을 읽는다.
+2. 아래 중 하나면 **훅만 믿지 말고** 제품 루트에서 `vendor/.../scripts/Invoke-KitStart.ps1`(또는 `.cursor-kit.json`의 `kitPath`)를 **Shell로 직접 실행**한다.
+   - state 파일 없음
+   - `at`이 **이번 요청 시각 기준 2분 이상 전**
+   - `afterSha`가 있으나 `vendor/<kitPath>/shared/skills/kit-work-log/SKILL.md`가 **없음**
+   - 훅 `user_message`가 비었고 state가 오래됨
+3. 실행 후 state를 **다시 읽는다.** `ok: false`이면 `message`·`docs/agent/kit-start.md`를 안내하고 **구현·Gate 진행을 멈춘다.**
+4. `ok: true`이면 `message`, `pulled`, `afterSha`, `channel`, (있으면) `submoduleRemoteSync`·`submoduleIndexRepaired`·`syncVerified`를 **한 줄로 요약**한 뒤, 접두어 **뒤의 지시만** 수행한다. **뒤에 지시가 없으면** sync 요약만 보고하고 작업은 시작하지 않는다.
+5. **오래된 state를 “방금 성공”처럼 읽어서 보고하지 않는다.** `at`·`afterSha`·kit marker 파일로 이번 요청에 sync가 반영됐는지 확인한다.
 
 ## 온보딩
 
