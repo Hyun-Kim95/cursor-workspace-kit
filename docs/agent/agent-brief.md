@@ -22,13 +22,16 @@
 - 성능/호환성/플랫폼 제약
 
 ## 4) Inputs
-- 참고 문서 경로
+- 참고 문서 경로 (PRD, `docs/qa/atdd-lite.md`, stage3 체크리스트 등)
+- **PRD 수용 기준:** `AC-xx` 목록 또는 `docs/requirements/...` AC 섹션 경로
 - **선택안 링크/ID**(디자인 HUMAN 선택 후) + **제품 구현 경로**(라우트·모듈)
 - 참고 코드/디자인 경로(목업은 스펙 근거만; `implement` 단계에서 mock-only만 다시 만들지 않음)
-- 선행 조건(있다면): stage3 체크리스트, Gate 2
+- **ATDD-lite (Gate 2+):** acceptance test 경로(RED 상태 또는 GREEN 목표), AC ID ↔ 테스트 매핑 메모
+- 선행 조건(있다면): stage3 체크리스트, Gate 2, **RED 확인 기록**
 
 ## 5) Expected Outputs
 - 산출물 파일/모듈 (코드 변경 경로 또는 `docs/` SSOT md)
+- **ATDD-lite:** acceptance test 경로(RED→GREEN), AC ID ↔ 테스트 매핑
 - **독립 검증 산출:** `docs/qa/verify-{날짜 또는 slug}.md` (`qa-agent` 채점·이슈 목록)
 - 검증 결과(테스트/체크리스트)
 - 사용자 전달용 요약
@@ -56,7 +59,9 @@
 | 필드 | 내용 |
 |------|------|
 | `artifactPaths` | 검증 대상 파일·모듈 경로 (예: `docs/requirements/business-plan.md`, 변경된 `src/...`) |
-| `rubricRef` | Gate 3, `docs/qa/reviewer-gate-rubric.md`, 작업별 체크리스트 경로 또는 요약 |
+| `acceptanceTestPaths` | (ATDD-lite) `e2e/...`, `tests/api/...` 등 acceptance test 경로 |
+| `acIds` | (ATDD-lite) PRD AC ID 목록 예: `["AC-01","AC-02"]` |
+| `rubricRef` | Gate 3, `docs/qa/atdd-lite.md`, `docs/qa/reviewer-gate-rubric.md`, 작업별 체크리스트 경로 또는 요약 |
 | `forbidden` | 금지 조건 (예: 칭찬·완화, 생성 맥락 참조, 산출물 수정) |
 
 **코드 예:** 변경 파일 목록 + Gate 3·상태 UI 루브릭  

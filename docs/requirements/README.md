@@ -18,7 +18,8 @@ tags: [docs, vault-sync]
 - 사용자 시나리오
 
 권장 파일명 예시:
-- feature-user-management.md
+- feature-user-management.md (PRD — **수용 기준(AC)** 섹션 포함, [`docs/qa/acceptance-criteria.template.md`](../qa/acceptance-criteria.template.md) 참고)
+- example-feature-notifications-ac.md (AC 조각 소비 예시 — [`docs/qa/atdd-lite.md`](../qa/atdd-lite.md), 기록: [`atdd-lite-consumption-record-example.md`](../qa/atdd-lite-consumption-record-example.md))
 - admin-board-requirements.md
 - mobile-app-navigation.md
 - app-update.md (모바일 앱 버전 업데이트 — [`docs/mobile/app-update/`](../../docs/mobile/app-update/README.md) 템플릿 복사본)

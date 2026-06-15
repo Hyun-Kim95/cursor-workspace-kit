@@ -162,11 +162,68 @@
       padding:10px 12px;color:#d7e4fb;font-size:12px;line-height:1.5;pointer-events:none;
       box-shadow:0 12px 32px rgba(0,0,0,.5)
     }
+    /* export view (?view=export) — PNG·정적 다이어그램용 */
+    body.export-view .sidebar,
+    body.export-view .detail,
+    body.export-view .sidebar-start-row,
+    body.export-view #btnExportPng { display: none !important; }
+    body.export-view .wrap { height: auto; min-height: 0; }
+    body.export-view .main { overflow: visible; }
+    body.export-view .process-view {
+      height: auto; min-height: 0; overflow: visible;
+      align-items: flex-start; padding: 12px 20px 28px;
+    }
+    body.export-view .fit-stage { transform: none !important; zoom: 1 !important; width: 100% !important; height: auto !important; }
+    body.export-view .top { position: static; }
+    .top-actions { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+    .btn.export { border-color: rgba(34,200,122,.45); color: #bbf7d0; }
+    .export-legend {
+      display: none; font-size: 11px; color: #9bb0d3; gap: 14px; flex-wrap: wrap;
+    }
+    body.export-view .export-legend { display: flex; }
+    .export-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .export-legend .swatch { width: 28px; height: 3px; border-radius: 2px; display: inline-block; }
+    .export-legend .swatch.forward { background: rgba(79,143,250,.95); }
+    .export-legend .swatch.regression { background: rgba(240,68,68,.95); border-top: 2px dashed rgba(240,68,68,.95); height: 0; }
+    .export-legend .swatch.kit { background: rgba(124,111,247,.85); }
+    .kit-evolution {
+      display: none; margin-top: 28px; padding: 18px 16px 14px;
+      border: 1px solid rgba(124,111,247,.35); border-radius: 14px;
+      background: linear-gradient(180deg, rgba(21,29,46,.6), rgba(15,22,35,.85));
+    }
+    body.export-view .kit-evolution { display: block; }
+    .kit-evolution-title {
+      font-size: 13px; font-weight: 800; letter-spacing: .4px; color: #c4b5fd;
+      margin-bottom: 14px; text-transform: uppercase;
+    }
+    .kit-loop {
+      display: flex; align-items: stretch; flex-wrap: wrap; gap: 6px 4px; justify-content: center;
+    }
+    .kit-step {
+      flex: 0 1 118px; min-width: 100px; padding: 10px 8px; border-radius: 10px;
+      border: 1px solid var(--border-l); background: var(--elev); text-align: center;
+      font-size: 11px; font-weight: 700; color: var(--text); line-height: 1.35;
+    }
+    .kit-step small { display: block; font-weight: 500; color: var(--text2); margin-top: 4px; font-size: 10px; }
+    .kit-arrow {
+      flex: 0 0 auto; align-self: center; color: #a78bfa; font-size: 16px; font-weight: 700; padding: 0 2px;
+    }
+    .kit-loop-note {
+      flex: 1 1 100%; text-align: center; font-size: 10px; color: #8b9ab0; margin-top: 8px;
+    }
   </style>
 </head>
 <body>
   <header class="top">
     <div class="title">AI Development Workflow</div>
+    <div class="top-actions">
+      <div class="export-legend" aria-label="범례">
+        <span><i class="swatch forward"></i>전진 (실선)</span>
+        <span><i class="swatch regression"></i>회귀 (점선)</span>
+        <span><i class="swatch kit"></i>템플릿 발전</span>
+      </div>
+      <button type="button" class="btn export" id="btnExportPng" title="?view=export 레이아웃을 PNG로 저장">PNG 저장</button>
+    </div>
   </header>
 
   <div class="wrap">
@@ -221,9 +278,12 @@
   </div>
   <div class="tt" id="tooltip"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnY/XiSanjWu/lY9Cb/4WrnEkktDHI3Rq2+4+wr/RHR45B5/L/s/nEnPTc4Vl+Gj2kX/d/Td0666P9R1M9Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script>
+    const EXPORT_VIEW = new URLSearchParams(location.search).get('view') === 'export';
     const completionHardChecks = [
       '요구사항·실제 구현·문서·API 약속이 서로 맞는지(완료 판정 단계)',
+      'PRD AC 대비 acceptance test 통과·미매핑 AC 없음(ATDD-lite, Gate 3)',
       '기본·로딩·빈·오류·권한 화면이 규칙과 스펙대로인지',
       '필요하면 웹/앱 환경·화면 크기·다크모드까지 점검',
       '바뀐 곳이 다른 곳을 망가뜨리지 않았는지 검토(검증 스킬·에이전트)',
@@ -244,10 +304,11 @@
       },
       {
         id:'p2', cardLabel:'PRD 작성', title:'PRD 작성', desc:'PRD 초안을 작성하고, 사람의 승인 전까지는 다음 단계로 넘어가지 않습니다.', meta:'고객 프로젝트 기본 규칙, delivery-gates(구현 착수 전) 문서', out:'승인된 PRD',
-        ruleRefs:['규칙: delivery-gates(착수 전)', '규칙: client-lifecycle-default', '.cursor/skills/client-project-lifecycle/SKILL.md', 'AGENTS.md'],
+        ruleRefs:['규칙: delivery-gates(착수 전)', '규칙: client-lifecycle-default', '.cursor/skills/client-project-lifecycle/SKILL.md', 'docs/qa/atdd-lite.md', 'docs/qa/acceptance-criteria.template.md', 'AGENTS.md'],
         owners:['prd-agent', 'Main Agent(승인 대기 안내)'],
-        artifacts:['PRD(예: docs/requirements/)', '사람 승인(채팅·이력)'],
+        artifacts:['PRD(예: docs/requirements/)', '수용 기준(AC, AC-xx)', '사람 승인(채팅·이력)'],
         requiredChecks:[
+          { text:'Gate 1: PRD에 AC 섹션·핵심 AC 포함', level:'MUST' },
           { text:'PRD 승인 전, 목업·구현用 코드·이미지 작업을 시작하지 않는다', level:'MUST' },
           { text:'초안 작성·고치기는 승인 전에도 할 수 있음', level:'MUST' }
         ],
@@ -265,22 +326,23 @@
         tags:['plan','role']
       },
       {
-        id:'p4', cardLabel:'선택안·제품 구현', title:'선택안 기준 제품 구현', desc:'디자인 HUMAN 선택 후 stage3 체크리스트 → Gate 2 → FE/BE 병렬(parallel-delivery). 선택안을 스펙으로 본 앱에 구현하며, mock 전용 사이트만 다시 만들지 않습니다.', meta:'단계 3, delivery-gates Gate 2, parallel-delivery', out:'연동된 제품 UI·API 일치',
-        ruleRefs:['규칙: delivery-gates(병렬·계약)', '규칙: design-gate', 'docs/qa/stage3-entry-checklist.md', 'User 스킬: parallel-delivery', 'User 스킬: start-feature', 'AGENTS.md'],
+        id:'p4', cardLabel:'선택안·제품 구현', title:'선택안 기준 제품 구현', desc:'디자인 HUMAN 선택 후 stage3 체크리스트 → Gate 2 → ATDD-lite RED(acceptance test) → FE/BE 병렬 구현(parallel-delivery/start-feature). 선택안을 스펙으로 본 앱에 구현하며, mock 전용 사이트만 다시 만들지 않습니다.', meta:'단계 3, delivery-gates Gate 2, ATDD-lite, parallel-delivery', out:'연동된 제품 UI·API·AC 테스트 일치',
+        ruleRefs:['규칙: delivery-gates(병렬·계약)', '규칙: design-gate', 'docs/qa/stage3-entry-checklist.md', 'docs/qa/atdd-lite.md', 'User 스킬: parallel-delivery', 'User 스킬: start-feature', 'AGENTS.md'],
         owners:['frontend-agent', 'backend-agent', 'Main Agent(통합)'],
-        artifacts:['stage3 체크리스트', '확정 API', '제품 라우트/모듈', '계약 변경 시 document-change'],
+        artifacts:['stage3 체크리스트', '확정 API', 'acceptance test (RED→GREEN)', 'PRD AC 매핑', '제품 라우트/모듈', '계약 변경 시 document-change'],
         requiredChecks:[
           { text:'stage3-entry-checklist(제품 경로·mock-only 금지) 완료', level:'MUST' },
-          { text:'API·상태 UI 확정 후 본 제품 경로에 구현 착수', level:'MUST' },
+          { text:'Gate 2 후·구현 착수 전 acceptance test RED 확인(stage3 §3d)', level:'MUST' },
+          { text:'API·상태 UI 확정 → RED → 본 제품 경로 구현(GREEN)', level:'MUST' },
           { text:'선택 후 mock-only 재구축 없음(예외는 문서화)', level:'MUST' }
         ],
         tags:['plan','role']
       },
       {
-        id:'p5', cardLabel:'착수 전(일반 신규)', title:'착수에 필요한 문서 확인', desc:'착수 문서, 화면/목업 스펙, API 초안 등이 준비되면 구현에 착수합니다. 빠진 부분이 있다면 요구·스펙 보완 작업을 진행합니다.', meta:'delivery-gates(구현 착수 전), plan-feature, start-feature', out:'착수에 필요한 요구사항 문서·화면 스펙·API 초안이 갖춰짐',
-        ruleRefs:['규칙: delivery-gates(착수 전)', 'User 스킬: plan-feature', 'User 스킬: start-feature', 'AGENTS.md'],
+        id:'p5', cardLabel:'착수 전(일반 신규)', title:'착수에 필요한 문서 확인', desc:'착수 문서, 화면/목업 스펙, API 초안·AC 등이 준비되면 Gate 2 후 ATDD-lite RED·구현에 착수합니다. 빠진 부분이 있다면 요구·스펙 보완 작업을 진행합니다.', meta:'delivery-gates(구현 착수 전), ATDD-lite, plan-feature, start-feature', out:'착수에 필요한 요구사항 문서·화면 스펙·API 초안·AC가 갖춰짐',
+        ruleRefs:['규칙: delivery-gates(착수 전)', 'docs/qa/atdd-lite.md', 'User 스킬: plan-feature', 'User 스킬: start-feature', 'AGENTS.md'],
         owners:['prd-agent', 'Main Agent'],
-        artifacts:['범위/요구', '누가 봐도 이해할 수 있는 화면·흐름', 'API 초안'],
+        artifacts:['범위/요구', '수용 기준(AC)', '누가 봐도 이해할 수 있는 화면·흐름', 'API 초안'],
         requiredChecks:[
           { text:'고객「전 과정(엔드투엔드)」이면 반드시 PRD·이중 목업·선택된 디자인까지 거침(여기서만 끊어 구현으로 점프하지 않음)', level:'MUST' },
           { text:'갖춰지지 않으면「요구·스펙 보완」으로', level:'MUST' }
@@ -310,7 +372,7 @@
       },
       {
         id:'p7', cardLabel:'끝·검수', title:'완료 판정', desc:'요구사항·코드·API 일치와 화면 상태를 확인하고, 필요 시 기기·테마까지 점검한 뒤 변경 요약으로 완료를 판단합니다. 「초기 착수 건」이면 검증·성능·문서·배포 직전 점검을 정책에 맞게 추가합니다.', meta:'완료·마감 기준, 검증·문서·릴리즈 전 점검', out:'끝냈다는 근거·(선택)배포 직전 점검',
-        ruleRefs:['규칙: delivery-gates(작업 끝)', 'User 스킬: verify-change', 'User 스킬: document-change', 'User 스킬: release-check(배포 직전)', 'AGENTS.md'],
+        ruleRefs:['규칙: delivery-gates(작업 끝)', 'docs/qa/atdd-lite.md', 'User 스킬: verify-change', 'User 스킬: document-change', 'User 스킬: release-check(배포 직전)', 'AGENTS.md'],
         owners:['qa-agent', 'docs-agent', 'Main Agent(통합)'],
         artifacts:['검증 및 회귀 테스트 결과', '변경 요약·(선택)릴리즈 점검'],
         requiredChecks: completionHardChecks.map(text => ({ text, level:'MUST' })),
@@ -444,13 +506,13 @@
       },
       {
         from: 'p3', to: 'p4', type: 'forward',
-        meaning: '디자인 선택 완료 → 목업 루프 종료 → stage3 체크리스트·Gate 2 후 선택안 기준 제품 구현(parallel-delivery). mock-only 재작업은 하지 않습니다.',
-        meaningShort: '선택 완료 → 제품 구현'
+        meaning: '디자인 선택 완료 → 목업 루프 종료 → stage3·Gate 2 → ATDD-lite RED → 선택안 기준 제품 구현(parallel-delivery). mock-only 재작업은 하지 않습니다.',
+        meaningShort: '선택 완료 → RED·구현'
       },
       {
         from: 'p5', to: 'p4', type: 'forward',
-        meaning: '착수에 필요한 말·그림·API 초안이 갖춰지면 통합 구현으로 갑니다. 고객 전 과정(엔드투엔드)이면 PRD·이중 목업·선택된 디자인까지 거친 뒤에만 이 화살표로 구현에 들어갑니다.',
-        meaningShort: '구현'
+        meaning: '착수에 필요한 말·그림·API 초안(및 AC)이 갖춰지고 Gate 2를 통과하면 ATDD-lite RED 후 통합 구현으로 갑니다. 고객 전 과정(엔드투엔드)이면 PRD·이중 목업·선택된 디자인까지 거친 뒤에만 이 화살표로 들어갑니다.',
+        meaningShort: 'RED·구현'
       },
       {
         from: 'p5', to: 'p8', type: 'forward',
@@ -469,7 +531,7 @@
       },
       {
         from: 'p4', to: 'p7', type: 'forward',
-        meaning: '구현 후 「완료 판정」에서 요구·코드·API 일치와 화면 상태를 확인하고, 변경 요약 등으로 끝냅니다(verify-change, document-change, delivery-gates 작업 끝).',
+        meaning: '구현(GREEN) 후 「완료 판정」에서 요구·AC·코드·API 일치와 acceptance test 통과를 확인하고, 변경 요약 등으로 끝냅니다(verify-change, qa-agent, delivery-gates Gate 3).',
         meaningShort: '검수'
       },
       {
@@ -484,7 +546,7 @@
       },
       {
         from: 'p7', to: 'p4', type: 'regression',
-        meaning: '완료 기준을 채우지 못하면 「통합 구현」으로 돌아가 코드·문서·계약을 다시 맞춥니다.',
+        meaning: '완료 기준·AC 커버리지를 채우지 못하면 「통합 구현」으로 돌아가 코드·테스트·문서·계약을 다시 맞춥니다.',
         meaningShort: '다시 구현'
       },
       {
@@ -1222,6 +1284,72 @@
       });
     }
 
+    function renderKitEvolutionMarkup() {
+      const steps = [
+        { t: '/start-setting', d: '제품 온보딩 (1회)' },
+        { t: '일상 개발', d: '위 워크플로우' },
+        { t: '규칙 신호 수집', d: '실시간 후보 + /kit-rule-mine' },
+        { t: 'HUMAN 승인', d: '규칙 승인 / 반려' },
+        { t: 'SSOT 승격', d: 'shared/rules · skills · AGENTS' },
+        { t: 'sync-kit.ps1', d: 'kit 동기화' },
+        { t: '/kit-start', d: '제품 pull·sync' }
+      ];
+      const parts = steps.map((s, i) => {
+        const card = `<div class="kit-step">${s.t}<small>${s.d}</small></div>`;
+        const arrow = i < steps.length - 1 ? '<div class="kit-arrow" aria-hidden="true">→</div>' : '';
+        return card + arrow;
+      }).join('');
+      return `<section class="kit-evolution" aria-label="템플릿 발전 루프">
+        <div class="kit-evolution-title">템플릿 발전 루프 (Kit Evolution)</div>
+        <div class="kit-loop">${parts}<div class="kit-loop-note">/kit-start 이후 일상 개발(2번)으로 환류 · SSOT는 <code>shared/*</code> + sync</div></div>
+      </section>`;
+    }
+
+    function applyExportView() {
+      if (!EXPORT_VIEW) return;
+      document.body.classList.add('export-view');
+    }
+
+    async function exportDiagramPng() {
+      if (typeof html2canvas !== 'function') {
+        window.alert('html2canvas 로드 실패. ?view=export 페이지를 새로고침하거나 scripts/Export-WorkflowDiagram.ps1 을 사용하세요.');
+        return;
+      }
+      const target = document.getElementById('fitStage');
+      if (!target) return;
+      const btn = document.getElementById('btnExportPng');
+      if (btn) { btn.disabled = true; btn.textContent = 'PNG 생성 중…'; }
+      try {
+        fitProcessView();
+        renderEdges();
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const canvas = await html2canvas(target, {
+          backgroundColor: '#090d16',
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          onclone(doc) {
+            const cloneStage = doc.getElementById('fitStage');
+            if (cloneStage) {
+              cloneStage.style.transform = 'none';
+              cloneStage.style.zoom = '1';
+            }
+            doc.body.classList.add('export-view');
+          }
+        });
+        canvas.toBlob(blob => {
+          if (!blob) return;
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'ai-development-workflow.png';
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }, 'image/png');
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'PNG 저장'; }
+      }
+    }
+
     function renderProcess() {
       const getNode = (id) => {
         const ph0 = phases.find(x => x.id === id) || {};
@@ -1239,6 +1367,7 @@
         <div class="grid-wrap">
         <svg class="edge-layer" id="edgeLayer" aria-hidden="true"></svg>
         <div class="grid" aria-label="양끝 얇은 여백, 박스 가로간격·행간격은 CSS 변수(--grid-col-gap, --grid-row-gap), p6는 가운데 열">${e2}${g}${s150}${getNode('p2')}${s150}${getNode('p3')}${s150}${g}${s150}${g}${e2}${e2}${getNode('p1')}${s150}${getNode('p5')}${s150}${getNode('p8')}${s150}${getNode('p4')}${s150}${getNode('p7')}${e2}${e2}${g}${s150}${g}${s150}${getNode('p6')}${s150}${g}${s150}${g}${e2}</div>
+        ${renderKitEvolutionMarkup()}
         </div>
         </div>
       `;
@@ -1281,6 +1410,8 @@
       fitStage.style.width = '';
       fitStage.style.height = '';
       fitStage.style.zoom = '';
+
+      if (EXPORT_VIEW) return;
 
       const contentW = wrap.offsetWidth;
       const contentH = wrap.offsetHeight;
@@ -1539,8 +1670,25 @@
     renderSidebar();
     renderProcess();
     initAnimScenarioSelect();
+    applyExportView();
     selectPhase('p1');
     updateRegressionVisual();
+    document.getElementById('btnExportPng')?.addEventListener('click', () => {
+      if (!EXPORT_VIEW) {
+        const u = new URL(location.href);
+        u.searchParams.set('view', 'export');
+        window.open(u.toString(), '_blank');
+        return;
+      }
+      exportDiagramPng();
+    });
+    if (EXPORT_VIEW) {
+      window.addEventListener('load', () => {
+        fitProcessView();
+        renderEdges();
+        updateRegressionVisual();
+      });
+    }
   </script>
 </body>
 </html>

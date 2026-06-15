@@ -84,6 +84,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Invoke-KitStartSetti
 - [ ] [`.cursor/state/kit-start-last.json`](../../.cursor/state/kit-start-last.json) `ok: true` 확인 (`false`이면 sync·submodule 점검 후 재시도)
 - [ ] (권장) 제품 루트 `AGENTS.md`에 `/start`·상태 JSON 선독 규칙 — 아래 (선택) 5단계
 
+**신규 기능**을 ATDD-lite로 진행할 때는 제품 `docs/qa/`에 [`atdd-lite-consumption-checklist.md`](../qa/atdd-lite-consumption-checklist.md)로 소비 증거를 남긴다. 기록 형식 예시: [`atdd-lite-consumption-record-example.md`](../qa/atdd-lite-consumption-record-example.md).
+
 ### (선택) 5단계 — `AGENTS.md`
 
 kit [`AGENTS.md`](../../AGENTS.md)를 참고해 제품 루트에 두고, `/start`·`/start-setting` 시 상태 JSON 선독 규칙을 넣는다. **자동 생성되지 않는다.**

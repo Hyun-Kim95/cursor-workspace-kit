@@ -10,7 +10,7 @@ tags: [docs, vault-sync, gate]
 
 횡단 자산(공유 패키지·내부 SDK·디자인 토큰·kit 연동·대외 API 계약)에서 **「만들었다」와 「지정 소비자가 실제로 쓴다」** 를 분리하는 DoD 기준이다. Gate 1~3 **번호는 바꾸지 않는다** — 상세는 [`project-kit/.cursor/rules/60-delivery-gates.mdc`](../../project-kit/.cursor/rules/60-delivery-gates.mdc) Gate 1 비고·Gate 3, 본 문서가 **운영 SSOT**이다.
 
-관련: 목업→제품 [`65-design-gate`](../../shared/rules/65-design-gate.mdc), stage3 [`stage3-entry-checklist.md`](stage3-entry-checklist.md), kit 온보딩 [`product-onboarding.md`](../agent/product-onboarding.md).
+관련: 목업→제품 [`65-design-gate`](../../shared/rules/65-design-gate.mdc), stage3 [`stage3-entry-checklist.md`](stage3-entry-checklist.md), kit 온보딩 [`product-onboarding.md`](../agent/product-onboarding.md), ATDD-lite 소비 증거 [`atdd-lite-consumption-checklist.md`](atdd-lite-consumption-checklist.md)·[`atdd-lite-consumption-record-example.md`](atdd-lite-consumption-record-example.md).
 
 ## 용어
 

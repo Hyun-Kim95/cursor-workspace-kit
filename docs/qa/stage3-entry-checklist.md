@@ -15,6 +15,7 @@ tags: [docs, vault-sync]
 - [ ] PRD 문서 경로: ``
 - [ ] PRD 버전/최종 수정 시각: ``
 - [ ] 목표/핵심 흐름/범위(핵심·선택)/정책·예외/미확정 항목이 명시됨
+- [ ] **수용 기준(AC):** `AC-01` 형식, 행위·계약·상태 중심 ([`acceptance-criteria.template.md`](acceptance-criteria.template.md))
 - [ ] 원본 요구사항과 PRD 간 불일치 항목이 정리됨
 
 ## 2) 디자인 기준 확정 여부
@@ -44,6 +45,16 @@ tags: [docs, vault-sync]
 - [ ] 활성 축(secrets/dependencies/sast/authz/transport/data) PRD·API 계약 정합
 - [ ] 인증·권한·민감 데이터·로그 금지 필드 PRD 반영 (`docs/security/policy-and-contract.md`)
 - [ ] `security:ci` 구현 계획·harness(`shellGuard` block, quality-gate 예시) 합의
+
+### 3d) ATDD-lite (Gate 2 직후·구현 전)
+
+상세: [`atdd-lite.md`](atdd-lite.md)
+
+- [ ] PRD AC 목록 경로: ``
+- [ ] acceptance test 경로: `` (예: `e2e/`, `tests/api/`)
+- [ ] 테스트 실행 명령: `` (예: `npm run test:e2e`, `npm test`)
+- [ ] AC ID ↔ 테스트 매핑표 작성 ([`acceptance-criteria.template.md`](acceptance-criteria.template.md) 하단 표)
+- [ ] RED 확인: 의도적 실패 또는 `test.todo` + AC ID 주석 (skip 사유 문서화)
 
 ## 4) 리스크/오픈 이슈
 

@@ -66,9 +66,9 @@
 
 ## 게이트/병렬/완료 기준
 
-- Gate 1~3, 병렬 조건, DoD는 `.cursor/rules/60-delivery-gates.mdc`를 SSOT로 따른다.
+- Gate 1~3, 병렬 조건, DoD는 `.cursor/rules/60-delivery-gates.mdc`를 SSOT로 따른다. **ATDD-lite**(PRD AC → Gate 2 후 RED acceptance test → 구현 GREEN) 상세: [`docs/qa/atdd-lite.md`](docs/qa/atdd-lite.md).
 - 디자인 승인과 구현 착수 승인 통합 규칙은 `.cursor/rules/70-client-lifecycle-default.mdc`를 따른다.
-- 고객 E2E에서 **디자인 선택 후**는 [`docs/qa/stage3-entry-checklist.md`](docs/qa/stage3-entry-checklist.md) → Gate 2 → 구현(`parallel-delivery` / `start-feature`)이며, **선택 후 mock-only 재목업은 기본 금지**(예외는 사용자 명시·문서 기록).
+- 고객 E2E에서 **디자인 선택 후**는 [`docs/qa/stage3-entry-checklist.md`](docs/qa/stage3-entry-checklist.md) → Gate 2 → **ATDD-lite RED** → 구현(`parallel-delivery` / `start-feature`)이며, **선택 후 mock-only 재목업은 기본 금지**(예외는 사용자 명시·문서 기록).
 - **횡단 자산**(공유 패키지·kit·내부 SDK 등)은 **생성**과 **소비** 완료를 분리한다. Gate 3·소비 증거: [`docs/qa/integration-consumption-gate.md`](docs/qa/integration-consumption-gate.md).
 - 본 파일에는 게이트 세부 불릿을 중복 정의하지 않는다.
 - 검증 구간에서 [`.cursor/state/quality-gate-last.json`](.cursor/state/quality-gate-last.json)이 있고 `ok`가 `false`이면 해당 변경에 대해 **완료·검증 완료 선언을 하지 않는다** ([`docs/agent/harness-layer1.md`](docs/agent/harness-layer1.md)).
@@ -98,8 +98,8 @@
 ## 기본 진입 규칙
 
 - 고객사 **전체 프로젝트(엔드투엔드)** 대화는 사용자가 스킬 이름을 말하지 않아도 `.cursor/rules/70-client-lifecycle-default.mdc`에 따라 `client-project-lifecycle`을 따른다(PRD·디자인 등 HUMAN 구간에서 멈춤). 단, **디자인 승인 완료 시점은 구현 착수 승인으로 간주**하며 구현 시작에 대한 중복 승인을 추가로 요구하지 않는다. 구현 이후 **다축 검증·리뷰어 GATE**는 해당 스킬 **단계 4B~4D(선택)** 및 `docs/qa/reviewer-gate-rubric.md`를 참고한다.
-- 고객사 신규 프로젝트를 **요구 붙여넣기 → PRD 승인 → 이중 목업 → 디자인 승인(=구현 착수 승인) → 병렬 구현 → 테스트·성능** 순으로 끝까지 진행하려면 `client-project-lifecycle`을 우선 고려한다.
-- 신규 기능 요청이면 `start-feature`를 우선 고려한다. (Gate 1 통과 후; UI+API 병렬이면 Gate 2 후 `parallel-delivery` 병행)
+- 고객사 신규 프로젝트를 **요구 붙여넣기 → PRD 승인 → 이중 목업 → 디자인 승인(=구현 착수 승인) → ATDD-lite RED → 병렬 구현 → 테스트·성능** 순으로 끝까지 진행하려면 `client-project-lifecycle`을 우선 고려한다.
+- 신규 기능 요청이면 `start-feature`를 우선 고려한다. (Gate 1 통과 후; UI+API 병렬이면 Gate 2 → **ATDD-lite RED** 후 `parallel-delivery` 병행)
 - 버그 수정 요청이면 `bugfix-flow`를 우선 고려한다.
 - 요구사항이 모호하거나 기획 정리가 먼저 필요하면 `plan-feature`를 우선 고려한다. (같은 선행을 3단 러브릭으로 쪼개려면 `context-organization`을 쓸 수 있으며, 둘 다 `60`·`70`·`75`·`AGENTS`에 종속이고, 러프한 아이디어/기획·스펙 부재일 때는 `plan-feature`·`context-organization` → Gate 1 충족 시 `start-feature` 순을 따른다.)
 - 구현 후 품질 확인이 필요하면 `verify-change`를 사용한다. (Gate 3 종료 검증)
@@ -128,7 +128,7 @@
 - 화면 + API 변경: `frontend-agent` + `backend-agent`
 - 기능 추가 + 요구사항 애매함: `plan-feature` 후 `start-feature`
 - 고객사 전체 프로젝트 라이프사이클: `client-project-lifecycle`
-- Gate 2 충족 후 UI+API 동시 진행: `parallel-delivery` (`frontend-agent` + `backend-agent`)
+- Gate 2 충족 → **ATDD-lite RED** 후 UI+API 동시 진행: `parallel-delivery` (`frontend-agent` + `backend-agent`)
 - 구현 완료 + QA 필요: `verify-change`
 - 수정 완료 + 전달 문서 필요: `document-change`
 

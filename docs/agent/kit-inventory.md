@@ -70,6 +70,10 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | 경로 | 한 줄 목적 |
 |------|------------|
 | [`docs/qa/stage3-entry-checklist.md`](../../docs/qa/stage3-entry-checklist.md) | 디자인 선택 후 Gate 2·제품 구현 착수 체크리스트 |
+| [`docs/qa/atdd-lite.md`](../../docs/qa/atdd-lite.md) | ATDD-lite SSOT (PRD AC → RED → GREEN) |
+| [`docs/qa/acceptance-criteria.template.md`](../../docs/qa/acceptance-criteria.template.md) | PRD 수용 기준(AC) 표 템플릿 |
+| [`docs/qa/atdd-lite-consumption-checklist.md`](../../docs/qa/atdd-lite-consumption-checklist.md) | 제품 레포 ATDD-lite 소비 증거 체크리스트 |
+| [`docs/qa/atdd-lite-consumption-record-example.md`](../../docs/qa/atdd-lite-consumption-record-example.md) | ATDD-lite 소비 기록 예시 (가상 제품) |
 | [`docs/qa/integration-consumption-gate.md`](../../docs/qa/integration-consumption-gate.md) | 횡단 자산·kit·공유 패키지 생성·소비 DoD SSOT |
 | [`docs/qa/reviewer-gate-rubric.md`](../../docs/qa/reviewer-gate-rubric.md) | 리뷰어 GATE 루브릭 (선택) |
 
@@ -77,7 +81,7 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 
 | 파일 | 한 줄 목적 |
 |------|------------|
-| `60-delivery-gates.mdc` | Gate 1~3, 병렬, DoD |
+| `60-delivery-gates.mdc` | Gate 1~3, 병렬, DoD, ATDD-lite |
 | `64-context-organization.mdc` | 맥락 정리 경계 |
 | `70-client-lifecycle-default.mdc` | 고객 E2E·디자인 승인=구현 착수 |
 
@@ -93,8 +97,8 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `kit-rule-mine` | 트랜스크립트 규칙 배치 마이닝 (`/kit-rule-mine` 훅; `kit-start`·`start-feature`와 별개) |
 | `kit-work-log` | 날짜별 작업 일지 (`docs/work-log/`; `/kit-work-log`·`/work-log` 훅) |
 | `start-setting` | 제품 1회 온보딩 (`/start-setting`, `/kit-start-setting` 훅; `kit-start`와 별개) |
-| `start-feature` | Gate 1 후 구현·검증 |
-| `parallel-delivery` | Gate 2 후 FE/BE 병렬 |
+| `start-feature` | Gate 1 후 ATDD-lite RED·구현·검증 |
+| `parallel-delivery` | Gate 2 후 ATDD RED·FE/BE 병렬 |
 | `verify-change` | 구현 검증·회귀 |
 | `document-change` | 변경 요약·문서 동기화 |
 | `bugfix-flow` | 버그 수정 흐름 |

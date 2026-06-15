@@ -31,6 +31,8 @@
 
 ## `60-delivery-gates.mdc`를 바꿀 때 (project-kit SSOT)
 - [ ] Gate 1 면제 문구가 `AGENTS.md` **직접 처리 가능한 예외** 섹션(SSOT)만 가리키고, 목록 확장을 다른 파일로 새지 않았는지
+- [ ] **ATDD-lite** 문구가 `docs/qa/atdd-lite.md`·`stage3-entry-checklist` §3d·`start-feature`·`parallel-delivery`·`verify-change`·`client-project-lifecycle` 단계 3·5·**workflow HTML/SVG**와 **삼자 정합**인지
+- [ ] Gate 2 후 RED·디자인 승인=구현 착수(`70`) 시점이 모순 없이 읽히는지
 - [ ] `AGENTS.md`의 게이트 요약·Gate 1 적용 범위 이해와 충돌 없는지
 - [ ] `70-client-lifecycle-default.mdc`·`AGENTS.md` 고객 프로젝트 절차와 모순 없는지
 - [ ] Gate 1 `비고`( `64` / `context-organization` )와 문구가 함께 읽혀도 Gate **조건**이 바뀌는 것이 아님이 분명한지

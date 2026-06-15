@@ -4,6 +4,17 @@
 
 ### Added
 
+- **ATDD-lite** — `docs/qa/atdd-lite.md`, `acceptance-criteria.template.md`, `atdd-lite-consumption-checklist.md`, `atdd-lite-consumption-record-example.md`; `60` Gate 1 AC·Gate 2 RED·Gate 3 AC 커버리지; `stage3-entry-checklist` §3d
+- `docs/requirements/example-feature-notifications-ac.md` — AC 예시
+
+### Changed
+
+- **ATDD-lite 정합** — `start-feature`, `parallel-delivery`, `client-project-lifecycle`, `70`, `verify-change`, `bugfix-flow`, `plan-feature`(AC 절), `prd-agent`·`qa-agent`·`frontend-agent`·`backend-agent`, `AGENTS.md`, `agent-brief`, `kit-inventory`, `rules-context-notes`, `integration-consumption-gate`, `product-onboarding`
+- **워크플로 시각화** — `cursor-workflow-detailed.html`, `docs/agent/workflow-overview.html`, `scripts/build-workflow-svg*.py`, `assets/ai-development-workflow*.svg` (ATDD-lite RED 단계)
+- `reviewer-gate-rubric`, `release-check` — AC·acceptance test 채점·릴리즈 점검 반영
+
+### Added
+
 - `docs/qa/integration-consumption-gate.md` — 생성·소비 DoD SSOT (횡단 자산·kit·공유 패키지)
 - `60-delivery-gates` Gate 1 비고·Gate 3 소비 조건; `stage3-entry-checklist` §6·`product-onboarding` 소비 확인 절
 

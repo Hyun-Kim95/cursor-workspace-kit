@@ -34,7 +34,7 @@
 
 | 파일 | 한 줄 목적 |
 |------|------------|
-| `60-delivery-gates.mdc` | Gate 1~3, 병렬 조건, DoD |
+| `60-delivery-gates.mdc` | Gate 1~3, 병렬 조건, DoD, ATDD-lite |
 | `64-context-organization.mdc` | 맥락 정리(3단) 러브릭; Gate/적용·HUMAN 권한은 60/70 |
 | `70-client-lifecycle-default.mdc` | 고객 E2E·디자인 승인 시 구현 착수 승인 통합 |
 
@@ -44,6 +44,10 @@
 |------|------------|
 | `AGENTS.md` (루트) | 총괄·직접 처리 예외 SSOT |
 | `docs/agent/delivery-loop-harness.md` | 고객 프로젝트 단계 3 이후 선택: 훅·테스트 루프 |
+| `docs/qa/atdd-lite.md` | ATDD-lite SSOT (PRD AC → RED → GREEN) |
+| `docs/qa/acceptance-criteria.template.md` | PRD 수용 기준(AC) 표 템플릿 |
+| `docs/qa/atdd-lite-consumption-checklist.md` | 제품 레포 ATDD-lite 소비 증거 체크리스트 |
+| `docs/qa/atdd-lite-consumption-record-example.md` | ATDD-lite 소비 기록 예시 |
 | `docs/mobile/app-update/` | 앱 버전 업데이트 템플릿 (정책·API·체크리스트) |
 | `docs/product-analytics/` | 제품 분석·이벤트 추적 템플릿 (PRD·계약·체크리스트) |
 | `docs/performance/` | 성능 게이트 템플릿 (web/app/api·perf-budget·perf-last) |
