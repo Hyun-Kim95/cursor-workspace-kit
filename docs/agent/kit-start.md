@@ -10,6 +10,7 @@
 |------|------|------|
 | `/start-setting` · `/kit-start-setting` | submodule·설정·훅·첫 sync **자동 온보딩** | 제품 레포 **1회** (또는 재설정) |
 | `/start <지시>` · `/kit-start <지시>` | kit `pull` + sync 후 작업 | **매일** |
+| `/kit-start` · `/start` **만** (할 일 없음) | kit `pull` + sync **만** (동일 훅) | **매일** |
 | 스킬 **`start-setting`** | 자동완성용; 동작은 `/start-setting` 훅과 동일(`kit-start-setting-last.json`) | 온보딩 전용 |
 | 스킬 **`kit-start`** | 자동완성용; 동작은 위 접두어와 동일(훅 + `kit-start-last.json`) | `/start`와 같음 |
 
@@ -21,7 +22,8 @@
 /kit-start docs/requirements에 PRD 초안 작성
 ```
 
-- `/start`·`/kit-start` 접두어는 **kit 갱신 트리거**이며, 에이전트는 갱신 요약을 확인한 뒤 **뒤쪽 지시만** 수행한다.
+- `/start`·`/kit-start` 접두어는 **kit 갱신 트리거**이며, 에이전트는 갱신 요약을 확인한 뒤 **뒤쪽 지시만** 수행한다. **할 일 문장은 sync 트리거가 아니다.**
+- **슬래시 스킬 `kit-start` 선택**도 동일 훅·sync 대상이다. Cursor가 `<manually_attached_skills>`를 붙이면 prompt 맨 앞이 `/kit-start`가 아닐 수 있으므로, 훅은 `<user_query>`·첨부 스킬 이름도 인식한다. `kit-start-last.json`의 `at`이 이번 요청보다 2분 이상 오래됐으면 에이전트는 `Invoke-KitStart.ps1`을 **직접 실행**한다.
 
 ### 자동완성과 `start-feature` 혼동
 

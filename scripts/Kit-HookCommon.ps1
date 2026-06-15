@@ -605,7 +605,11 @@ function Test-KitProductSyncResult {
     $missingProduct = New-Object System.Collections.ArrayList
     $productChecks = @(
         ".cursor\skills\kit-work-log\SKILL.md",
-        ".cursor\hooks\work-log-on-prompt.ps1"
+        ".cursor\skills\kit-start\SKILL.md",
+        ".cursor\hooks\work-log-on-prompt.ps1",
+        ".cursor\hooks\kit-start-on-prompt.ps1",
+        ".cursor\commands\kit-work-log.md",
+        ".cursor\commands\kit-start.md"
     )
     foreach ($rel in $productChecks) {
         if (-not (Test-Path -LiteralPath (Join-Path $WorkspaceRoot $rel))) {
