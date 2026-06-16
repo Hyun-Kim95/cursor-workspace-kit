@@ -29,59 +29,28 @@ try {
 
     $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
     $gitDir = Join-Path $projectRoot ".git"
-    $installScript = Join-Path $projectRoot "scripts\obsidian\install-hook.ps1"
-    $hookFile = Join-Path $gitDir "hooks\post-commit"
     $stateDir = Join-Path $projectRoot ".cursor\state"
     $markerFile = Join-Path $stateDir "obsidian-post-commit.ok"
 
     if (-not (Test-Path -LiteralPath $gitDir)) {
         exit 0
     }
-    if (-not (Test-Path -LiteralPath $installScript)) {
+    if (-not (Import-ObsidianHookInstallModule -ProjectRoot $projectRoot)) {
         exit 0
     }
 
-    $ingestCommon = Join-Path $projectRoot "scripts\obsidian\Obsidian-IngestCommon.ps1"
-    $wantJournal = $false
-    if (Test-Path -LiteralPath $ingestCommon) {
-        . $ingestCommon
-        $ingest = Get-ObsidianIngestSettings -RepoPath $projectRoot
-        $wantJournal = [bool]$ingest.CommitJournal
-    }
-
-    function Test-HookLooksCurrent {
-        param(
-            [string]$Path,
-            [bool]$ExpectJournal
-        )
-        if (-not (Test-Path -LiteralPath $Path)) {
-            return $false
-        }
-        $content = Get-Content -LiteralPath $Path -Raw -Encoding UTF8
-        $hasSync = ($content -match 'sync-docs\.ps1')
-        $hasJournal = ($content -match 'write-commit-journal')
-        if (-not $hasSync) { return $false }
-        if ($ExpectJournal) { return $hasJournal }
-        return -not $hasJournal
-    }
-
-    $hookGood = Test-HookLooksCurrent -Path $hookFile -ExpectJournal $wantJournal
-    if ($hookGood -and (Test-Path -LiteralPath $markerFile)) {
-        exit 0
-    }
-
-    if (-not $hookGood) {
-        powershell -NoProfile -ExecutionPolicy Bypass -File $installScript -TargetRepo $projectRoot 2>$null | Out-Null
-        $hookGood = Test-HookLooksCurrent -Path $hookFile -ExpectJournal $wantJournal
-    }
-
-    if ($hookGood) {
+    $result = Invoke-ObsidianPostCommitInstall -RepoPath $projectRoot
+    if ($result.Ok) {
         if (-not (Test-Path -LiteralPath $stateDir)) {
             New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
         }
         $stamp = (Get-Date).ToString("s")
         Set-Content -LiteralPath $markerFile -Value "verified_at=$stamp" -Encoding ASCII
     }
+    elseif (-not $result.Skipped) {
+        Write-HookWarning -ProjectRoot $projectRoot -Message $result.Reason
+    }
+
     exit 0
 }
 catch {

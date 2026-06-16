@@ -75,7 +75,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\obsidian\sync-doc
 
 ## 4) 커밋 저널 (선택, 기본 꺼짐)
 
-기본값은 **저널을 쓰지 않음** (`commitJournal: false`). 일별 맥락은 [`docs/work-log/`](../work-log/README.md) + `kit-work-log`를 권장한다.
+기본값은 **저널을 쓰지 않음** (`commitJournal: false`, 필드 생략 시 동일). 일별 맥락은 [`docs/work-log/`](../work-log/README.md) + `kit-work-log`를 권장한다.
+
+**자동 정렬(kit):** 제품 레포에서 Cursor 세션 시작·파일 편집·`/kit-start` 시 `scripts/obsidian/Obsidian-HookInstall.ps1`이 `post-commit`을 위 정책에 맞게 재설치한다. 프로젝트마다 수동으로 `install-hook`을 돌릴 필요가 없다(kit sync 후).
 
 저널을 다시 쓰려면 `.obsidian-ingest.json`에 `"commitJournal": true` 후 훅 재설치:
 

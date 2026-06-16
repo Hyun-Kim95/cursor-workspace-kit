@@ -2,6 +2,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$TargetRepo,
     [string]$ScriptPath = "",
+    [string]$KitRoot = "",
     [switch]$CommitJournal,
     [switch]$NoCommitJournal
 )
@@ -10,28 +11,35 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 . (Join-Path $PSScriptRoot "Obsidian-IngestCommon.ps1")
+. (Join-Path $PSScriptRoot "Obsidian-HookInstall.ps1")
 
-$journalInRepo = Join-Path $TargetRepo "scripts\obsidian\write-commit-journal.ps1"
-$syncInRepo = Join-Path $TargetRepo "scripts\obsidian\sync-docs.ps1"
+$TargetRepo = (Resolve-Path -LiteralPath $TargetRepo).Path
+if ([string]::IsNullOrWhiteSpace($KitRoot)) {
+    $KitRoot = Resolve-ObsidianKitRoot -RepoPath $TargetRepo
+}
 
 $ingest = Get-ObsidianIngestSettings -RepoPath $TargetRepo
 $enableJournal = [bool]$ingest.CommitJournal
 if ($CommitJournal.IsPresent) { $enableJournal = $true }
 if ($NoCommitJournal.IsPresent) { $enableJournal = $false }
 
+$syncPath = Resolve-ObsidianScriptPath -RepoPath $TargetRepo -FileName "sync-docs.ps1" -KitRoot $KitRoot
+if (-not $syncPath) {
+    throw "Sync script not found for repo (expected under scripts/obsidian or kit submodule): $TargetRepo"
+}
+
+$journalPath = Resolve-ObsidianScriptPath -RepoPath $TargetRepo -FileName "write-commit-journal.ps1" -KitRoot $KitRoot
+
 if ($enableJournal) {
     if (-not [string]::IsNullOrWhiteSpace($ScriptPath)) {
         if (-not (Test-Path -LiteralPath $ScriptPath)) {
             throw "Journal script not found: $ScriptPath"
         }
+        $journalPath = $ScriptPath
     }
-    elseif (-not (Test-Path -LiteralPath $journalInRepo)) {
-        throw "Journal script not found in target repo (expected): $journalInRepo"
+    elseif (-not $journalPath) {
+        throw "Journal script not found for repo (expected under scripts/obsidian or kit submodule): $TargetRepo"
     }
-}
-
-if (-not (Test-Path -LiteralPath $syncInRepo)) {
-    throw "Sync script not found in target repo (expected): $syncInRepo"
 }
 
 $hookDir = Join-Path $TargetRepo ".git\hooks"
@@ -40,6 +48,7 @@ if (-not (Test-Path -LiteralPath $hookDir)) {
 }
 
 $hookFile = Join-Path $hookDir "post-commit"
+$syncHookPath = Convert-ToRepoRootHookPath -RepoPath $TargetRepo -AbsolutePath $syncPath
 
 $hookContent = @(
     "#!/bin/sh"
@@ -48,16 +57,16 @@ $hookContent = @(
 )
 
 if ($enableJournal) {
-    if (-not [string]::IsNullOrWhiteSpace($ScriptPath)) {
-        $normalizedScriptPath = $ScriptPath.Replace("\", "/")
-        $hookContent += ('powershell -NoProfile -ExecutionPolicy Bypass -File "{0}" -RepoRoot "$REPO_ROOT" || true' -f $normalizedScriptPath)
+    $journalHookPath = if ([string]::IsNullOrWhiteSpace($ScriptPath)) {
+        Convert-ToRepoRootHookPath -RepoPath $TargetRepo -AbsolutePath $journalPath
     }
     else {
-        $hookContent += 'powershell -NoProfile -ExecutionPolicy Bypass -File "$REPO_ROOT/scripts/obsidian/write-commit-journal.ps1" -RepoRoot "$REPO_ROOT" || true'
+        '"' + ($ScriptPath.Replace('\', '/')) + '"'
     }
+    $hookContent += ('powershell -NoProfile -ExecutionPolicy Bypass -File {0} -RepoRoot "$REPO_ROOT" || true' -f $journalHookPath)
 }
 
-$hookContent += 'powershell -NoProfile -ExecutionPolicy Bypass -File "$REPO_ROOT/scripts/obsidian/sync-docs.ps1"'
+$hookContent += ('powershell -NoProfile -ExecutionPolicy Bypass -File {0}' -f $syncHookPath)
 
 Set-Content -LiteralPath $hookFile -Value ($hookContent -join "`n") -Encoding ASCII
 

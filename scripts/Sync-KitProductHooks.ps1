@@ -102,21 +102,27 @@ function Copy-KitHookScript {
     return $true
 }
 
-function Resolve-ObsidianInstallScript {
+function Import-ObsidianHookInstallFromKit {
+    param([string]$KitRoot)
+
+    $modulePath = Join-Path $KitRoot "scripts\obsidian\Obsidian-HookInstall.ps1"
+    if (-not (Test-Path -LiteralPath $modulePath)) {
+        return $false
+    }
+    . $modulePath
+    return $true
+}
+
+function Test-ObsidianAvailable {
     param(
         [string]$WorkspaceRoot,
         [string]$KitRoot
     )
-
-    $local = Join-Path $WorkspaceRoot "scripts\obsidian\install-hook.ps1"
-    if (Test-Path -LiteralPath $local) { return $local }
-
-    $fromKit = Join-Path $KitRoot "scripts\obsidian\install-hook.ps1"
-    if (Test-Path -LiteralPath $fromKit) { return $fromKit }
-
-    return $null
+    if (-not (Import-ObsidianHookInstallFromKit -KitRoot $KitRoot)) {
+        return $false
+    }
+    return ($null -ne (Resolve-ObsidianInstallScript -RepoPath $WorkspaceRoot -KitRoot $KitRoot))
 }
-
 function Copy-KitSlashCommands {
     param(
         [string]$KitRoot,
@@ -146,14 +152,6 @@ function Copy-KitSlashCommands {
         }
     }
     return $n
-}
-
-function Test-ObsidianAvailable {
-    param(
-        [string]$WorkspaceRoot,
-        [string]$KitRoot
-    )
-    return ($null -ne (Resolve-ObsidianInstallScript -WorkspaceRoot $WorkspaceRoot -KitRoot $KitRoot))
 }
 
 $hooksDest = Join-Path $WorkspaceRoot ".cursor\hooks"
@@ -235,27 +233,17 @@ if ($obsidianOk) {
     }))
 
     if (Test-Path -LiteralPath $gitDir) {
-        $installScript = Resolve-ObsidianInstallScript -WorkspaceRoot $WorkspaceRoot -KitRoot $KitRoot
-        $ingestCommon = Join-Path (Split-Path -Parent $installScript) "Obsidian-IngestCommon.ps1"
-        $noJournal = $true
-        if (Test-Path -LiteralPath $ingestCommon) {
-            . $ingestCommon
-            $ingest = Get-ObsidianIngestSettings -RepoPath $WorkspaceRoot
-            $noJournal = -not [bool]$ingest.CommitJournal
-        }
-
-        $installArgs = @(
-            "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $installScript,
-            "-TargetRepo", $WorkspaceRoot
-        )
-        if ($noJournal) { $installArgs += "-NoCommitJournal" }
-
-        & powershell @installArgs
-        if ($LASTEXITCODE -eq 0) {
-            $obsidianPostCommit = if ($noJournal) { "post-commit sync-only" } else { "post-commit with journal" }
+        if (Import-ObsidianHookInstallFromKit -KitRoot $KitRoot) {
+            $installResult = Invoke-ObsidianPostCommitInstall -RepoPath $WorkspaceRoot -KitRoot $KitRoot -Force
+            if ($installResult.Ok) {
+                $obsidianPostCommit = if ($installResult.WantJournal) { "post-commit with journal" } else { "post-commit sync-only" }
+            }
+            else {
+                $obsidianPostCommit = "post-commit install failed ($($installResult.Reason))"
+            }
         }
         else {
-            $obsidianPostCommit = "post-commit install failed (exit $LASTEXITCODE)"
+            $obsidianPostCommit = "post-commit install skipped (Obsidian-HookInstall.ps1 missing)"
         }
 
         $marker = Join-Path $WorkspaceRoot ".cursor\state\obsidian-post-commit.ok"

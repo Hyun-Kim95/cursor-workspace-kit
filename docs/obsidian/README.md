@@ -50,10 +50,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\obsidian\normaliz
 `## Vault`의 커밋 링크는 `[[…/journal]]`이 아니라 **`commit-journal-overview` 대시보드**를 가리킨다. 전자는 옵시디언이 빈 `journal.md` 노트를 만들어 백링크가 몰리는 문제가 있어서 피한다.
 
 ## Cursor에서 자동 설치
-- 세션 시작 시 `.cursor/hooks/bootstrap-obsidian-once.ps1`가 한 번 실행되며, Git 레포면 `install-hook.ps1`까지 호출할 수 있다.
-- Cursor의 `afterFileEdit` 훅(파일 쓰기 이벤트, matcher: `Write|TabWrite`)에서 `.cursor/hooks/ensure-obsidian-git-hook.ps1`가 `post-commit` 형식을 점검하고, 없거나 예전 형식이면 `install-hook.ps1`를 실행한다. (수동으로 `install-hook`을 안 돌려도 된다.)
+- 세션 시작마다 `.cursor/hooks/bootstrap-obsidian-once.ps1`가 `post-commit`을 **`.obsidian-ingest.json`의 `commitJournal`(기본 false)에 맞게** 재정렬한다. 예전에 journal이 켜진 훅이 남아 있어도 Cursor를 열면 sync-only로 맞춘다.
+- Cursor의 `afterFileEdit` 훅에서 `.cursor/hooks/ensure-obsidian-git-hook.ps1`가 동일 정책으로 `post-commit`을 점검·복구한다. kit submodule(`vendor/...`)만 있어도 `scripts/obsidian/Obsidian-HookInstall.ps1` 경로로 설치한다.
+- `/kit-start`·`/start` 시 `Sync-KitProductHooks.ps1`도 같은 모듈로 훅을 강제 재설치한다.
 - 문서 변경 감지 훅(`.cursor/hooks/sync-docs-on-doc-change.ps1`)은 기본 15초 쿨다운을 적용해 저장 연타 시 중복 동기화를 줄인다.
-- 훅 형식을 바꾼 뒤에는 `.cursor/state/obsidian-post-commit.ok`를 지우거나 `post-commit`을 삭제하면 다음 편집 때 다시 맞춘다.
+- 훅 형식을 바꾼 뒤에는 `.cursor/state/obsidian-post-commit.ok`를 지우거나 `post-commit`을 삭제하면 다음 세션·편집 때 다시 맞춘다.
 - 훅은 fail-open이며, 실패 원인은 `.cursor/state/obsidian-hook-warnings.log`에 경량 로그로 남는다.
 
 ## Backlink Tips
