@@ -3,7 +3,7 @@
 규칙 **편집 SSOT**는 `shared/rules/`, `shared/optional/`, `project-kit/.cursor/rules/`이다.  
 이 워크스페이스의 [`.cursor/rules/`](../../.cursor/rules/)는 [`scripts/sync-rules.ps1`](../../scripts/sync-rules.ps1) 산출물이며 Cursor 로드용이다.
 
-배포·중복 방지: [`rules-deploy.md`](rules-deploy.md) · 인벤토리: [`kit-inventory.md`](kit-inventory.md)
+배포·중복 방지: [`rules-deploy.md`](rules-deploy.md) · 인벤토리: [`kit-inventory.md`](kit-inventory.md) · **강제 수준(항상/상황별/권장):** [`enforcement-matrix.md`](enforcement-matrix.md)
 
 ## 한 줄 요약 (파일 → 목적)
 

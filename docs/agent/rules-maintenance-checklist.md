@@ -12,6 +12,7 @@
 - [ ] 실행 계획/분담/미확정 의사결정 문구가 `AGENTS.md` 운영 원칙과 모순 없는지
 - [ ] 출력/완료 판정 문구가 스킬 문서(`start-feature`, `client-project-lifecycle`)와 모순 없는지
 - [ ] `docs/agent/kit-inventory.md` 표가 최신인지
+- [ ] 적용 범위·강제 수준이 바뀌었으면 [`enforcement-matrix.md`](enforcement-matrix.md) 표·판단표도 갱신했는지
 - [ ] sync 실행 후 `.cursor/rules`에 반영됐는지
 
 ## `.cursor-kit.json` / harness를 바꿀 때
@@ -52,8 +53,14 @@
 ## 새 규칙 파일을 추가할 때
 - [ ] SSOT 경로(`shared/` 또는 `project-kit/`)에만 추가
 - [ ] `docs/agent/kit-inventory.md`·`rules-context-notes.md` 표에 행 추가
+- [ ] [`enforcement-matrix.md`](enforcement-matrix.md)에 항상/상황별/권장 행 추가
 - [ ] `alwaysApply`·`description` 의도 명확한지
 - [ ] sync 실행
+
+## `enforcement-matrix.md`를 바꿀 때
+- [ ] Gate·예외·절차 **정의를 복붙**하지 않았는지(링크·요약만; SSOT는 rule/skill)
+- [ ] `AGENTS.md` 직접 처리 예외·`60` 적용 범위·`70` 적용 판단과 판단표가 모순 없는지
+- [ ] `kit-inventory.md`·`rules-context-notes.md`·`AGENTS.md`에서 본 문서로 링크됐는지
 
 ## `.cursor/skills`에 `context-organization` 등 **선행 러브릭** 스킬을 바꿀 때
 - [ ] `64`·`60`·`plan-feature`와 **Gate/조건**이 이중·모순 정의되지 않는지(위임·링크 위주)

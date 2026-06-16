@@ -78,6 +78,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\Invoke-KitStartSetti
 - [`docs/agent/rules-deploy.md`](docs/agent/rules-deploy.md)
 - [`docs/agent/skills-agents-deploy.md`](docs/agent/skills-agents-deploy.md)
 - [`docs/agent/kit-inventory.md`](docs/agent/kit-inventory.md)
+- [`docs/agent/enforcement-matrix.md`](docs/agent/enforcement-matrix.md) — 규칙·Gate **강제 수준** (항상/상황별/권장, 읽기용)
 
 전역 `~/.cursor/skills`·`agents`·User Rules와 **중복되지 않게** 정리하세요.
 

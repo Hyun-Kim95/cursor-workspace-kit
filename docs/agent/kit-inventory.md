@@ -12,6 +12,17 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 
 배포: [`rules-deploy.md`](rules-deploy.md), [`skills-agents-deploy.md`](skills-agents-deploy.md)
 
+## docs/agent (운영·온보딩)
+
+| 경로 | 한 줄 목적 |
+|------|------------|
+| [`enforcement-matrix.md`](enforcement-matrix.md) | 규칙·Gate·훅 **강제 수준** 읽기용 인덱스 (항상/상황별/권장; SSOT 아님) |
+| [`rules-context-notes.md`](rules-context-notes.md) | rule 파일별 한 줄 목적 |
+| [`rules-maintenance-checklist.md`](rules-maintenance-checklist.md) | rule·스킬 수정 시 정합 점검 |
+| [`harness-layer1.md`](harness-layer1.md) | shell·품질·dev 서버 harness |
+| [`product-onboarding.md`](product-onboarding.md) | 제품 레포 kit 연동 |
+| [`kit-start.md`](kit-start.md) | `/start`·sync |
+
 ---
 
 ## shared/rules
