@@ -12,6 +12,14 @@ $ErrorActionPreference = "Stop"
 $WorkspaceRoot = (Resolve-Path -LiteralPath $WorkspaceRoot).Path
 $KitRoot = (Resolve-Path -LiteralPath $KitRoot).Path
 
+# Dot-source at script scope so Obsidian helpers are visible to all functions (PS 5.1).
+$script:ObsidianHookInstallLoaded = $false
+$obsidianModulePath = Join-Path $KitRoot "scripts\obsidian\Obsidian-HookInstall.ps1"
+if (Test-Path -LiteralPath $obsidianModulePath) {
+    . $obsidianModulePath
+    $script:ObsidianHookInstallLoaded = $true
+}
+
 function Ensure-Dir {
     param([string]$Path)
     if (-not (Test-Path -LiteralPath $Path)) {
@@ -102,15 +110,8 @@ function Copy-KitHookScript {
     return $true
 }
 
-function Import-ObsidianHookInstallFromKit {
-    param([string]$KitRoot)
-
-    $modulePath = Join-Path $KitRoot "scripts\obsidian\Obsidian-HookInstall.ps1"
-    if (-not (Test-Path -LiteralPath $modulePath)) {
-        return $false
-    }
-    . $modulePath
-    return $true
+function Test-ObsidianHookInstallLoaded {
+    return $script:ObsidianHookInstallLoaded
 }
 
 function Test-ObsidianAvailable {
@@ -118,7 +119,7 @@ function Test-ObsidianAvailable {
         [string]$WorkspaceRoot,
         [string]$KitRoot
     )
-    if (-not (Import-ObsidianHookInstallFromKit -KitRoot $KitRoot)) {
+    if (-not (Test-ObsidianHookInstallLoaded)) {
         return $false
     }
     return ($null -ne (Resolve-ObsidianInstallScript -RepoPath $WorkspaceRoot -KitRoot $KitRoot))
@@ -233,7 +234,7 @@ if ($obsidianOk) {
     }))
 
     if (Test-Path -LiteralPath $gitDir) {
-        if (Import-ObsidianHookInstallFromKit -KitRoot $KitRoot) {
+        if (Test-ObsidianHookInstallLoaded) {
             $installResult = Invoke-ObsidianPostCommitInstall -RepoPath $WorkspaceRoot -KitRoot $KitRoot -Force
             if ($installResult.Ok) {
                 $obsidianPostCommit = if ($installResult.WantJournal) { "post-commit with journal" } else { "post-commit sync-only" }
