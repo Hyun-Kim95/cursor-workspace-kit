@@ -36,5 +36,12 @@ node_modules/
 dist/
 build/
 
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Git worktrees (local only)
+.worktrees/
+
 # Logs
 *.log
