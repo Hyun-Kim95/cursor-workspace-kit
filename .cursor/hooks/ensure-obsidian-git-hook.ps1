@@ -24,6 +24,40 @@ function Write-HookWarning {
     }
 }
 
+# Locate Obsidian-HookInstall.ps1 (product-local first, then kit submodule). Returns
+# the path only; the caller must dot-source it at SCRIPT scope so the module functions
+# are visible. (Dot-sourcing inside a function would load them into that function's
+# scope only - the original cause of "Import-ObsidianHookInstallModule not recognized".)
+function Resolve-ObsidianHookInstallModulePath {
+    param([Parameter(Mandatory = $true)][string]$ProjectRoot)
+
+    $local = Join-Path $ProjectRoot "scripts\obsidian\Obsidian-HookInstall.ps1"
+    if (Test-Path -LiteralPath $local) { return $local }
+
+    $kitPath = "vendor/cursor-workspace-kit"
+    $configPath = Join-Path $ProjectRoot ".cursor-kit.json"
+    if (Test-Path -LiteralPath $configPath) {
+        try {
+            $raw = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8
+            if (-not [string]::IsNullOrWhiteSpace($raw)) {
+                $cfg = $raw | ConvertFrom-Json
+                $kp = $cfg.PSObject.Properties['kitPath']
+                if ($kp -and -not [string]::IsNullOrWhiteSpace([string]$kp.Value)) {
+                    $kitPath = [string]$kp.Value
+                }
+            }
+        }
+        catch {
+            # fail-open: default kitPath
+        }
+    }
+
+    $fromKit = Join-Path (Join-Path $ProjectRoot $kitPath) "scripts\obsidian\Obsidian-HookInstall.ps1"
+    if (Test-Path -LiteralPath $fromKit) { return $fromKit }
+
+    return $null
+}
+
 try {
     $null = [Console]::In.ReadToEnd()
 
@@ -35,9 +69,13 @@ try {
     if (-not (Test-Path -LiteralPath $gitDir)) {
         exit 0
     }
-    if (-not (Import-ObsidianHookInstallModule -ProjectRoot $projectRoot)) {
+
+    $modulePath = Resolve-ObsidianHookInstallModulePath -ProjectRoot $projectRoot
+    if (-not $modulePath) {
         exit 0
     }
+    # Dot-source at script scope (try/catch does not create a new scope).
+    . $modulePath
 
     $result = Invoke-ObsidianPostCommitInstall -RepoPath $projectRoot
     if ($result.Ok) {

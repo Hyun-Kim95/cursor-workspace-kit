@@ -14,7 +14,8 @@ function Resolve-ObsidianKitRoot {
             $raw = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8
             if (-not [string]::IsNullOrWhiteSpace($raw)) {
                 $cfg = $raw | ConvertFrom-Json
-                if ($cfg.kitPath) { $kitPath = [string]$cfg.kitPath }
+                $kp = $cfg.PSObject.Properties['kitPath']
+                if ($kp -and -not [string]::IsNullOrWhiteSpace([string]$kp.Value)) { $kitPath = [string]$kp.Value }
             }
         }
         catch {
@@ -207,7 +208,8 @@ function Import-ObsidianHookInstallModule {
             $raw = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8
             if (-not [string]::IsNullOrWhiteSpace($raw)) {
                 $cfg = $raw | ConvertFrom-Json
-                if ($cfg.kitPath) { $kitPath = [string]$cfg.kitPath }
+                $kp = $cfg.PSObject.Properties['kitPath']
+                if ($kp -and -not [string]::IsNullOrWhiteSpace([string]$kp.Value)) { $kitPath = [string]$kp.Value }
             }
         }
         catch {

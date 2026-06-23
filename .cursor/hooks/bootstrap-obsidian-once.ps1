@@ -29,6 +29,40 @@ function Write-HookWarning {
     }
 }
 
+# Locate Obsidian-HookInstall.ps1 (product-local first, then kit submodule). The caller
+# must dot-source the returned path at SCRIPT scope so the module functions are visible
+# to the functions below (dot-sourcing inside a function loads them into that function's
+# scope only).
+function Resolve-ObsidianHookInstallModulePath {
+    param([Parameter(Mandatory = $true)][string]$ProjectRoot)
+
+    $local = Join-Path $ProjectRoot "scripts\obsidian\Obsidian-HookInstall.ps1"
+    if (Test-Path -LiteralPath $local) { return $local }
+
+    $kitPath = "vendor/cursor-workspace-kit"
+    $configPath = Join-Path $ProjectRoot ".cursor-kit.json"
+    if (Test-Path -LiteralPath $configPath) {
+        try {
+            $raw = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8
+            if (-not [string]::IsNullOrWhiteSpace($raw)) {
+                $cfg = $raw | ConvertFrom-Json
+                $kp = $cfg.PSObject.Properties['kitPath']
+                if ($kp -and -not [string]::IsNullOrWhiteSpace([string]$kp.Value)) {
+                    $kitPath = [string]$kp.Value
+                }
+            }
+        }
+        catch {
+            # fail-open: default kitPath
+        }
+    }
+
+    $fromKit = Join-Path (Join-Path $ProjectRoot $kitPath) "scripts\obsidian\Obsidian-HookInstall.ps1"
+    if (Test-Path -LiteralPath $fromKit) { return $fromKit }
+
+    return $null
+}
+
 function Invoke-ObsidianHookReconcile {
     param([string]$ProjectRoot)
 
@@ -70,6 +104,11 @@ try {
     $stateDir = Join-Path $projectRoot ".cursor\state"
     $stateFile = Join-Path $stateDir "obsidian-bootstrap.done"
     $ingestConfigPath = Join-Path $projectRoot ".obsidian-ingest.json"
+
+    # Dot-source the hook-install module at script scope so the helper functions below
+    # (which call Import-ObsidianHookInstallModule / Invoke-ObsidianPostCommitInstall) resolve.
+    $modulePath = Resolve-ObsidianHookInstallModulePath -ProjectRoot $projectRoot
+    if ($modulePath) { . $modulePath }
 
     # Every session: reconcile post-commit (journal-off by default) without waiting for file edit or /kit-start.
     Invoke-ObsidianHookReconcile -ProjectRoot $projectRoot
