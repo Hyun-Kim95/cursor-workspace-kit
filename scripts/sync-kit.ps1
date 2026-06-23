@@ -12,6 +12,9 @@ $kitRoot = Split-Path -Parent $Scripts
 $commandsSync = Join-Path $Scripts "Sync-KitProductHooks.ps1"
 if (Test-Path -LiteralPath $commandsSync) {
     $commandsDest = Join-Path $kitRoot ".cursor\commands"
+    $deprecatedCommands = @(
+        "kit-work-log.md"
+    )
     $srcDirs = @(
         (Join-Path $kitRoot "project-kit\.cursor\commands"),
         (Join-Path $kitRoot ".cursor\commands")
@@ -35,6 +38,17 @@ if (Test-Path -LiteralPath $commandsSync) {
     }
     if ($n -gt 0) {
         Write-Host "sync-kit: copied $n slash command(s) to .cursor/commands"
+    }
+    $removed = 0
+    foreach ($name in $deprecatedCommands) {
+        $path = Join-Path $commandsDest $name
+        if (Test-Path -LiteralPath $path) {
+            Remove-Item -LiteralPath $path -Force
+            $removed++
+        }
+    }
+    if ($removed -gt 0) {
+        Write-Host "sync-kit: removed $removed deprecated slash command(s)"
     }
 }
 

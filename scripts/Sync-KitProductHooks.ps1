@@ -155,6 +155,26 @@ function Copy-KitSlashCommands {
     return $n
 }
 
+function Remove-DeprecatedKitSlashCommands {
+    param(
+        [string]$CommandsDest
+    )
+
+    $deprecated = @(
+        "kit-work-log.md"
+    )
+
+    $n = 0
+    foreach ($name in $deprecated) {
+        $path = Join-Path $CommandsDest $name
+        if (Test-Path -LiteralPath $path) {
+            Remove-Item -LiteralPath $path -Force
+            $n++
+        }
+    }
+    return $n
+}
+
 $hooksDest = Join-Path $WorkspaceRoot ".cursor\hooks"
 $hooksPath = Join-Path $WorkspaceRoot ".cursor\hooks.json"
 $gitDir = Join-Path $WorkspaceRoot ".git"
@@ -254,5 +274,6 @@ if ($obsidianOk) {
 
 $commandsDest = Join-Path $WorkspaceRoot ".cursor\commands"
 $commandsCopied = Copy-KitSlashCommands -KitRoot $KitRoot -CommandsDest $commandsDest
+$commandsRemoved = Remove-DeprecatedKitSlashCommands -CommandsDest $commandsDest
 
-Write-Host "sync-kit-product-hooks: copied $copied hook file(s); commands=$commandsCopied; hooks.json: $($mergeResults -join '; '); obsidian: $obsidianPostCommit"
+Write-Host "sync-kit-product-hooks: copied $copied hook file(s); commands=$commandsCopied; deprecatedCommandsRemoved=$commandsRemoved; hooks.json: $($mergeResults -join '; '); obsidian: $obsidianPostCommit"

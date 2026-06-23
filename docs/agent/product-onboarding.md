@@ -318,7 +318,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File vendor\cursor-workspace-kit\
 |------|------|
 | `/start` 했는데 스킬 폴더 1개·옛 템플릿 | [Submodule 최신화](#submodule-최신화--start-vs-submodule-update---remote) 체크리스트 → `--remote` 또는 submodule `git pull` |
 | `/start` 대신 `start-feature`만 실행됨 | 자동완성 Tab 주의 → **`/kit-start `** 또는 **`/start `** 직접 입력, 또는 스킬 **`kit-start`** |
-| `/kit-work-log` 자동완성 안 뜸 | `.cursor/commands/kit-work-log.md`·스킬 sync 확인 → `/kit-start` 후 창 리로드 |
+| `/kit-work-log` 자동완성 안 뜸 | `.cursor/skills/kit-work-log/SKILL.md` sync 확인 → `/kit-start` 후 창 리로드 |
 | `/kit-start` 했는데 kit이 구버전·state `at` 오래됨 | 슬래시 **스킬**만 고른 경우 훅 미실행(구 kit) 가능 → **`Invoke-KitStart.ps1` 직접 실행** 또는 kit 최신화 후 `/kit-start` 재시도. `at`이 2분 이상 전이면 에이전트가 sync를 **직접** 돌려야 함(할 일 붙임과 무관) |
 | `/start-setting`이 아무 일도 안 함 | 제품에 `hooks.json`·훅 파일 있는지 → 없으면 **2단계** PowerShell 먼저. 슬래시만 고르면 훅 미실행 → 맨 앞 `/start-setting` 직접 입력 |
 | `Missing .cursor-kit.json` | 2단계 또는 `/start-setting` 재실행 |
