@@ -29,6 +29,7 @@ if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
 $slug = Split-Path -Path $RepoRoot -Leaf
 $displayName = ""
 $hubFileStem = ""
+$commitJournal = $false
 $ingestPath = Join-Path $RepoRoot ".obsidian-ingest.json"
 if (Test-Path -LiteralPath $ingestPath) {
     try {
@@ -43,6 +44,10 @@ if (Test-Path -LiteralPath $ingestPath) {
         $hfProp = $ingest.PSObject.Properties['hubFileStem']
         if ($null -ne $hfProp -and -not [string]::IsNullOrWhiteSpace([string]$hfProp.Value)) {
             $hubFileStem = [string]$hfProp.Value
+        }
+        $cjProp = $ingest.PSObject.Properties['commitJournal']
+        if ($null -ne $cjProp -and $null -ne $cjProp.Value) {
+            $commitJournal = [bool]$cjProp.Value
         }
     } catch {
         # keep folder slug
@@ -63,17 +68,23 @@ function Escape-YamlDoubleQuotedValue {
 function Get-ExpectedVaultBlock {
     param(
         [string]$ProjectSlug,
-        [string]$ProjectHubStem
+        [string]$ProjectHubStem,
+        [bool]$IncludeCommitJournal = $false
     )
 
-    return @"
+    $lines = @(
+""
+"## Vault"
+""
+"- [[$ProjectSlug/docs/$ProjectHubStem|Hub]]"
+"- [[$ProjectSlug/docs/obsidian/dashboards/projects-overview|Dashboards]]"
+    )
 
-## Vault
+    if ($IncludeCommitJournal) {
+        $lines += "- [[$ProjectSlug/docs/obsidian/dashboards/commit-journal-overview|Commit journals (Dataview)]]"
+    }
 
-- [[$ProjectSlug/docs/$ProjectHubStem|Hub]]
-- [[$ProjectSlug/docs/obsidian/dashboards/projects-overview|Dashboards]]
-- [[$ProjectSlug/docs/obsidian/dashboards/commit-journal-overview|Commit journals (Dataview)]]
-"@
+    return ($lines -join "`n")
 }
 
 function Test-HasYamlFrontmatter {
@@ -192,7 +203,7 @@ if ($LaneFilter.Count -gt 0) {
     }
 }
 
-$expectedVault = Get-ExpectedVaultBlock -ProjectSlug $slug -ProjectHubStem $hubStem
+$expectedVault = Get-ExpectedVaultBlock -ProjectSlug $slug -ProjectHubStem $hubStem -IncludeCommitJournal $commitJournal
 
 $summary = [ordered]@{
     Total      = 0

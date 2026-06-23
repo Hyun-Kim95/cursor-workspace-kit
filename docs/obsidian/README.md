@@ -8,13 +8,13 @@
   - `daily-log-template.md`
 - `dashboards/`
   - `projects-overview.md`
-  - `commit-journal-overview.md`
+  - `commit-journal-overview.md` (`commitJournal: true`일 때만 볼트에 노출)
   - `daily-log-overview.md`
 
 ## Core Flow
 1. `scripts/obsidian/install-hook.ps1`로 Git `post-commit`을 설치하면 **커밋할 때마다** `sync-docs.ps1`가 문서를 볼트 `.../docs`에 반영한다. **커밋 저널**(`.../journal`)은 `.obsidian-ingest.json`의 `commitJournal: true`일 때만 추가된다(기본 **false**).
 2. 훅 없이 수동으로만 동기화하려면 `scripts/obsidian/sync-docs.ps1`만 실행하면 된다.
-3. Obsidian 대시보드에서 Dataview로 프로젝트/저널/데일리 로그를 조회한다.
+3. Obsidian 대시보드에서 Dataview로 프로젝트/데일리 로그를 조회한다. 커밋 저널 대시보드는 `commitJournal: true`일 때만 노출된다.
 
 볼트 경로·슬러그는 레포 루트의 `.obsidian-ingest.json`으로 맞춘다. 이 파일은 **저장하지 않아도 되며**(`.gitignore`에 포함), `sync-docs.ps1` 실행 시 Git 루트 폴더명 기준으로 **없으면 자동 생성**된다. 기본적으로 `slug`가 폴더명과 다르면 폴더명으로 보정하지만, `lockSlug: true`면 기존 `slug`를 유지한다. 수동 예시는 `docs/obsidian/obsidian-ingest.example.json`을 참고한다.
 
@@ -47,7 +47,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File ".\scripts\obsidian\normaliz
 
 기존 PRD를 다른 프로젝트에서 복사해 온 경우, 먼저 `-CheckOnly`로 불일치를 확인하고 필요한 경우 `-FixMismatch`를 1회 실행하는 운영을 권장한다.
 
-`## Vault`의 커밋 링크는 `[[…/journal]]`이 아니라 **`commit-journal-overview` 대시보드**를 가리킨다. 전자는 옵시디언이 빈 `journal.md` 노트를 만들어 백링크가 몰리는 문제가 있어서 피한다.
+`commitJournal: false`(기본값)이면 `## Vault`와 프로젝트 허브에서 커밋 저널 링크를 만들지 않고, 볼트에 이미 복사된 `commit-journal-overview.md`도 다음 sync 때 제거한다. `commitJournal: true`일 때만 커밋 링크는 `[[…/journal]]`이 아니라 **`commit-journal-overview` 대시보드**를 가리킨다. 전자는 옵시디언이 빈 `journal.md` 노트를 만들어 백링크가 몰리는 문제가 있어서 피한다.
 
 ## Cursor에서 자동 설치
 - 세션 시작마다 `.cursor/hooks/bootstrap-obsidian-once.ps1`가 `post-commit`을 **`.obsidian-ingest.json`의 `commitJournal`(기본 false)에 맞게** 재정렬한다. 예전에 journal이 켜진 훅이 남아 있어도 Cursor를 열면 sync-only로 맞춘다.

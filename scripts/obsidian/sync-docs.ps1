@@ -32,7 +32,8 @@ function Write-ProjectDocIndex {
         [string]$Slug,
         [string]$RepoPath,
         [string]$DisplayName = "",
-        [string]$HubFileStem = ""
+        [string]$HubFileStem = "",
+        [bool]$IncludeCommitJournal = $false
     )
 
     $updatedAt = (Get-Date).ToString("s")
@@ -50,7 +51,9 @@ function Write-ProjectDocIndex {
     $links = @()
     $links += "- '[[" + $Slug + "/docs]]'"
     $links += "- '[[" + $dashProjects + "]]'"
-    $links += "- '[[" + $dashJournal + "]]'"
+    if ($IncludeCommitJournal) {
+        $links += "- '[[" + $dashJournal + "]]'"
+    }
     if (Test-Path -LiteralPath $readmePath) {
         $links += "- '[[" + $Slug + "/docs/README]]'"
     }
@@ -84,7 +87,9 @@ function Write-ProjectDocIndex {
     $null = $body.Add('')
     $null = $body.Add('## Dataview dashboards')
     $null = $body.Add('- [[' + $dashProjects + '|Projects overview]]')
-    $null = $body.Add('- [[' + $dashJournal + '|Commit journal overview]]')
+    if ($IncludeCommitJournal) {
+        $null = $body.Add('- [[' + $dashJournal + '|Commit journal overview]]')
+    }
     $null = $body.Add('- [[' + $dashDaily + '|Daily log overview]]')
     $null = $body.Add('')
     $null = $body.Add('## Templates')
@@ -92,7 +97,9 @@ function Write-ProjectDocIndex {
     $null = $body.Add('')
     $null = $body.Add('## Quick links')
     $null = $body.Add('- [[' + $Slug + '/docs|Synced docs root]]')
-    $null = $body.Add('- [[' + $Slug + '/docs/obsidian/dashboards/commit-journal-overview|Commit journals (Dataview)]]')
+    if ($IncludeCommitJournal) {
+        $null = $body.Add('- [[' + $Slug + '/docs/obsidian/dashboards/commit-journal-overview|Commit journals (Dataview)]]')
+    }
     $null = $body.Add('- [[' + $Slug + '/docs/obsidian/README|Obsidian kit notes]]')
     $null = $body.Add('')
     $null = $body.Add('## Meta')
@@ -108,6 +115,23 @@ function Write-ProjectDocIndex {
     $legacyHub = Join-Path $TargetDocsRoot "_project-doc-index.md"
     if ($hubStem -ne '_project-doc-index' -and (Test-Path -LiteralPath $legacyHub)) {
         Remove-Item -LiteralPath $legacyHub -Force
+    }
+}
+
+function Remove-CommitJournalDashboardIfDisabled {
+    param(
+        [string]$TargetDocsRoot,
+        [bool]$IncludeCommitJournal = $false
+    )
+
+    if ($IncludeCommitJournal) {
+        return
+    }
+
+    $dashboardPath = Join-Path $TargetDocsRoot "obsidian\dashboards\commit-journal-overview.md"
+    if (Test-Path -LiteralPath $dashboardPath) {
+        Remove-Item -LiteralPath $dashboardPath -Force
+        Write-Host "Removed inactive commit journal dashboard: $dashboardPath"
     }
 }
 
@@ -248,6 +272,7 @@ function Get-AutoRepositoryEntry {
 
     $displayName = ""
     $hubFileStem = ""
+    $commitJournal = $false
     $ingestConfigPath = Join-Path $repoPath ".obsidian-ingest.json"
     if (Test-Path -LiteralPath $ingestConfigPath) {
         $repoConfig = Get-Content -LiteralPath $ingestConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -272,15 +297,20 @@ function Get-AutoRepositoryEntry {
         if ($null -ne $hfProp -and -not [string]::IsNullOrWhiteSpace([string]$hfProp.Value)) {
             $hubFileStem = [string]$hfProp.Value
         }
+        $cjProp = $repoConfig.PSObject.Properties['commitJournal']
+        if ($null -ne $cjProp -and $null -ne $cjProp.Value) {
+            $commitJournal = [bool]$cjProp.Value
+        }
     }
 
     return @([pscustomobject]@{
-        path         = $repoPath
-        slug         = $slug
-        docsPaths    = $docsPaths
-        syncMode     = $repoSyncMode
-        displayName  = $displayName
-        hubFileStem  = $hubFileStem
+        path          = $repoPath
+        slug          = $slug
+        docsPaths     = $docsPaths
+        syncMode      = $repoSyncMode
+        displayName   = $displayName
+        hubFileStem   = $hubFileStem
+        commitJournal = $commitJournal
     })
 }
 
@@ -321,6 +351,11 @@ foreach ($repo in $repositories) {
     $hfRepo = $repo.PSObject.Properties['hubFileStem']
     if ($null -ne $hfRepo -and -not [string]::IsNullOrWhiteSpace([string]$hfRepo.Value)) {
         $hubFileStem = [string]$hfRepo.Value
+    }
+    $commitJournal = $false
+    $cjRepo = $repo.PSObject.Properties['commitJournal']
+    if ($null -ne $cjRepo -and $null -ne $cjRepo.Value) {
+        $commitJournal = [bool]$cjRepo.Value
     }
 
     if (-not (Test-Path -LiteralPath $repoPath)) {
@@ -378,7 +413,8 @@ foreach ($repo in $repositories) {
         Write-Host "Synced($repoSyncMode): $sourcePath -> $targetPath"
     }
 
-    Write-ProjectDocIndex -TargetDocsRoot $targetDocsRoot -Slug $slug -RepoPath $repoPath -DisplayName $displayName -HubFileStem $hubFileStem
+    Remove-CommitJournalDashboardIfDisabled -TargetDocsRoot $targetDocsRoot -IncludeCommitJournal $commitJournal
+    Write-ProjectDocIndex -TargetDocsRoot $targetDocsRoot -Slug $slug -RepoPath $repoPath -DisplayName $displayName -HubFileStem $hubFileStem -IncludeCommitJournal $commitJournal
     Write-Host "Indexed: $targetDocsRoot"
 }
 
