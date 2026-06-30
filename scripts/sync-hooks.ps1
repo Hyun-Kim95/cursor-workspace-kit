@@ -12,7 +12,8 @@ $whitelist = @(
     "dev-server-harness.ps1",
     "rule-signal-capture.ps1",
     "rule-signal-patterns.json",
-    "work-log-on-prompt.ps1"
+    "work-log-on-prompt.ps1",
+    "kit-wiki-on-prompt.ps1"
 )
 
 if (-not (Test-Path -LiteralPath $SourceDir)) {

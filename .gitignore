@@ -7,6 +7,9 @@
 # Generated / runtime agent artifacts
 docs/agent/rule-candidates.ndjson
 
+# LLM wiki raw dumps (may contain sensitive originals; only distilled notes are committed)
+docs/wiki/_raw/
+
 # Machine-local Obsidian ingest config (copy from _config/obsidian-repos.example.json)
 _config/obsidian-repos.json
 .obsidian-ingest.json
@@ -45,3 +48,5 @@ __pycache__/
 
 # Logs
 *.log
+
+.claude/settings.json

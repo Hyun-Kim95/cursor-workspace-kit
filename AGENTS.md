@@ -95,6 +95,17 @@
 
 제품 레포·채널 A/B·submodule 설정: [`docs/agent/kit-start.md`](docs/agent/kit-start.md), [`docs/agent/product-onboarding.md`](docs/agent/product-onboarding.md).
 
+## `/kit-wiki` · `/kit-wiki-ask` (LLM 위키)
+
+AI 대화·리서치·결정을 `docs/wiki/`(LLM 위키)로 정제 저장하고 다시 꺼내 쓰는 지식 관리. 스킬 **`kit-wiki`**.
+
+- **`/kit-wiki <자료/주제>`** — 정제 저장(ingest) + **증분 lint**. 노트는 `docs/wiki/<topic>.md`, 원본은 `docs/wiki/_raw/`(gitignore). redaction(경로/이메일/키 마스킹) 필수.
+- **`/kit-wiki lint`** — `docs/wiki/` 전체 정합성 점검만.
+- **`/kit-wiki-ask <질문>`** — 위키 기반 **읽기 전용** 답변(파일 미수정).
+- 커밋은 사용자 명시 시에만(`_raw/`는 커밋 금지).
+
+**`kit-rule-mine`과 경계:** `kit-wiki`는 **지식**(무엇을 결정했나)을 쌓고, `kit-rule-mine`은 **규칙 후보**(에이전트가 어떻게 일할지)를 모아 HUMAN 승인 후 `shared/rules`로 승격한다. 위키 노트는 규칙이 아니다. 상세: [`docs/wiki/README.md`](docs/wiki/README.md).
+
 ## 기본 진입 규칙
 
 - 고객사 **전체 프로젝트(엔드투엔드)** 대화는 사용자가 스킬 이름을 말하지 않아도 `.cursor/rules/70-client-lifecycle-default.mdc`에 따라 `client-project-lifecycle`을 따른다(PRD·디자인 등 HUMAN 구간에서 멈춤). 단, **디자인 승인 완료 시점은 구현 착수 승인으로 간주**하며 구현 시작에 대한 중복 승인을 추가로 요구하지 않는다. 구현 이후 **다축 검증·리뷰어 GATE**는 해당 스킬 **단계 4B~4D(선택)** 및 `docs/qa/reviewer-gate-rubric.md`를 참고한다.
@@ -106,6 +117,7 @@
 - **생성·검증 분리(기본):** 메인이 산출(코드·`docs/` 문서) → `qa-agent` 독립 검증(파일·루브릭만 handoff, [`docs/agent/agent-brief.md`](docs/agent/agent-brief.md) 9절) → 메인은 판정 인용만. self-verify·검증 완료 선언은 메인 금지. 상세: `start-feature`·`verify-change`·`qa-agent`.
 - 변경사항 공유나 문서 정리가 필요하면 `document-change`를 사용한다. (병렬 중 계약 변경 시에도 수시 적용)
 - 세션·하루 마무리 시 작업 일지가 필요하면 `kit-work-log` 또는 `/kit-work-log`를 사용한다. (`docs/work-log/YYYY-MM-DD.md`)
+- 대화·리서치·결정을 지식으로 정제·축적하거나(`/kit-wiki`) 위키 기반으로 다시 꺼내 쓰려면(`/kit-wiki-ask`) `kit-wiki`를 사용한다. (`docs/wiki/`; 규칙 후보 수집인 `kit-rule-mine`과 다름)
 - 배포 전 확인이 필요하면 `release-check`를 사용한다.
 
 ## 직접 처리 가능한 예외

@@ -34,6 +34,11 @@
                                                  "timeout":  300
                                              },
                                              {
+                                                 "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/kit-wiki-on-prompt.ps1",
+                                                 "matcher":  "UserPromptSubmit",
+                                                 "timeout":  30
+                                             },
+                                             {
                                                  "command":  "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/rule-approval-gate.ps1",
                                                  "matcher":  "UserPromptSubmit",
                                                  "timeout":  20

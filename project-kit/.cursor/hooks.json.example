@@ -12,6 +12,11 @@
         "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/kit-start-on-prompt.ps1",
         "matcher": "UserPromptSubmit",
         "timeout": 120
+      },
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/kit-wiki-on-prompt.ps1",
+        "matcher": "UserPromptSubmit",
+        "timeout": 30
       }
     ],
     "afterAgentResponse": [

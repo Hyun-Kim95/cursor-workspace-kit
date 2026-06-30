@@ -88,6 +88,14 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | [`docs/qa/integration-consumption-gate.md`](../../docs/qa/integration-consumption-gate.md) | 횡단 자산·kit·공유 패키지 생성·소비 DoD SSOT |
 | [`docs/qa/reviewer-gate-rubric.md`](../../docs/qa/reviewer-gate-rubric.md) | 리뷰어 GATE 루브릭 (선택) |
 
+## docs/wiki
+
+| 경로 | 한 줄 목적 |
+|------|------------|
+| [`docs/wiki/README.md`](../../docs/wiki/README.md) | LLM 위키 폴더 규약·frontmatter·redaction·`kit-rule-mine` 경계 (`kit-wiki` 스킬 SSOT) |
+| `docs/wiki/_templates/wiki-note-template.md` | 위키 노트 템플릿 (`type: wiki-note`) |
+| `docs/wiki/_raw/` | 원본 덤프 (gitignore; 커밋 안 함) |
+
 ## project-kit/.cursor/rules
 
 | 파일 | 한 줄 목적 |
@@ -106,6 +114,7 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | `context-organization` | Gate 비변 선행 3단 러브릭 |
 | `kit-start` | kit pull·sync (`/start`, `/kit-start` 훅; `start-feature`와 별개) |
 | `kit-rule-mine` | 트랜스크립트 규칙 배치 마이닝 (`/kit-rule-mine` 훅; `kit-start`·`start-feature`와 별개) |
+| `kit-wiki` | LLM 위키 지식 관리 (`/kit-wiki` ingest+lint, `/kit-wiki-ask` 읽기; `docs/wiki/`; `kit-rule-mine`과 별개) |
 | `kit-work-log` | 날짜별 작업 일지 (`docs/work-log/`; `/kit-work-log`·`/work-log` 훅) |
 | `start-setting` | 제품 1회 온보딩 (`/start-setting`, `/kit-start-setting` 훅; `kit-start`와 별개) |
 | `start-feature` | Gate 1 후 ATDD-lite RED·구현·검증 |
@@ -168,6 +177,7 @@ Kit SSOT는 Git에서 관리한다. **편집은 SSOT 경로만** 하고, 루트 
 | 경로 | 용도 |
 |------|------|
 | `.cursor/hooks/kit-start-on-prompt.ps1` | `beforeSubmitPrompt` — `/start` 트리거 |
+| `.cursor/hooks/kit-wiki-on-prompt.ps1` | `beforeSubmitPrompt` — `/kit-wiki`·`/kit-wiki-ask` 폴더 bootstrap + 모드 주입 |
 | `.cursor/hooks/guard-shell.ps1` | `beforeShellExecution` — shell guard |
 | `.cursor/hooks/quality-gate.ps1` | `afterAgentResponse` — 짧은 lint/tsc |
 | `.cursor/hooks/rule-signal-capture.ps1` | `beforeSubmitPrompt` — 암묵적 보정 신호 후보 |

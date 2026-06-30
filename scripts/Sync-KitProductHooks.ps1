@@ -155,6 +155,26 @@ function Copy-KitSlashCommands {
     return $n
 }
 
+function Ensure-WikiRawGitignore {
+    # Idempotently ensure the product .gitignore excludes docs/wiki/_raw/ (kit-wiki raw dumps).
+    param([string]$Root)
+
+    $giPath = Join-Path $Root ".gitignore"
+    $marker = "docs/wiki/_raw/"
+    $comment = "# LLM wiki raw dumps (may contain sensitive originals; only distilled notes are committed)"
+
+    if (Test-Path -LiteralPath $giPath) {
+        $raw = Get-Content -LiteralPath $giPath -Raw -Encoding UTF8
+        if ($raw -match [regex]::Escape($marker)) { return "exists" }
+        Add-Content -LiteralPath $giPath -Value @("", $comment, $marker) -Encoding UTF8
+        return "appended"
+    }
+
+    $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($giPath, ($comment + "`r`n" + $marker + "`r`n"), $utf8NoBom)
+    return "created"
+}
+
 function Remove-DeprecatedKitSlashCommands {
     param(
         [string]$CommandsDest
@@ -182,6 +202,7 @@ $gitDir = Join-Path $WorkspaceRoot ".git"
 $hookFiles = @(
     "kit-start-on-prompt.ps1"
     "work-log-on-prompt.ps1"
+    "kit-wiki-on-prompt.ps1"
     "guard-shell.ps1"
     "guard-shell.patterns.json"
     "quality-gate.ps1"
@@ -212,6 +233,11 @@ $mergeResults = New-Object System.Collections.ArrayList
     command = ($ps + "work-log-on-prompt.ps1")
     matcher = "UserPromptSubmit"
     timeout = 15
+}))
+[void]$mergeResults.Add((Merge-HookEntryIntoJson -HooksPath $hooksPath -EventName "beforeSubmitPrompt" -ScriptMarker "kit-wiki-on-prompt.ps1" -NewEntry @{
+    command = ($ps + "kit-wiki-on-prompt.ps1")
+    matcher = "UserPromptSubmit"
+    timeout = 30
 }))
 [void]$mergeResults.Add((Merge-HookEntryIntoJson -HooksPath $hooksPath -EventName "beforeShellExecution" -ScriptMarker "guard-shell.ps1" -NewEntry @{
     command = ($ps + "guard-shell.ps1")
@@ -276,4 +302,6 @@ $commandsDest = Join-Path $WorkspaceRoot ".cursor\commands"
 $commandsCopied = Copy-KitSlashCommands -KitRoot $KitRoot -CommandsDest $commandsDest
 $commandsRemoved = Remove-DeprecatedKitSlashCommands -CommandsDest $commandsDest
 
-Write-Host "sync-kit-product-hooks: copied $copied hook file(s); commands=$commandsCopied; deprecatedCommandsRemoved=$commandsRemoved; hooks.json: $($mergeResults -join '; '); obsidian: $obsidianPostCommit"
+$wikiGitignore = Ensure-WikiRawGitignore -Root $WorkspaceRoot
+
+Write-Host "sync-kit-product-hooks: copied $copied hook file(s); commands=$commandsCopied; deprecatedCommandsRemoved=$commandsRemoved; wikiGitignore=$wikiGitignore; hooks.json: $($mergeResults -join '; '); obsidian: $obsidianPostCommit"
