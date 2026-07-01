@@ -98,8 +98,8 @@ try {
     $wikiDir = Join-Path $projectRoot "docs\wiki"
 
     if ($mode -eq "ask") {
-        $ctx = "kit-wiki ask (read-only): docs/wiki/ 기준으로 답하고 출처 노트 경로를 인용한다. 파일을 수정하지 않는다. 없으면 '위키에 없음'을 명확히 한다. 절차: .cursor/skills/kit-wiki/SKILL.md ask."
-        $msg = "kit-wiki-ask: docs/wiki/ 읽기 전용 질의 (파일 미수정)."
+        $ctx = "kit-wiki ask (read-only): docs/wiki/index.md(MOC)를 먼저 읽어 후보를 좁힌 뒤 docs/wiki/ 기준으로 답하고 출처 노트 경로를 인용한다. review: pending 노트는 「검토 전 — 사실 확인 필요」를 함께 표시. 파일을 수정하지 않는다. 없으면 '위키에 없음'을 명확히 한다. 절차: .cursor/skills/kit-wiki/SKILL.md ask."
+        $msg = "kit-wiki-ask: docs/wiki/ 읽기 전용 질의 (index 우선, 파일 미수정)."
         Write-HookJson -Object @{
             continue           = $true
             user_message       = $msg
@@ -116,13 +116,48 @@ try {
         }
     }
 
+    # seed index.md (MOC) with fixed-category skeleton if missing
+    $indexPath = Join-Path $wikiDir "index.md"
+    if (-not (Test-Path -LiteralPath $indexPath)) {
+        $stamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ss")
+        $indexSeed = @"
+---
+type: wiki-index
+project: cursor-workspace-kit
+updated_at: $stamp
+tags: [wiki, index, moc]
+---
+# docs/wiki 인덱스 (MOC)
+
+위키의 진입점(목차)이다. ask는 이 파일을 먼저 읽어 후보를 좁히고, ingest는 새 노트를 알맞은 카테고리에 등록한다.
+
+## 설계·결정
+- (해당 노트가 생기면 여기에 등록)
+
+## 운영·워크플로우
+- (해당 노트가 생기면 여기에 등록)
+
+## 리서치
+- (해당 노트가 생기면 여기에 등록)
+
+## Q&A
+- (해당 노트가 생기면 여기에 등록)
+
+## 미분류
+- (분류 전 임시 등록)
+"@
+        if (Get-Command Write-KitUtf8File -ErrorAction SilentlyContinue) {
+            Write-KitUtf8File -Path $indexPath -Content $indexSeed
+        }
+    }
+
     if ($mode -eq "lint") {
-        $ctx = "kit-wiki lint (full): docs/wiki/ 전체의 깨진 [[링크]]·frontmatter·모순·redaction 누락을 점검한다. 모순/폐기는 제안 후 사용자 확인, 명백한 frontmatter/redaction만 자동 수정. 절차: .cursor/skills/kit-wiki/SKILL.md lint."
-        $msg = "kit-wiki lint: docs/wiki/ 전체 정합성 점검."
+        $ctx = "kit-wiki lint (full): docs/wiki/ 전체의 깨진 [[링크]]·frontmatter·모순·index 미등록 노트·review: pending 목록을 점검한다. pending인데 ## 검토 필요 없으면 추가 제안. redaction은 docs/wiki/README.md 정규식 패턴표로 스캔: 이메일/sk-/AKIA/Bearer/자격증명/절대경로는 자동 마스킹, 카드·주민번호·긴 hex는 경고 후 사용자 확인. 모순/폐기는 제안 후 확인. 절차: .cursor/skills/kit-wiki/SKILL.md lint."
+        $msg = "kit-wiki lint: docs/wiki/ 전체 정합성 점검(정규식 redaction 스캔 포함)."
     }
     else {
-        $ctx = "kit-wiki ingest + 증분 lint: 입력을 docs/wiki/<topic>.md로 정제 저장(요약 + 결정(배경/대안/근거) + 출처), 템플릿 docs/wiki/_templates/wiki-note-template.md 사용, 같은 주제는 갱신. redaction 필수(경로/이메일/키 마스킹), 민감 원문은 docs/wiki/_raw/(gitignore)에만. 저장 후 만진/연결 노트 증분 lint. 커밋은 사용자 명시 시에만. 절차: .cursor/skills/kit-wiki/SKILL.md ingest."
-        $msg = "kit-wiki: docs/wiki/에 정제 저장(ingest) + 증분 lint. _raw/는 gitignore."
+        $ctx = "kit-wiki ingest + 증분 lint: 입력을 docs/wiki/<topic>.md로 정제 저장(요약 + 결정(배경/대안/근거) + 출처), 템플릿 docs/wiki/_templates/wiki-note-template.md 사용, 같은 주제는 갱신. review: pending|done 판정(README review 절), pending이면 ## 검토 필요 bullet 작성. 새 노트는 docs/wiki/index.md(MOC) 알맞은 카테고리에 [[slug]] 한 줄 등록(기존 노트 갱신은 index 유지). redaction 필수(경로/이메일/키 마스킹), 민감 원문은 docs/wiki/_raw/(gitignore)에만. 저장 후 만진/연결 노트 증분 lint. 보고에 review 상태·검토 필요 항목 포함. 커밋은 사용자 명시 시에만. 절차: .cursor/skills/kit-wiki/SKILL.md ingest."
+        $msg = "kit-wiki: docs/wiki/에 정제 저장(ingest) + review + index 등록 + 증분 lint. _raw/는 gitignore."
     }
 
     Write-HookJson -Object @{

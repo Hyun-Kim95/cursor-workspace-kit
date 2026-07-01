@@ -42,17 +42,20 @@ AI와 나눈 대화·리서치·결정·산출물을 휘발시키지 않고 **`d
    - 핵심 요약 + 결론
    - **결정에는 배경 / 대안 / 근거(왜)** 를 함께 기록 (가장 가치 있는 부분)
    - 일관 구조 유지(제목/요약/결정/출처/링크)
+   - **review 판정** — [`docs/wiki/README.md`](../../../docs/wiki/README.md) "review" 절 기준으로 `review: pending|done`을 정한다. 외부 사실·OCR·수치·첫 `_raw/` ingest 등은 기본 `pending`, 사용자가 직접 확정한 내부 설계·결정은 `done` 가능.
 3. **redaction(필수)** — 커밋 대상 노트(`docs/wiki/*.md`)에는 민감정보를 넣지 않는다.
    - 절대 경로 → `[path]`, 이메일 → `[email]`, `sk-…`/토큰 → `[secret]`, `Bearer …` → `Bearer [redacted]`
    - 고객 실명·내부 식별자·비밀값은 일반화하거나 마스킹한다.
    - 판단이 서지 않는 민감 원문은 `_raw/`(gitignore)에만 두고 노트엔 요약·결정만 남긴다.
 4. **저장/구조화(Store)** — `docs/wiki/_templates/wiki-note-template.md`를 따라 노트를 만든다.
    - 파일명: `docs/wiki/<topic-slug>.md` (kebab-case, ASCII 권장)
-   - frontmatter: `type: wiki-note`, `project`, `status`(active/deprecated), `tags`, `sources`, `updated_at`
-   - 기존 같은 주제 노트가 있으면 **새로 만들지 말고 갱신**한다(중복 방지).
+   - frontmatter: `type: wiki-note`, `project`, `status`(active/deprecated), **`review`(pending/done)**, `tags`, `sources`, `updated_at`
+   - **`review: pending`이면** 본문 `## 검토 필요`에 확인할 수치·날짜·인용·외부 사실을 bullet로 적는다. `done`이면 섹션 생략.
+   - 기존 같은 주제 노트가 있으면 **새로 만들지 말고 갱신**한다(중복 방지). 사실·결정 내용을 크게 바꾸면 `review: pending`으로 되돌리고 `## 검토 필요`를 갱신한다. 오탈자·링크 등 경미 수정은 기존 `review` 유지.
    - 관련 노트로 `[[wikilink]]` 교차 링크를 건다(결정 → 관련 산출물 → 근거 대화).
-5. **연속 lint** — 아래 "증분 lint"를 바로 수행한다.
-6. 사용자에게 보고: 만든/갱신한 노트 경로, 핵심 결정 1~2줄, lint 결과.
+5. **index 등록** — `docs/wiki/index.md`(MOC)의 알맞은 고정 카테고리(설계·결정 / 운영·워크플로우 / 리서치 / Q&A / 미분류)에 새 노트 `[[slug]]` 링크를 한 줄 추가한다. 카테고리가 모호하면 "미분류"에 둔다. **기존 노트 갱신이면 index는 그대로** 둔다(중복 등록 금지). `index.md`가 없으면 카테고리 골격으로 새로 만든다.
+6. **연속 lint** — 아래 "증분 lint"를 바로 수행한다.
+7. 사용자에게 보고: 만든/갱신한 노트 경로, index 등록 카테고리, **`review` 상태**, **검토 필요 항목 1~3줄**(`pending`일 때), 핵심 결정 1~2줄, lint 결과.
 
 ## 절차 — lint (정합성 점검)
 
@@ -61,17 +64,21 @@ AI와 나눈 대화·리서치·결정·산출물을 휘발시키지 않고 **`d
 
 점검 항목:
 - 깨진 `[[wikilink]]`(대상 노트 없음)
-- frontmatter 누락/형식 오류(`type`, `updated_at` 등)
+- **index 미등록 노트** — `docs/wiki/*.md`(템플릿·index 제외) 중 `docs/wiki/index.md` 어느 카테고리에도 링크되지 않은 노트 → 고아 후보로 보고하고 카테고리 등록 제안.
+- frontmatter 누락/형식 오류(`type`, `updated_at`, **`review`** 등)
+- **`review: pending` 노트** — 목록으로 보고. `pending`인데 `## 검토 필요` 섹션이 없으면 추가 제안. 오래된 `pending`(updated_at 기준)은 검토 독촉.
 - 모순(같은 주제 노트 간 상반된 결정) → 사용자에게 알리고 갱신 제안
 - 오래된 내용 → `status: deprecated` 표시 제안(임의 삭제 금지)
-- redaction 누락(경로/이메일/키 잔존) → 즉시 마스킹
+- **redaction 정규식 스캔(1차 안전장치)** — 커밋 대상 노트(`docs/wiki/*.md`)를 [`docs/wiki/README.md`](../../../docs/wiki/README.md) "lint 점검용 정규식 패턴" 표로 스캔한다.
+  - 자동 마스킹: 이메일·`sk-…`/`AKIA…` 키·`Bearer …`·`token/secret/api_key/password` 자격증명·절대 경로 → 즉시 마스킹.
+  - 경고 후 사용자 확인: 카드번호·주민번호류·긴 hex(32+) 등 오탐 가능 항목은 위치만 보고하고 확인 후 처리(임의 삭제·변형 금지).
 
-결과는 요약으로 보고하고, 자동 수정은 frontmatter/redaction 등 명백한 것만. 모순·폐기는 **제안 후** 사용자 확인.
+결과는 요약으로 보고하고, 자동 수정은 frontmatter/명백한 redaction만. 모순·폐기·오탐 가능 PII는 **제안 후** 사용자 확인.
 
 ## 절차 — ask (재사용, 읽기 전용)
 
-1. `docs/wiki/`에서 질문과 관련된 노트를 찾는다(파일명·제목·태그·본문·`[[링크]]` 기반). RAG/벡터 검색은 기본 범위 밖 — 파일·링크로 시작한다.
-2. 찾은 노트의 **결정·근거를 인용**해 답한다. 출처 노트 경로를 함께 제시한다.
+1. **`docs/wiki/index.md`(MOC)를 먼저 읽어** 카테고리·노트 목록에서 후보를 좁힌다. 그다음 파일명·제목·태그·본문·`[[링크]]`로 보강한다. index가 없거나 후보가 안 보이면 폴더 전체 탐색으로 폴백한다. RAG/벡터 검색은 기본 범위 밖 — 파일·링크로 시작한다.
+2. 찾은 노트의 **결정·근거를 인용**해 답한다. 출처 노트 경로를 함께 제시한다. **`review: pending` 노트는 「검토 전 — 사실 확인 필요」** 를 함께 표시한다.
 3. 관련 노트가 없으면 "위키에 없음"을 명확히 하고, 필요하면 `/kit-wiki`로 정리할지 제안한다.
 4. **파일을 수정하지 않는다.** 갱신이 필요하면 ask가 아니라 `/kit-wiki`로 분리한다.
 
