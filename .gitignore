@@ -7,6 +7,9 @@
 # Generated / runtime agent artifacts
 docs/agent/rule-candidates.ndjson
 
+# Local workflow / diagram assets (regenerate locally; not kit SSOT)
+assets/
+
 # LLM wiki raw dumps (may contain sensitive originals; only distilled notes are committed)
 docs/wiki/_raw/
 

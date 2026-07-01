@@ -26,7 +26,7 @@ $out = New-Object System.Collections.Generic.List[string]
 $now = (Get-Date).ToString("o")
 $approvalPath = Join-Path $WorkspaceRoot "docs\agent\rule-approvals.md"
 
-foreach ($line in (Get-Content -LiteralPath $path -Encoding UTF8)) {
+foreach ($line in ((Read-KitUtf8File -Path $path) -split "`r?`n")) {
     if ([string]::IsNullOrWhiteSpace($line)) { continue }
     $o = $line | ConvertFrom-Json
     $clone = [ordered]@{}

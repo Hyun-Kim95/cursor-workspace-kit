@@ -91,14 +91,15 @@ try {
         }
     }
 
+    $candidateTemplates = Get-RuleCandidateTemplates -Config $config
     $ts = Get-Date -Format "yyyyMMdd_HHmmss"
     $candidate = [ordered]@{
         id               = "rc_sig_$ts"
-        title            = "암묵적 보정 신호 (실시간)"
+        title            = $candidateTemplates.realtimeTitle
         scope            = "general"
         target           = "skill"
         target_path      = "shared/skills/$($topic.suggested_target)/SKILL.md"
-        rule_text        = "(HUMAN) 검증 가능한 의무로 다듬기 — 신호: $snippet"
+        rule_text        = Expand-RuleCandidateTemplate -Template $candidateTemplates.realtimeRuleText -Placeholders @{ snippet = $snippet }
         source           = "hook:beforeSubmitPrompt"
         status           = "pending"
         created_at       = (Get-Date).ToString("o")

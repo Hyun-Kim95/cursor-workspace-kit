@@ -29,3 +29,6 @@
 | 2026-05-29T17:54:22 | rc_mined_24 | reject | promoted document-change step 0 |
 | 2026-05-29T17:54:23 | rc_mined_25 | reject | product-only; not kit SSOT |
 | 2026-05-29T17:54:23 | rc_mined_26 | reject | product-only; not kit SSOT |
+| 2026-07-01T14:00:00 | rc_mined_21 | reject | mis-cluster (encoding); superseded by rc_rewritten_20260701_external-url |
+| 2026-07-01T14:00:00 | rc_rewritten_20260701_external-url | pending | human:rewrite — Notion URL fetch·캐시·부분 수신 |
+| 2026-07-01T14:30:00 | rc_rewritten_20260701_external-url | 승인 | promoted verify-change 절차 2c |

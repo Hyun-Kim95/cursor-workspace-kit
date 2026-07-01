@@ -255,6 +255,7 @@ Write-Host "  report: $reportJsonPath"
 Write-Host "  report: $reportMdPath"
 
 if ($ImportToCandidates -and $ranked.Count -gt 0) {
+    $candidateTemplates = Get-RuleCandidateTemplates -Config $config
     $existing = Read-RuleCandidateNdjson -Path $candidatePath
     $index = @{}
     foreach ($item in $existing) {
@@ -282,11 +283,11 @@ if ($ImportToCandidates -and $ranked.Count -gt 0) {
         $ts = Get-Date -Format "yyyyMMdd_HHmmss"
         $candidate = [ordered]@{
             id                = "rc_mined_$ts_$imported"
-            title             = "배치 마이닝: $($cl.cluster_key)"
+            title             = Expand-RuleCandidateTemplate -Template $candidateTemplates.batchTitle -Placeholders @{ cluster_key = $cl.cluster_key }
             scope             = "general"
             target            = "skill"
             target_path       = "shared/skills/$($cl.suggested_target)/SKILL.md"
-            rule_text         = "(HUMAN) 검증 가능한 의무로 다듬기 — 신호: $sampleText"
+            rule_text         = Expand-RuleCandidateTemplate -Template $candidateTemplates.batchRuleText -Placeholders @{ snippet = $sampleText }
             source            = "batch:transcript"
             status            = "pending"
             created_at        = (Get-Date).ToString("o")

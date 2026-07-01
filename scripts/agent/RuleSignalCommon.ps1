@@ -141,12 +141,47 @@ function New-ClusterKey {
     return "$SignalType|$TopicId"
 }
 
+function Expand-RuleCandidateTemplate {
+    param(
+        [string]$Template,
+        [hashtable]$Placeholders
+    )
+    $out = $Template
+    foreach ($key in $Placeholders.Keys) {
+        $out = $out.Replace("{${key}}", [string]$Placeholders[$key])
+    }
+    return $out
+}
+
+function Get-RuleCandidateTemplates {
+    param($Config)
+
+    # Korean strings live in rule-signal-patterns.json (UTF-8 via Read-KitUtf8File).
+    # PS 5.1 may misread Korean literals embedded in .ps1 without BOM.
+    if ($null -ne $Config.candidateTemplates) {
+        $t = $Config.candidateTemplates
+        return @{
+            batchTitle       = [string]$t.batchTitle
+            batchRuleText    = [string]$t.batchRuleText
+            realtimeTitle    = [string]$t.realtimeTitle
+            realtimeRuleText = [string]$t.realtimeRuleText
+        }
+    }
+    return @{
+        batchTitle       = "batch: {cluster_key}"
+        batchRuleText    = "(HUMAN) draft rule - signal: {snippet}"
+        realtimeTitle    = "implicit signal (realtime)"
+        realtimeRuleText = "(HUMAN) draft rule - signal: {snippet}"
+    }
+}
+
 function Read-RuleCandidateNdjson {
     param([string]$Path)
 
     $items = New-Object System.Collections.Generic.List[object]
     if (-not (Test-Path -LiteralPath $Path)) { return $items }
-    foreach ($line in (Get-Content -LiteralPath $Path -Encoding UTF8)) {
+    $raw = Read-KitUtf8File -Path $Path
+    foreach ($line in ($raw -split "`r?`n")) {
         if ([string]::IsNullOrWhiteSpace($line)) { continue }
         try { $items.Add(($line | ConvertFrom-Json)) } catch { }
     }
@@ -162,7 +197,14 @@ function Write-RuleCandidateNdjsonLine {
     if ($dir -and -not (Test-Path -LiteralPath $dir)) {
         New-Item -ItemType Directory -Path $dir -Force | Out-Null
     }
-    Add-Content -LiteralPath $Path -Value ($Candidate | ConvertTo-Json -Compress) -Encoding UTF8
+    $line = ($Candidate | ConvertTo-Json -Compress) + "`n"
+    $enc = Get-KitUtf8NoBomEncoding
+    if (Test-Path -LiteralPath $Path) {
+        [System.IO.File]::AppendAllText($Path, $line, $enc)
+    }
+    else {
+        [System.IO.File]::WriteAllText($Path, $line, $enc)
+    }
 }
 
 function Get-RuleMineCooldownDays {
