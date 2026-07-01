@@ -1,0 +1,38 @@
+name: kit-wiki lint
+
+on:
+  pull_request:
+    paths:
+      - 'docs/wiki/**'
+      - 'scripts/wiki/**'
+      - '.github/workflows/kit-wiki-lint.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/wiki/**'
+      - 'scripts/wiki/**'
+      - '.github/workflows/kit-wiki-lint.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  wiki-lint:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run deterministic wiki lint
+        shell: pwsh
+        run: |
+          & ./scripts/wiki/Test-WikiLint.ps1 -WorkspaceRoot $env:GITHUB_WORKSPACE
+
+      - name: Upload wiki-loop state (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiki-loop-last
+          path: .cursor/state/wiki-loop-last.json
+          if-no-files-found: ignore
